@@ -376,10 +376,27 @@ def sector_treemap_plotly(all_metrics: list[dict]):
         title="India Defence Sector — Market Cap Treemap (colour = PAT Margin)",
         hover_data={"Full Name": True},
     )
+    fig.update_traces(
+        textfont=dict(color="#0d1117", size=13, family="Inter, Arial"),
+        insidetextfont=dict(color="#0d1117", size=13, family="Inter, Arial"),
+        outsidetextfont=dict(color="#0d1117", size=13, family="Inter, Arial"),
+        marker=dict(line=dict(width=2, color="#ffffff")),
+    )
     fig.update_layout(
-        font=dict(family="Inter, Arial", size=12),
-        paper_bgcolor=LIGHT_BG,
-        margin=dict(t=50, l=10, r=10, b=10),
+        title=dict(
+            text="India Defence Sector — Market Cap Treemap (colour = PAT Margin %)",
+            font=dict(color="#0d1117", size=13, family="Inter, Arial"),
+        ),
+        font=dict(family="Inter, Arial", size=13, color="#0d1117"),
+        paper_bgcolor="#f0f3f8",
+        coloraxis=dict(
+            colorbar=dict(
+                title=dict(text="PAT Margin (%)", font=dict(color="#0d1117", size=12)),
+                tickfont=dict(color="#0d1117", size=11),
+                outlinewidth=0,
+            )
+        ),
+        margin=dict(t=40, l=10, r=10, b=10),
     )
     return fig
 
