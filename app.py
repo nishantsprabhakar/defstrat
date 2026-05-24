@@ -20,6 +20,67 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# ── SEO: meta tags, Open Graph, Twitter Card, JSON-LD ─────────────────────────
+_OG_IMAGE = "https://raw.githubusercontent.com/nishantsprabhakar/defstrat/main/logo.png"
+st.markdown(f"""
+<script>
+(function() {{
+  var H = document.head;
+  [
+    // Core SEO
+    {{name:"description",        content:"DefStrat — real-time financial intelligence for India's listed defence sector. Track HAL, BEL, Bharat Forge, Paras Defence, GRSE and more with live valuations, earnings briefings and AI-powered analysis."}},
+    {{name:"keywords",           content:"India defence stocks, HAL, BEL, Bharat Forge, Paras Defence, GRSE, Cochin Shipyard, defence sector India, Indian defence ETF, defence equity research"}},
+    {{name:"author",             content:"Nishant Prabhakar"}},
+    {{name:"robots",             content:"index, follow"}},
+    {{name:"theme-color",        content:"#07090f"}},
+    // Open Graph
+    {{property:"og:type",        content:"website"}},
+    {{property:"og:site_name",   content:"DefStrat"}},
+    {{property:"og:title",       content:"DefStrat — India Defence Intelligence Platform"}},
+    {{property:"og:description", content:"Real-time valuations, earnings briefings and AI analyst for the India listed defence sector. Built by Nishant Prabhakar."}},
+    {{property:"og:image",       content:"{_OG_IMAGE}"}},
+    {{property:"og:image:width", content:"1200"}},
+    {{property:"og:image:alt",   content:"DefStrat logo — India Defence Intelligence Platform"}},
+    {{property:"og:url",         content:window.location.href}},
+    // Twitter Card
+    {{name:"twitter:card",       content:"summary_large_image"}},
+    {{name:"twitter:site",       content:"@nishantsprabhakar"}},
+    {{name:"twitter:creator",    content:"@nishantsprabhakar"}},
+    {{name:"twitter:title",      content:"DefStrat — India Defence Intelligence"}},
+    {{name:"twitter:description",content:"Real-time valuations, earnings briefings and AI analyst for the India listed defence sector."}},
+    {{name:"twitter:image",      content:"{_OG_IMAGE}"}},
+  ].forEach(function(a) {{
+    var m = document.createElement("meta");
+    Object.keys(a).forEach(function(k) {{ m.setAttribute(k, a[k]); }});
+    H.appendChild(m);
+  }});
+
+  // JSON-LD structured data (WebApplication + Person)
+  var ld = document.createElement("script");
+  ld.type = "application/ld+json";
+  ld.text = JSON.stringify({{
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "DefStrat",
+    "url": window.location.href,
+    "description": "Real-time financial intelligence platform for the India listed defence sector — valuations, earnings, AI analysis.",
+    "applicationCategory": "FinanceApplication",
+    "operatingSystem": "Web",
+    "browserRequirements": "Requires JavaScript",
+    "offers": {{"@type":"Offer","price":"0","priceCurrency":"USD"}},
+    "author": {{
+      "@type": "Person",
+      "name": "Nishant Prabhakar",
+      "url": "https://github.com/nishantsprabhakar"
+    }},
+    "image": "{_OG_IMAGE}",
+    "keywords": "India defence stocks, HAL, BEL, Bharat Forge, equity research, defence sector"
+  }});
+  H.appendChild(ld);
+}})();
+</script>
+""", unsafe_allow_html=True)
+
 # ── Logo loader ───────────────────────────────────────────────────────────────
 _LOGO_PATH = Path(__file__).parent / "logo.png"
 
