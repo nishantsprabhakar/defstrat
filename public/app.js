@@ -97,6 +97,54 @@ const companyUpdates = {
 };
 
 const callSummaries = {
+  zentec: {
+    title: "Zen Technologies earnings call summary",
+    callDate: "4 May 2026",
+    period: "Q4 FY26 and FY26",
+    source: "Zen investor page / Q4 FY26 transcript filing",
+    sections: [
+      { heading: "Financial Performance", text: "Zen reported Q4 FY26 consolidated revenue of Rs 178.08crs and PAT of Rs 31.53crs. FY26 revenue stood at Rs 687.69crs, with EBITDA margin reported at 48.37%. The quarter was optically weaker on YoY growth because execution timing shifted revenue into FY27, but profitability remained strong relative to peers." },
+      { heading: "Order Book and Pipeline", text: "The consolidated order book stood at approximately Rs 1,336.04crs as of 31 March 2026. Q4 FY26 order inflows were approximately Rs 431.36crs. Management commentary indicated that a large portion of the order book is scheduled for execution from FY27 onwards, particularly around Q2 and Q3." },
+      { heading: "Segment Performance and Strategic Direction", text: "The call emphasised anti-drone systems, simulators, hard-kill options, interceptor drones, unmanned ground vehicles and smart ammunition. The strategic thrust remains self-funded defence R&D, indigenous private-sector innovation and widening product coverage against evolving drone threats." },
+      { heading: "FY27 Guidance", text: "Management commentary points to stronger execution visibility in FY27 from the current order book. Exact revenue guidance was not disclosed in the current source snippets, but the order book provides a clear base for monitoring quarterly conversion." },
+      { heading: "Key Positives from the Call", text: "Large order book, strong EBITDA margin, product breadth across anti-drone/simulators, and increasing relevance of indigenous defence technology." },
+      { heading: "Key Concerns and Watch Points", text: "Quarterly revenue can be lumpy due to execution timing. Working capital days were elevated around 196 days as of 31 March 2026. Investors should track order conversion, receivables and margin sustainability." }
+    ],
+    q4: [
+      ["Revenue", "Rs 178.08crs", "Not disclosed in current source", "Q4 FY26 reported"],
+      ["PAT", "Rs 31.53crs", "Not disclosed in current source", "Q4 FY26 reported"],
+      ["Order inflow", "Rs 431.36crs", "N/A", "Q4 FY26"]
+    ],
+    fy: [
+      ["Revenue", "Rs 687.69crs", "Not disclosed in current source", "FY26"],
+      ["EBITDA margin", "48.37%", "Not disclosed in current source", "FY26"],
+      ["Order book", "Rs 1,336.04crs", "N/A", "As of 31 Mar 2026"]
+    ]
+  },
+  ideaforge: {
+    title: "ideaForge Technology earnings call summary",
+    callDate: "May 2026",
+    period: "Q4 FY26 and FY26",
+    source: "Q4 FY26 transcript filing / investor materials",
+    sections: [
+      { heading: "Financial Performance", text: "ideaForge delivered its strongest quarterly performance in Q4 FY26, with revenue of approximately Rs 141crs versus Rs 20.3crs in the prior-year quarter. Q4 FY26 PAT was reported at approximately Rs 60crs, implying a PAT margin of about 42.5%. FY26 EBITDA was reported at approximately Rs 27crs." },
+      { heading: "Order Book and Pipeline", text: "The company entered FY27 with an opening order book of approximately Rs 310crs, scheduled for execution within roughly three quarters. The call/transcript commentary highlighted open order book conversion as a key driver of the Q4 improvement." },
+      { heading: "Segment Performance and Strategic Direction", text: "The company is positioned around UAV platforms and drone solutions, with expansion into the US market noted in Q4 commentary. Execution of the order book, product mix and scaling of international opportunities remain key strategic variables." },
+      { heading: "FY27 Guidance", text: "Specific FY27 revenue guidance was not disclosed in the current source snippets. The near-term visibility comes from the Rs 310crs opening order book and management's commentary around execution within three quarters." },
+      { heading: "Key Positives from the Call", text: "Record quarterly revenue, positive profitability, debt-free status as of 31 March 2026 per reported commentary, and order book visibility for near-term execution." },
+      { heading: "Key Concerns and Watch Points", text: "Revenue has historically been lumpy. Investors should track order conversion, repeatability of the Q4 margin profile, drone procurement timing and international expansion execution." }
+    ],
+    q4: [
+      ["Revenue", "Rs 141crs", "Rs 20.3crs", "Strong YoY growth"],
+      ["PAT", "Rs 60crs", "Not disclosed in current source", "42.5% PAT margin"],
+      ["Order book", "Rs 310crs opening FY27", "N/A", "Execution expected within ~3 quarters"]
+    ],
+    fy: [
+      ["EBITDA", "Rs 27crs", "Not disclosed in current source", "FY26"],
+      ["Borrowing", "Nil", "N/A", "Debt-free as of 31 Mar 2026"],
+      ["Revenue", "Not disclosed in current source", "Not disclosed in current source", "FY26"]
+    ]
+  },
   mtar: {
     title: "MTAR Technologies earnings call summary",
     callDate: "31 March 2026",
@@ -120,7 +168,7 @@ const callSummaries = {
         text: "Management raised FY27 revenue growth guidance to approximately 80% plus or minus 5%, implying around Rs 1,577crs at the midpoint. EBITDA margin guidance is approximately 24% for FY27. Clean Energy order inflows are expected at approximately Rs 4,000crs in FY27."
       },
       {
-        heading: "Key Positives",
+        heading: "Key Positives from the Call",
         text: "Record order book, aggressive FY27 revenue guidance, clean energy diversification, new customer additions across SLB, GKN Aerospace, Thales and Thales Alenia Space, and proposed subsidiary amalgamation."
       },
       {
@@ -137,6 +185,126 @@ const callSummaries = {
       ["Revenue", "Rs 876crs (USD 105mn)", "Rs 676crs (USD 81mn)", "+29.6% YoY"],
       ["EBITDA", "Rs 171crs (USD 20mn)", "Rs 121crs (USD 14mn)", "+41.7% YoY"],
       ["PAT", "Rs 94crs (USD 11mn)", "Rs 53crs (USD 6mn)", "+76.2% YoY"]
+    ]
+  },
+  datapatterns: {
+    title: "Data Patterns earnings call summary",
+    callDate: "Q4 FY2025-26",
+    period: "Q4 FY26 and FY26",
+    source: "Company-hosted Q4 FY26 earnings call transcript PDF",
+    sections: [
+      { heading: "Financial Performance", text: "Data Patterns reported Q4 FY26 revenue of approximately Rs 345crs. Gross margin for Q4 FY26 improved significantly to around 73% versus 49% in Q4 FY25. Q4 PAT stood at approximately Rs 139crs, translating to a PAT margin of around 40%." },
+      { heading: "Order Book and Pipeline", text: "Detailed order book values were not captured in the current source snippets. The company remains positioned around defence electronics, radar, EW and avionics programmes where execution timing can influence quarterly revenue mix." },
+      { heading: "Segment Performance and Strategic Direction", text: "The transcript highlights strong margin performance and operating leverage. The strategic direction remains electronics-led defence systems, with emphasis on maintaining profitability while scaling revenue." },
+      { heading: "FY27 Guidance", text: "Specific FY27 revenue guidance was not captured in the current source snippets. Investors should track order inflows, execution cadence and whether Q4's elevated gross margin is sustainable." },
+      { heading: "Key Positives from the Call", text: "High Q4 gross margin, strong PAT margin, full-year scale, and high-quality defence electronics exposure." },
+      { heading: "Key Concerns and Watch Points", text: "Quarterly revenue mix can shift materially depending on programme execution. Sustainability of 73% gross margin and timing of large defence orders are the key watch points." }
+    ],
+    q4: [
+      ["Revenue", "Rs 345crs", "Not disclosed in current source", "Q4 FY26"],
+      ["Gross margin", "73%", "49%", "Improved significantly YoY"],
+      ["PAT", "Rs 139crs", "Not disclosed in current source", "40% PAT margin"]
+    ],
+    fy: [
+      ["Revenue", "Rs 925crs", "Not disclosed in current source", "+31% YoY"],
+      ["EBITDA", "Rs 371crs", "Not disclosed in current source", "FY26"],
+      ["PAT", "Rs 271crs", "Not disclosed in current source", "FY26"]
+    ]
+  },
+  azad: {
+    title: "Azad Engineering earnings call summary",
+    callDate: "16 May 2026",
+    period: "Q4 FY26 and FY26",
+    source: "Azad IR transcript page / Q4 FY26 call transcript",
+    sections: [
+      { heading: "Financial Performance", text: "Azad delivered a strong Q4 FY26, with revenue of approximately Rs 157crs, up 26.4% YoY. EBITDA margin improved to approximately 36.7% and PAT margin to approximately 22.3%. FY26 revenue reached approximately Rs 590crs versus Rs 453crs in FY25, with EBITDA margin at 36.9% and PAT margin at 22.4%." },
+      { heading: "Order Book and Pipeline", text: "Management indicated a rolling order book of approximately Rs 6,500crs, with delivery schedules extending over roughly five to six years. This gives the business unusually long revenue visibility for a precision manufacturing platform." },
+      { heading: "Segment Performance and Strategic Direction", text: "FY26 was described as a year of consolidation and investment, with around 70% to 80% of infrastructure build-out complete and four dedicated facilities operational. The Mitsubishi Heavy Industries eight-year single-source contract validates technical capability in hot-section components." },
+      { heading: "FY27 Guidance", text: "Management reiterated approximately 25% plus top-line growth, with potential upside as new plants stabilise." },
+      { heading: "Key Positives from the Call", text: "Strong revenue growth, high EBITDA/PAT margins, long-duration order visibility, new dedicated facilities and strategic validation from Mitsubishi Heavy Industries." },
+      { heading: "Key Concerns and Watch Points", text: "Capacity ramp-up execution, customer concentration, working capital and how quickly new plants stabilise will be important to monitor." }
+    ],
+    q4: [
+      ["Revenue", "Rs 157crs", "Not disclosed in current source", "+26.4% YoY"],
+      ["EBITDA margin", "36.7%", "Not disclosed in current source", "Q4 FY26"],
+      ["PAT margin", "22.3%", "Not disclosed in current source", "Q4 FY26"]
+    ],
+    fy: [
+      ["Revenue", "Rs 590crs", "Rs 453crs", "FY26 vs FY25"],
+      ["EBITDA margin", "36.9%", "Not disclosed in current source", "FY26"],
+      ["PAT margin", "22.4%", "Not disclosed in current source", "FY26"]
+    ]
+  },
+  aequs: {
+    title: "Aequs earnings call summary",
+    callDate: "29 January 2026",
+    period: "Q3 FY26 and 9M FY26",
+    source: "Company-hosted investor meet transcript dated 29 January 2026",
+    sections: [
+      { heading: "Financial Performance", text: "The Q3 FY26 investor meet transcript notes strong 51% YoY quarterly revenue growth, described as the highest quarterly revenue for Aequs Limited. The commentary also refers to a 15% margin, revenue growth of 29% and EBITDA growth of 75% in the relevant period." },
+      { heading: "Order Book and Pipeline", text: "Detailed order book values were not captured in the current source snippets. The business is tied to aerospace precision components and contract manufacturing, where customer programme ramps and capacity utilisation drive revenue conversion." },
+      { heading: "Segment Performance and Strategic Direction", text: "The key strategic theme is scaling aerospace manufacturing with improved utilisation and operating leverage. The transcript highlights revenue growth and EBITDA growth as signs of improving scale." },
+      { heading: "FY27 Guidance", text: "Specific FY27 revenue guidance was not captured in the current source snippets. Investors should track capacity utilisation, margin improvement and customer concentration." },
+      { heading: "Key Positives from the Call", text: "Highest quarterly revenue, strong YoY revenue growth, EBITDA growth and aerospace manufacturing exposure." },
+      { heading: "Key Concerns and Watch Points", text: "Profitability still needs monitoring, and the scale-up profile may remain sensitive to utilisation, customer schedules and working capital." }
+    ],
+    q4: [
+      ["Revenue", "Not applicable", "Not applicable", "Latest source is Q3 FY26"],
+      ["EBITDA", "Not applicable", "Not applicable", "Latest source is Q3 FY26"],
+      ["PAT", "Not applicable", "Not applicable", "Latest source is Q3 FY26"]
+    ],
+    fy: [
+      ["Revenue growth", "29%", "Not disclosed in current source", "Period per transcript snippet"],
+      ["EBITDA growth", "75%", "Not disclosed in current source", "Period per transcript snippet"],
+      ["Margin", "15%", "Not disclosed in current source", "Period per transcript snippet"]
+    ]
+  },
+  paras: {
+    title: "Paras Defence earnings call summary",
+    callDate: "Q4 FY26 results period",
+    period: "Q4 FY26",
+    source: "Q4 FY26 results/news and investor presentation material",
+    sections: [
+      { heading: "Financial Performance", text: "Paras Defence reported Q4 FY26 revenue from operations of approximately Rs 171.31crs, up 58.3% YoY from Rs 108.23crs. Net profit was approximately Rs 38.88crs, up around 75% YoY. EBITDA was reported to have increased by approximately 51%." },
+      { heading: "Order Book and Pipeline", text: "Detailed earnings-call order book values were not confirmed in the current source snippets. The business remains exposed to optics, defence electronics and space engineering." },
+      { heading: "Segment Performance and Strategic Direction", text: "The results reflect accelerating defence indigenisation demand and stronger execution. Investor presentation material indicates continuing emphasis on defence and space engineering capabilities." },
+      { heading: "FY27 Guidance", text: "Specific FY27 guidance was not captured in the current source snippets. Investors should track order intake, execution timelines and margin conversion." },
+      { heading: "Key Positives from the Call", text: "Strong Q4 revenue growth, PAT growth, improving EBITDA, and exposure to optics/space/defence electronics." },
+      { heading: "Key Concerns and Watch Points", text: "Latest transcript link still needs direct confirmation. Quarterly revenue may remain lumpy, and margins should be monitored as order mix evolves." }
+    ],
+    q4: [
+      ["Revenue", "Rs 171.31crs", "Rs 108.23crs", "+58.3% YoY"],
+      ["PAT", "Rs 38.88crs", "Not disclosed in current source", "+75% YoY"],
+      ["EBITDA", "Not disclosed in current source", "Not disclosed in current source", "+51% YoY"]
+    ],
+    fy: [
+      ["Revenue", "Not disclosed in current source", "Not disclosed in current source", "FY26"],
+      ["PAT", "Not disclosed in current source", "Not disclosed in current source", "FY26"],
+      ["Order book", "Not disclosed in current source", "N/A", "FY26"]
+    ]
+  },
+  astra: {
+    title: "Astra Microwave earnings call summary",
+    callDate: "13 February 2026",
+    period: "Q3 FY26",
+    source: "Astra Microwave transcript listing / Q3 FY26 transcript highlights",
+    sections: [
+      { heading: "Financial Performance", text: "Astra Microwave's Q3 FY26 transcript highlights record performance, strong margins and a robust order book exceeding Rs 2,200crs. Q1 FY26 revenue was previously reported at Rs 197crs, up 28.1% YoY, and Q2 FY26 commentary noted H1 revenue up 7.2% YoY and PAT up 13.5%." },
+      { heading: "Order Book and Pipeline", text: "Order book exceeded Rs 2,200crs in Q3 FY26. Management highlighted major wins in defence and space and expected order additions of approximately Rs 1,500crs plus for FY27." },
+      { heading: "Segment Performance and Strategic Direction", text: "The company remains focused on RF, microwave and defence electronics across defence, space and meteorology. Management expects to double turnover over three to four years." },
+      { heading: "FY27 Guidance", text: "Transcript highlights indicate around 15% revenue growth expected for FY27 and order book additions of around Rs 1,500crs plus." },
+      { heading: "Key Positives from the Call", text: "Record Q3 performance, strong margins, order book over Rs 2,200crs, major defence/space wins and multi-year growth ambition." },
+      { heading: "Key Concerns and Watch Points", text: "Execution of large order book, quarterly mix, defence order timing and conversion of long-term $1bn aspiration into near-term revenue are key watch points." }
+    ],
+    q4: [
+      ["Revenue", "Not applicable", "Not applicable", "Latest source is Q3 FY26"],
+      ["Order book", "Over Rs 2,200crs", "N/A", "Q3 FY26"],
+      ["Guidance", "15% FY27 revenue growth", "N/A", "Management outlook"]
+    ],
+    fy: [
+      ["H1 revenue growth", "+7.2% YoY", "N/A", "Q2 FY26 commentary"],
+      ["H1 PAT growth", "+13.5% YoY", "N/A", "Q2 FY26 commentary"],
+      ["FY27 order additions", "Approx. Rs 1,500crs+", "N/A", "Management outlook"]
     ]
   }
 };
