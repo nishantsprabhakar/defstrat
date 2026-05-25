@@ -141,6 +141,57 @@ const callSummaries = {
   }
 };
 
+const transcriptSources = {
+  zentec: {
+    status: "Transcript available",
+    date: "Q4 FY2026 / exchange filing reported in May 2026",
+    url: "https://www.zentechnologies.com/calls-and-conferences",
+    note: "Zen's investor page carries earnings-call and conference-call transcripts, including FY26 call materials."
+  },
+  ideaforge: {
+    status: "Transcript available",
+    date: "Quarter and year ended 31 March 2026",
+    url: "https://www.stockinsights.ai/in/IDEAFORGE/announcement/earnings-calls-20260511-516",
+    note: "Q4 FY26 transcript filing reported with exchanges; summary notes highest quarterly revenue and positive EBITDA."
+  },
+  mtar: {
+    status: "Transcript/audio available",
+    date: "13 May 2026 call for Q4 FY26 and FY26",
+    url: "https://trendlyne.com/latest-news/BSE-Announcements/436155/MTARTECH/mtar-technologies-ltd/",
+    note: "Exchange announcements show Q4 FY26 earnings call material/audio; attached document summary is formatted in the tab below."
+  },
+  datapatterns: {
+    status: "Transcript available",
+    date: "Q4 FY2025-26",
+    url: "https://www.datapatternsindia.com/investors/files/Earnings-Call-Transcript-Q4-2025-26.pdf",
+    note: "Company-hosted Q4 FY26 earnings call transcript PDF."
+  },
+  azad: {
+    status: "Transcript available",
+    date: "16 May 2026 Q4 FY26 call",
+    url: "https://azad.in/quarterly-financial-results/",
+    note: "Azad IR page lists earning-call transcripts by quarter; Q4 FY26 call held on 16 May 2026."
+  },
+  aequs: {
+    status: "Transcript available",
+    date: "29 January 2026 investor meet / Q3 FY26",
+    url: "https://www.aequs.com/wp-content/uploads/2026/02/Investor-Meet-transcript-29-January-2026.pdf",
+    note: "Company-hosted transcript for Q3 and nine months ended 31 December 2025."
+  },
+  paras: {
+    status: "Investor presentation available",
+    date: "Q1 FY26 presentation",
+    url: "https://parasdefence.com/uploads/presentation/1754971084_paras-defence-investor-presentation-2025.pdf",
+    note: "I found investor presentation material; latest call transcript link still needs confirmation from company/BSE announcements."
+  },
+  astra: {
+    status: "Transcript available",
+    date: "Q3 FY26 call on 13 February 2026",
+    url: "https://stockanalysis.com/quote/bom/532493/transcripts/",
+    note: "Transcript listing shows Q3 FY26, Q2 FY26, Q1 FY26 and Q4 FY25 call transcripts."
+  }
+};
+
 const formatInr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 });
 const formatNum = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 });
 
@@ -533,7 +584,21 @@ function renderCallSummary() {
   if (!selected) return;
   const summary = callSummaries[selected.meta.id] || callSummaries.mtar;
   const note = callSummaries[selected.meta.id] ? "" : `<div class="empty">No earnings call summary has been added for ${escapeHtml(selected.meta.name)} yet. Showing the latest attached MTAR earnings call format below. Current ${escapeHtml(selected.meta.name)} period tracked: ${escapeHtml(extraData[selected.meta.id]?.period || "N/A")}.</div>`;
+  const transcriptRows = dashboard.map((item) => {
+    const source = transcriptSources[item.meta.id] || {};
+    return [
+      `<strong>${escapeHtml(item.meta.name)}</strong><br><small>${escapeHtml(item.meta.nse || item.meta.symbol)}</small>`,
+      escapeHtml(source.status || "Checking"),
+      escapeHtml(source.date || extraData[item.meta.id]?.period || "N/A"),
+      source.url ? `<a href="${source.url}" target="_blank" rel="noreferrer">Open source</a><br><small>${escapeHtml(source.note || "")}</small>` : escapeHtml(source.note || "No transcript source added yet.")
+    ];
+  });
   els.callSummaryPanel.innerHTML = `<article class="brief-card">
+    <small>Transcript availability rechecked</small>
+    <strong>Latest earnings-call transcript sources</strong>
+    ${table(["Company", "Availability", "Date / period", "Source"], transcriptRows)}
+  </article>
+  <article class="brief-card">
     ${note}
     <small>${escapeHtml(summary.period)} &middot; Call date/period: ${escapeHtml(summary.callDate)} &middot; Source: ${escapeHtml(summary.source)}</small>
     <strong>${escapeHtml(summary.title)}</strong>
