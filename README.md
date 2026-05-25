@@ -22,6 +22,18 @@ Then open:
 http://localhost:4173
 ```
 
+On Windows, you can also double-click:
+
+```text
+Run DefStrat Dashboard.cmd
+```
+
+To stop the local server, double-click:
+
+```text
+Stop DefStrat Dashboard.cmd
+```
+
 The backend proxies Yahoo Finance chart/quote data and BSE filings so the browser can keep refreshing without CORS failures. The dashboard refreshes automatically every 60 seconds and stores added/deleted companies in local browser storage.
 
 ## Publish
