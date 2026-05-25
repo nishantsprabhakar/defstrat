@@ -55,8 +55,10 @@
 
       <nav class="app-tabs" aria-label="Dashboard tabs">
         <button class="is-active" data-tab="charts">Charts</button>
+        <button data-tab="companyInfo">Company Info</button>
         <button data-tab="historical">Historical</button>
         <button data-tab="earnings">Earnings</button>
+        <button data-tab="callSummary">Earnings Call</button>
         <button data-tab="comparison">Comparison</button>
         <button data-tab="ai">DefStrat AI</button>
         <button data-tab="manage">Manage</button>
@@ -105,12 +107,28 @@
         </section>
       </section>
 
+      <section class="tab-panel data-panel" data-panel="companyInfo">
+        <div class="section-title">
+          <h2>Company Info</h2>
+          <span>Business basics, key updates and recent news</span>
+        </div>
+        <div id="companyInfoPanel"></div>
+      </section>
+
       <section class="tab-panel data-panel" data-panel="historical">
         <div class="section-title">
           <h2>Historical</h2>
           <span>1Y return, live price and range</span>
         </div>
         <div id="historicalPanel"></div>
+      </section>
+
+      <section class="tab-panel data-panel" data-panel="callSummary">
+        <div class="section-title">
+          <h2>Earnings Call Summary</h2>
+          <span>Latest call notes in the attached format</span>
+        </div>
+        <div id="callSummaryPanel"></div>
       </section>
 
       <section class="tab-panel data-panel" data-panel="earnings">

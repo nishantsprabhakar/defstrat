@@ -26,7 +26,9 @@ const els = {
 els.tabs = document.querySelectorAll("[data-tab]");
 els.panels = document.querySelectorAll("[data-panel]");
 els.historicalPanel = document.querySelector("#historicalPanel");
+els.companyInfoPanel = document.querySelector("#companyInfoPanel");
 els.earningsPanel = document.querySelector("#earningsPanel");
+els.callSummaryPanel = document.querySelector("#callSummaryPanel");
 els.comparisonPanel = document.querySelector("#comparisonPanel");
 els.aiPanel = document.querySelector("#aiPanel");
 els.managePanel = document.querySelector("#managePanel");
@@ -64,6 +66,80 @@ const extraData = {
 };
 
 const years = ["FY21", "FY22", "FY23", "FY24", "FY25"];
+
+const companyUpdates = {
+  zentec: [
+    { date: "2026-05-25", title: "Live market feed active", detail: "Yahoo chart feed is used for latest price, volume and 1Y return." },
+    { date: "2026-03-31", title: "DefStrat watch item", detail: "Track anti-drone order execution, simulator exports and margin sustainability." }
+  ],
+  ideaforge: [
+    { date: "2026-05-25", title: "Live market feed active", detail: "Watch drone demand recovery, government orders and working-capital discipline." }
+  ],
+  mtar: [
+    { date: "2026-03-31", title: "FY26 earnings call", detail: "Management guided to approximately 80% revenue growth for FY27 and 24% EBITDA margin." },
+    { date: "2026-09-30", title: "Facility milestone to monitor", detail: "Oil & Gas greenfield facility expected to commission by September 2026 per call commentary." }
+  ],
+  datapatterns: [
+    { date: "2026-05-25", title: "DefStrat watch item", detail: "Track radar, EW and avionics program wins, order inflows and execution cycle." }
+  ],
+  azad: [
+    { date: "2026-05-25", title: "DefStrat watch item", detail: "Track aerospace/turbine component ramp-up, exports and customer concentration." }
+  ],
+  aequs: [
+    { date: "2025-12-31", title: "Latest period tracked", detail: "DefStrat model period set to December 2025 pending further public filings." }
+  ],
+  paras: [
+    { date: "2026-05-25", title: "DefStrat watch item", detail: "Monitor optics, space electronics, order conversion and margin recovery." }
+  ],
+  astra: [
+    { date: "2025-12-31", title: "Latest period tracked", detail: "Track RF/microwave order book, defence electronics execution and margin progression." }
+  ]
+};
+
+const callSummaries = {
+  mtar: {
+    title: "MTAR Technologies earnings call summary",
+    callDate: "31 March 2026",
+    period: "Q4 FY26 and FY26",
+    source: "Attached MTAR earnings call.docx",
+    sections: [
+      {
+        heading: "Financial Performance",
+        text: "FY26 was a year of strong operational recovery. Q4 FY26 revenue was Rs 306crs, up 67.2% YoY from Rs 183crs in Q4 FY25 and 10.1% ahead of Q3 FY26. FY26 revenue from operations reached Rs 876crs, up 29.6% from Rs 676crs in FY25. Q4 FY26 EBITDA was Rs 62crs, up 80.9% YoY, with EBITDA margin at 20.2%. FY26 EBITDA grew 41.7% to Rs 171crs. Q4 PAT rose 222% YoY to Rs 44crs, and FY26 PAT rose 76.2% to Rs 94crs."
+      },
+      {
+        heading: "Order Book and Pipeline",
+        text: "Order inflows were Rs 2,453crs during FY26, resulting in a closing order book of Rs 2,582crs as of 31 March 2026, nearly 3x FY26 revenue. Clean Energy accounted for 51.2% of the order book, Civil Nuclear 26.3%, Aerospace and Defence 14.0%, and Products/Others 8.5%."
+      },
+      {
+        heading: "Segment Performance and Strategic Direction",
+        text: "Clean Energy contributed Rs 615crs to FY26 revenue and remained the dominant driver. Aerospace and Defence revenue grew to Rs 104crs. Management highlighted a shift from component-level supply to integrated systems delivery, which should raise revenue per program and support structurally better margins."
+      },
+      {
+        heading: "FY27 Guidance",
+        text: "Management raised FY27 revenue growth guidance to approximately 80% plus or minus 5%, implying around Rs 1,577crs at the midpoint. EBITDA margin guidance is approximately 24% for FY27. Clean Energy order inflows are expected at approximately Rs 4,000crs in FY27."
+      },
+      {
+        heading: "Key Positives",
+        text: "Record order book, aggressive FY27 revenue guidance, clean energy diversification, new customer additions across SLB, GKN Aerospace, Thales and Thales Alenia Space, and proposed subsidiary amalgamation."
+      },
+      {
+        heading: "Key Concerns and Watch Points",
+        text: "FY27 margin guidance requires strong execution versus Q4 FY26 EBITDA margin of 20.2%. Greenfield facility timing may create quarterly lumpiness. Clean Energy concentration remains a key risk if large customers slow procurement."
+      }
+    ],
+    q4: [
+      ["Revenue", "Rs 306crs (USD 37mn)", "Rs 183crs (USD 22mn)", "+67.2% YoY"],
+      ["EBITDA", "Rs 62crs (USD 7mn)", "Rs 34crs (USD 4mn)", "+80.9% YoY"],
+      ["PAT", "Rs 44crs (USD 5mn)", "Rs 14crs (USD 2mn)", "+222% YoY"]
+    ],
+    fy: [
+      ["Revenue", "Rs 876crs (USD 105mn)", "Rs 676crs (USD 81mn)", "+29.6% YoY"],
+      ["EBITDA", "Rs 171crs (USD 20mn)", "Rs 121crs (USD 14mn)", "+41.7% YoY"],
+      ["PAT", "Rs 94crs (USD 11mn)", "Rs 53crs (USD 6mn)", "+76.2% YoY"]
+    ]
+  }
+};
 
 const formatInr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 });
 const formatNum = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 });
@@ -362,11 +438,41 @@ function oneYearReturn(item) {
 }
 
 function renderDataTabs() {
+  renderCompanyInfo();
   renderHistorical();
   renderEarnings();
+  renderCallSummary();
   renderComparison();
   renderAiBrief();
   renderManage();
+}
+
+function renderCompanyInfo() {
+  if (!els.companyInfoPanel) return;
+  const selected = dashboard.find((item) => item.meta.id === selectedId) || dashboard[0];
+  if (!selected) return;
+  const extra = extraData[selected.meta.id] || {};
+  const q = selected.yahoo?.quote || {};
+  const updates = companyUpdates[selected.meta.id] || [];
+  els.companyInfoPanel.innerHTML = `<div class="info-grid">
+    <article class="brief-card">
+      <small>${escapeHtml(selected.meta.nse || selected.meta.symbol)} &middot; BSE ${escapeHtml(selected.meta.bse || "custom")}</small>
+      <strong>${escapeHtml(selected.meta.name)}</strong>
+      <p>${escapeHtml(extra.oneLine || selected.meta.segment || "")}</p>
+      <div class="fundamentals">
+        <div><small>Sub-sector</small><strong>${escapeHtml(extra.focus || selected.meta.segment || "--")}</strong></div>
+        <div><small>Live price</small><strong>${money(q.regularMarketPrice)}</strong></div>
+        <div><small>Day move</small><strong class="${moveClass(q.regularMarketChangePercent)}">${pct(q.regularMarketChangePercent)}</strong></div>
+        <div><small>1Y return</small><strong class="${moveClass(oneYearReturn(selected))}">${pct(oneYearReturn(selected))}</strong></div>
+      </div>
+      <p><a href="https://finance.yahoo.com/quote/${selected.meta.symbol}" target="_blank" rel="noreferrer">Yahoo Finance</a> &middot; <a href="https://www.bseindia.com/corporates/ann.html" target="_blank" rel="noreferrer">BSE announcements</a></p>
+    </article>
+    <article class="brief-card">
+      <small>Recent updates and news</small>
+      <strong>Key dated items</strong>
+      <div class="update-list">${updates.map((row) => `<div class="update-item"><small>${escapeHtml(row.date)}</small><strong>${escapeHtml(row.title)}</strong><p>${escapeHtml(row.detail)}</p></div>`).join("") || `<div class="empty">No dated updates added yet.</div>`}</div>
+    </article>
+  </div>`;
 }
 
 function renderHistorical() {
@@ -419,6 +525,22 @@ function renderEarnings() {
         </div>
       </details>`;
     }).join("")}</div>`;
+}
+
+function renderCallSummary() {
+  if (!els.callSummaryPanel) return;
+  const selected = dashboard.find((item) => item.meta.id === selectedId) || dashboard[0];
+  if (!selected) return;
+  const summary = callSummaries[selected.meta.id] || callSummaries.mtar;
+  const note = callSummaries[selected.meta.id] ? "" : `<div class="empty">No earnings call summary has been added for ${escapeHtml(selected.meta.name)} yet. Showing the latest attached MTAR earnings call format below. Current ${escapeHtml(selected.meta.name)} period tracked: ${escapeHtml(extraData[selected.meta.id]?.period || "N/A")}.</div>`;
+  els.callSummaryPanel.innerHTML = `<article class="brief-card">
+    ${note}
+    <small>${escapeHtml(summary.period)} &middot; Call date/period: ${escapeHtml(summary.callDate)} &middot; Source: ${escapeHtml(summary.source)}</small>
+    <strong>${escapeHtml(summary.title)}</strong>
+    ${summary.sections.map((section) => `<div class="call-section"><h3>${escapeHtml(section.heading)}</h3><p>${escapeHtml(section.text)}</p></div>`).join("")}
+    <div class="call-section"><h3>Q4 FY26 Metrics</h3>${table(["Metric", "Q4 FY26", "Q4 FY25", "Change"], summary.q4)}</div>
+    <div class="call-section"><h3>FY26 Metrics</h3>${table(["Metric", "FY26", "FY25", "Change"], summary.fy)}</div>
+  </article>`;
 }
 
 function renderComparison() {
@@ -487,12 +609,18 @@ function renderManage() {
   document.querySelector("#manageAdd")?.addEventListener("click", addFromManage);
 }
 
-function answerAi(prompt) {
+async function answerAi(prompt) {
   const normalized = prompt.toLowerCase();
   const answer = document.querySelector("#aiAnswer");
   if (!answer) return;
+  answer.innerHTML = `<small>Searching Yahoo Finance</small><p>Refreshing live quote and chart context before answering...</p>`;
+  await refreshYahooContext(normalized);
   const rows = getAnalystRows();
   const metric = inferMetric(normalized);
+  const mentioned = mentionedRows(rows, normalized);
+  const priceLead = (normalized.includes("price") || normalized.includes("quote") || normalized.includes("yahoo") || normalized.includes("latest"))
+    ? mentioned.map((row) => `${row.name} latest Yahoo-backed quote: ${money(row.price)} (${pct(row.dayMove)} today, ${pct(row.return1y)} 1Y).`).join(" ")
+    : "";
   let title = "Analyst response";
   let text = "";
   if (normalized.includes("highest") || normalized.includes("best") || normalized.includes("leader")) {
@@ -519,7 +647,25 @@ function answerAi(prompt) {
     const quality = rankRows(rows, metrics.roce, "desc")[0];
     text = `Momentum leader: ${leader?.name || "N/A"} (${leader ? pct(leader.return1y) : "--"} 1Y). Quality leader: ${quality?.name || "N/A"} (${quality ? pct(quality.roce) : "--"} ROCE). Ask for a metric like PAT margin, ROCE, P/E, 1Y return, debt, revenue, or market cap for a precise ranking.`;
   }
+  if (priceLead) text = `${priceLead} ${text}`;
   answer.innerHTML = `<small>${escapeHtml(title)}</small><p>${escapeHtml(text)}</p>`;
+}
+
+async function refreshYahooContext(text) {
+  const matches = dashboard.filter((item) => {
+    const haystack = `${item.meta.name} ${item.meta.nse} ${extraData[item.meta.id]?.label || ""}`.toLowerCase();
+    return text && haystack.split(/\s+/).some((part) => part.length > 2 && text.includes(part));
+  });
+  const targets = matches.length ? matches : (dashboard.find((item) => item.meta.id === selectedId) ? [dashboard.find((item) => item.meta.id === selectedId)] : []);
+  await Promise.all(targets.map(async (item) => {
+    try {
+      const fresh = await getJson(`/api/company?symbol=${encodeURIComponent(item.meta.symbol)}&bse=${encodeURIComponent(item.meta.bse || "")}&name=${encodeURIComponent(item.meta.name)}`);
+      const index = dashboard.findIndex((row) => row.meta.id === item.meta.id);
+      if (index >= 0 && fresh?.yahoo) dashboard[index] = { ...dashboard[index], ...fresh, meta: dashboard[index].meta };
+    } catch {
+      // Keep existing dashboard data when Yahoo is temporarily unavailable.
+    }
+  }));
 }
 
 function addFromManage() {
@@ -618,6 +764,7 @@ function getAnalystRows() {
       id: item.meta.id,
       name: item.meta.name,
       price: quote.regularMarketPrice,
+      dayMove: quote.regularMarketChangePercent,
       return1y: oneYearReturn(item),
       revenue: extra.revenue,
       patMargin: extra.patMargin,
@@ -629,6 +776,17 @@ function getAnalystRows() {
       oneLine: extra.oneLine || item.meta.segment || ""
     };
   });
+}
+
+function mentionedRows(rows, text) {
+  const matches = rows.filter((row) => {
+    const extra = extraData[row.id] || {};
+    const terms = [row.name, extra.label, row.id].filter(Boolean).flatMap((value) => String(value).toLowerCase().split(/\s+/));
+    return terms.some((term) => term.length > 2 && text.includes(term));
+  });
+  if (matches.length) return matches;
+  const selected = rows.find((row) => row.id === selectedId);
+  return selected ? [selected] : rows.slice(0, 1);
 }
 
 function inferMetric(text) {

@@ -170,6 +170,11 @@ label {
   gap: 8px;
 }
 
+.search-wrap {
+  position: relative;
+  min-width: 0;
+}
+
 input {
   width: 100%;
   min-height: 42px;
@@ -187,14 +192,18 @@ input:focus {
 
 .search-results {
   position: absolute;
-  margin-top: 8px;
-  width: min(560px, calc(100% - 32px));
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-height: 320px;
   background: #111611;
   border: 1px solid var(--line);
   border-radius: 8px;
-  overflow: hidden;
-  z-index: 5;
+  overflow-y: auto;
+  z-index: 30;
   display: none;
+  box-shadow: 0 18px 44px rgba(0,0,0,.32);
 }
 
 .search-results button {
@@ -204,6 +213,12 @@ input:focus {
   border-radius: 0;
   text-align: left;
   min-height: 52px;
+}
+
+.search-results strong,
+.search-results small,
+.update-item strong {
+  display: block;
 }
 
 .metric-strip {
@@ -257,7 +272,7 @@ input:focus {
   margin-top: 16px;
   padding: 8px;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(8, minmax(120px, 1fr));
   gap: 8px;
 }
 
@@ -615,6 +630,39 @@ svg {
   line-height: 1.5;
 }
 
+.info-grid {
+  display: grid;
+  grid-template-columns: minmax(260px, .8fr) minmax(320px, 1.2fr);
+  gap: 12px;
+}
+
+.update-list {
+  display: grid;
+  gap: 10px;
+}
+
+.update-item {
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255,255,255,.035);
+}
+
+.call-section {
+  margin-top: 14px;
+}
+
+.call-section h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.call-section p {
+  margin: 0 0 10px;
+  color: #cdd5ca;
+  line-height: 1.58;
+}
+
 .earnings-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -684,7 +732,7 @@ svg {
   .toolbar { grid-template-columns: 1fr; }
   .compare-grid, .fundamentals, .metric-strip { grid-template-columns: 1fr; }
   .sector-snapshot, .chart-grid, .earnings-grid, .manage-form { grid-template-columns: 1fr; }
-  .app-tabs { grid-template-columns: repeat(2, 1fr); }
+  .app-tabs, .info-grid { grid-template-columns: 1fr; }
   .brief-grid { grid-template-columns: 1fr; }
   .big-quote strong { font-size: 34px; }
 }
