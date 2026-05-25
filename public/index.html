@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Defence Finance Command</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div class="hero__copy">
+          <div class="brand-lockup">
+            <img src="/defstrat-logo.svg" alt="DefStrat logo">
+            <span>by Nishant Prabhakar</span>
+          </div>
+          <p class="eyebrow">Live Indian defence equities</p>
+          <h1>Defence Finance Command</h1>
+          <p class="lede">A real-time operating view of prices, financials, filings, presentations and earnings commentary from Yahoo Finance and BSE sources.</p>
+        </div>
+        <div class="status-panel" aria-live="polite">
+          <span class="pulse"></span>
+          <div>
+            <strong id="marketStatus">Connecting to live feeds</strong>
+            <span id="refreshStamp">Waiting for first refresh</span>
+          </div>
+          <button id="refreshBtn" class="icon-button" title="Refresh live data" aria-label="Refresh live data">&#8635;</button>
+        </div>
+      </section>
+
+      <section class="toolbar" aria-label="Company controls">
+        <div class="search-wrap">
+          <label for="companySearch">Add company</label>
+          <div class="search-row">
+            <input id="companySearch" type="search" placeholder="Search Yahoo symbol or type NSE code">
+            <button id="addManualBtn">Add</button>
+          </div>
+          <div id="searchResults" class="search-results"></div>
+        </div>
+        <div class="metric-strip">
+          <div><span id="companyCount">0</span><small>Tracked</small></div>
+          <div><span id="avgMove">--</span><small>Avg move</small></div>
+          <div><span id="filingCount">0</span><small>BSE filings</small></div>
+        </div>
+      </section>
+
+      <section class="sector-snapshot" aria-label="Sector snapshot">
+        <div><small>Combined market cap</small><strong id="combinedMarketCap">--</strong></div>
+        <div><small>Companies tracked</small><strong id="snapshotCompanies">0</strong></div>
+        <div><small>Sector avg P/E</small><strong id="sectorPe">N/A</strong></div>
+        <div><small>Best 1Y return</small><strong id="bestReturn">--</strong></div>
+        <div><small>Sector avg ROE</small><strong id="sectorRoe">N/A</strong></div>
+      </section>
+      <p class="data-note">Live prices and history use Yahoo Finance chart feeds. Peer financial metrics are DefStrat model values for dashboard analysis and should be reconciled with original exchange filings before investment use.</p>
+
+      <nav class="app-tabs" aria-label="Dashboard tabs">
+        <button class="is-active" data-tab="charts">Charts</button>
+        <button data-tab="historical">Historical</button>
+        <button data-tab="earnings">Earnings</button>
+        <button data-tab="comparison">Comparison</button>
+        <button data-tab="ai">DefStrat AI</button>
+        <button data-tab="manage">Manage</button>
+      </nav>
+
+      <section class="layout tab-panel is-active" data-panel="charts">
+        <aside class="watchlist">
+          <div class="section-title">
+            <h2>Watchlist</h2>
+            <button id="resetBtn" title="Restore default defence list">Reset</button>
+          </div>
+          <div id="watchlist"></div>
+        </aside>
+
+        <section class="workspace">
+          <div class="section-title">
+            <h2>Sector Charts</h2>
+            <span>Revenue, profitability, valuation and returns</span>
+          </div>
+          <div class="chart-grid" id="sectorCharts"></div>
+
+          <div class="compare-grid" id="cards"></div>
+
+          <div class="detail-grid">
+            <article class="market-map">
+              <div class="section-title">
+                <h2 id="selectedName">Company detail</h2>
+                <span id="selectedCodes"></span>
+              </div>
+              <div class="big-quote">
+                <strong id="selectedPrice">--</strong>
+                <span id="selectedMove">--</span>
+              </div>
+              <svg id="priceChart" viewBox="0 0 720 260" role="img" aria-label="One year price chart"></svg>
+              <div class="fundamentals" id="fundamentals"></div>
+            </article>
+
+            <article class="insights">
+              <div class="section-title">
+                <h2>Notes & Filings</h2>
+                <span>BSE + Yahoo</span>
+              </div>
+              <div id="insightList" class="insight-list"></div>
+            </article>
+          </div>
+        </section>
+      </section>
+
+      <section class="tab-panel data-panel" data-panel="historical">
+        <div class="section-title">
+          <h2>Historical</h2>
+          <span>1Y return, live price and range</span>
+        </div>
+        <div id="historicalPanel"></div>
+      </section>
+
+      <section class="tab-panel data-panel" data-panel="earnings">
+        <div class="section-title">
+          <h2>Earnings</h2>
+          <span>Latest filings, presentations and call notes</span>
+        </div>
+        <div id="earningsPanel"></div>
+      </section>
+
+      <section class="tab-panel data-panel" data-panel="comparison">
+        <div class="section-title">
+          <h2>Comparison</h2>
+          <span>Operating and valuation snapshot</span>
+        </div>
+        <div id="comparisonPanel"></div>
+      </section>
+
+      <section class="tab-panel data-panel" data-panel="ai">
+        <div class="section-title">
+          <h2>DefStrat AI</h2>
+          <span>Rule-based briefing from current dashboard data</span>
+        </div>
+        <div id="aiPanel"></div>
+      </section>
+
+      <section class="tab-panel data-panel" data-panel="manage">
+        <div class="section-title">
+          <h2>Manage</h2>
+          <span>Add, delete and restore companies</span>
+        </div>
+        <div id="managePanel"></div>
+      </section>
+    </main>
+    <div id="chartTooltip" class="chart-tooltip" role="status" aria-live="polite"></div>
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

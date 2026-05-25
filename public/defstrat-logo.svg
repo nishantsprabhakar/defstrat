@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 280" role="img" aria-labelledby="title desc">
+  <title id="title">DefStrat logo</title>
+  <desc id="desc">Shield, upward aircraft mark and DefStrat wordmark.</desc>
+  <rect width="520" height="280" rx="24" fill="#ffffff"/>
+  <g transform="translate(168 44)">
+    <path d="M92 0 8 28v53c0 54 36 93 84 113 48-20 84-59 84-113V28L92 0Z" fill="#ffffff" stroke="#1c2a3a" stroke-width="8"/>
+    <path d="M92 20 30 41v41c0 36 23 64 62 83 39-19 62-47 62-83V41L92 20Z" fill="#eef3f7"/>
+    <path d="M55 98V64h18v44M84 108V50h18v58M113 108V72h18v36" fill="none" stroke="#1c2a3a" stroke-width="8" stroke-linecap="round"/>
+    <path d="M69 45 92 34l22 11M62 122h61" fill="none" stroke="#1c2a3a" stroke-width="7" stroke-linecap="round"/>
+    <path d="m128 36 74-28-36 66-15-22-32 20 17-27-8-9Z" fill="#263b52"/>
+  </g>
+  <text x="260" y="205" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="44" font-weight="800" fill="#263b52">DefStrat</text>
+  <text x="260" y="232" text-anchor="middle" font-family="Inter, Arial, sans-serif" font-size="15" font-weight="700" letter-spacing="3" fill="#5b6877">INDIA DEFENCE INTELLIGENCE</text>
+</svg>

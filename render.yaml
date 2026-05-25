@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: defstrat-dashboard
+    env: node
+    plan: free
+    buildCommand: ""
+    startCommand: "node server.mjs"
+    autoDeploy: false
+    envVars:
+      - key: NODE_ENV
+        value: production
