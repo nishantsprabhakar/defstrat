@@ -907,7 +907,7 @@ svg {
 .product-card {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 14px;
   align-items: start;
   padding: 12px;
   border: 1px solid var(--line);
@@ -927,16 +927,21 @@ svg {
 
 .product-copy {
   min-width: 0;
+  padding: 2px 2px 4px;
 }
 
 .product-copy strong {
   display: block;
   overflow-wrap: anywhere;
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.25;
 }
 
 .product-card p {
-  margin: 4px 0 0;
+  margin: 6px 0 0;
   color: #cdd5ca;
+  line-height: 1.5;
 }
 
 .update-list {

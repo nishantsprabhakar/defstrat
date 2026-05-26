@@ -1136,7 +1136,6 @@ function productPhoto(product = {}, id = "", variant = 0) {
     <path d="M0 154c48-28 83-25 128-10 51 17 89 14 152-24v70H0z" fill="rgba(217,180,95,.18)"/>
     <g opacity=".18" stroke="#f3f5ee"><path d="M18 36h244M18 78h244M18 120h244"/><path d="M42 18v150M96 18v150M150 18v150M204 18v150"/></g>
     ${scenes[type] || scenes.grid}
-    <text x="18" y="172" fill="#f3f5ee" font-size="13" font-weight="800">${title}</text>
   </svg>`;
 }
 
