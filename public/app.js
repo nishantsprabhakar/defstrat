@@ -961,12 +961,20 @@ function renderBusiness() {
     capabilities: selected.meta.segment || "Capability profile will appear here once added."
   };
   const q = selected.yahoo?.quote || {};
+  const f = selected.yahoo?.financials || {};
+  const valuation = valuationMetrics(extra);
   const financialRows = [
     ["Revenue", Number.isFinite(extra.revenue) ? `Rs ${compact(extra.revenue)}crs` : compact(selected.yahoo?.financials?.revenue)],
+    ["Gross margin", Number.isFinite(extra.grossMargin) ? pct(extra.grossMargin) : pct(Number(f.grossMargins) * 100)],
+    ["EBITDA margin", Number.isFinite(extra.ebitdaMargin) ? pct(extra.ebitdaMargin) : pct(Number(f.operatingMargins) * 100)],
     ["PAT margin", Number.isFinite(extra.patMargin) ? pct(extra.patMargin) : pct((selected.yahoo?.financials?.profitMargins || NaN) * 100)],
     ["ROCE", Number.isFinite(extra.roce) ? pct(extra.roce) : "--"],
+    ["Debt", Number.isFinite(extra.debt) ? `Rs ${compact(extra.debt)}crs` : (Number.isFinite(f.totalDebt) ? `Rs ${compact(f.totalDebt)}` : "--")],
+    ["Cash", Number.isFinite(extra.cash) ? `Rs ${compact(extra.cash)}crs` : (Number.isFinite(f.totalCash) ? `Rs ${compact(f.totalCash)}` : "--")],
     ["D/E", Number.isFinite(extra.debtEquity) ? `${formatNum.format(extra.debtEquity)}x` : "--"],
-    ["P/E", Number.isFinite(extra.pe) ? formatNum.format(extra.pe) : compact(q.trailingPE)],
+    ["EV/Revenue", valuation.evRevenue],
+    ["EV/EBITDA", valuation.evEbitda],
+    ["P/E", valuation.pe !== "--" ? valuation.pe : (Number.isFinite(q.trailingPE) ? `${formatNum.format(q.trailingPE)}x` : "--")],
     ["1Y return", pct(oneYearReturn(selected))]
   ];
   els.businessPanel.innerHTML = `<div class="business-layout">
@@ -1054,6 +1062,31 @@ function detailList(items = []) {
   return `<ul class="detail-list">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
 }
 
+function valuationMetrics(extra = {}) {
+  const revenue = Number(extra.revenue);
+  const ebitda = revenue * (Number(extra.ebitdaMargin) / 100);
+  const enterpriseValue = Number.isFinite(extra.enterpriseValue) ? Number(extra.enterpriseValue) : Number(extra.marketCap);
+  const rawEvRevenue = Number.isFinite(enterpriseValue) && revenue > 0 ? enterpriseValue / revenue : NaN;
+  const rawEvEbitda = Number.isFinite(enterpriseValue) && ebitda > 0 ? enterpriseValue / ebitda : NaN;
+  const rawPe = Number(extra.pe);
+  return {
+    rawEvRevenue,
+    rawEvEbitda,
+    rawPe: Number.isFinite(rawPe) ? rawPe : NaN,
+    evRevenue: Number.isFinite(rawEvRevenue) ? `${formatNum.format(rawEvRevenue)}x` : "--",
+    evEbitda: Number.isFinite(rawEvEbitda) ? `${formatNum.format(rawEvEbitda)}x` : "--",
+    pe: Number.isFinite(rawPe) ? `${formatNum.format(rawPe)}x` : "--"
+  };
+}
+
+function workingCapitalMetrics(extra = {}) {
+  const receivable = Number.isFinite(extra.receivableDays) ? extra.receivableDays : extra.debtorDays;
+  const inventory = extra.inventoryDays;
+  const debtor = extra.debtorDays;
+  const netCycle = [receivable, inventory, debtor].every(Number.isFinite) ? receivable + inventory - debtor : NaN;
+  return { receivable, inventory, debtor, netCycle };
+}
+
 function shareholdingChart(rows = []) {
   const total = rows.reduce((sum, row) => sum + Number(row[1] || 0), 0) || 1;
   let offset = 25;
@@ -1137,14 +1170,19 @@ function renderHistorical() {
   const selectedExtra = extraData[selected?.meta.id] || {};
   const rows = dashboard.map((item) => {
     const extra = extraData[item.meta.id] || {};
+    const valuation = valuationMetrics(extra);
+    const wc = workingCapitalMetrics(extra);
     return [
       `<strong>${escapeHtml(item.meta.name)}</strong><br><small>${escapeHtml(extra.focus || item.meta.segment)}</small>`,
       money(item.yahoo?.quote?.regularMarketPrice),
       `<span class="${moveClass(oneYearReturn(item))}">${pct(oneYearReturn(item))}</span>`,
       Number.isFinite(extra.roce) ? pct(extra.roce) : "--",
       Number.isFinite(extra.ebitdaMargin) ? pct(extra.ebitdaMargin) : "--",
+      valuation.evRevenue,
+      valuation.evEbitda,
+      valuation.pe,
       Number.isFinite(extra.fcf) ? `\u20b9${compact(extra.fcf)} Cr` : "--",
-      `${extra.receivableDays || extra.debtorDays || "--"} / ${extra.inventoryDays || "--"} / ${extra.debtorDays || "--"}`
+      `${wc.receivable || "--"} / ${wc.inventory || "--"} / ${wc.debtor || "--"} / ${wc.netCycle || "--"}`
     ];
   });
   els.historicalPanel.innerHTML = `<div class="chart-grid">
@@ -1152,13 +1190,18 @@ function renderHistorical() {
     <article class="chart-card">${chartTitle("Return on Capital Employed (ROCE)")}${lineChart(years, seededSeries(selected, "roce"), "ROCE")}</article>
     <article class="chart-card">${chartTitle("EBITDA vs PAT Margins")}${barChart([{ id: selected?.meta.id, label: selectedExtra.label || selected?.meta.nse, a: selectedExtra.ebitdaMargin || 0, b: selectedExtra.patMargin || 0 }], "EBITDA", "PAT")}</article>
     <article class="chart-card">${chartTitle("Free Cash Flow Generation")}${lineChart(years, seededSeries(selected, "fcf"), "FCF")}</article>
-    <article class="chart-card">${chartTitle("Peer Valuation Multiples")}${barChart(dashboard.map((item) => ({ id: item.meta.id, label: extraData[item.meta.id]?.label || item.meta.nse, a: extraData[item.meta.id]?.pe || 0, b: extraData[item.meta.id]?.pb || 0 })), "P/E", "P/B")}</article>
-    <article class="chart-card wide">${chartTitle("Working Capital - Receivable, Inventory & Debtor Days")}${tripleBarChart(dashboard.map((item) => {
+    <article class="chart-card wide">${chartTitle("Peer Valuation Multiples")}${groupedBarChart(dashboard.map((item) => {
       const extra = extraData[item.meta.id] || {};
-      return { id: item.meta.id, label: extra.label || item.meta.nse, a: extra.receivableDays || extra.debtorDays || 0, b: extra.inventoryDays || 0, c: extra.debtorDays || 0 };
-    }), "Receivable days", "Inventory days", "Debtor days")}</article>
+      const valuation = valuationMetrics(extra);
+      return { id: item.meta.id, label: extra.label || item.meta.nse, values: [valuation.rawEvRevenue, valuation.rawEvEbitda, valuation.rawPe] };
+    }), ["EV/Revenue", "EV/EBITDA", "P/E"], "Multiple (x)")}</article>
+    <article class="chart-card wide">${chartTitle("Working Capital - Receivable, Inventory, Debtor & Net WC Cycle")}${groupedBarChart(dashboard.map((item) => {
+      const extra = extraData[item.meta.id] || {};
+      const wc = workingCapitalMetrics(extra);
+      return { id: item.meta.id, label: extra.label || item.meta.nse, values: [wc.receivable, wc.inventory, wc.debtor, wc.netCycle] };
+    }), ["Receivable days", "Inventory days", "Debtor days", "Net WC cycle"], "Days")}</article>
   </div>` + table([
-    "Company", "Live price", "1Y return", "ROCE", "EBITDA margin", "FCF", "Receivable / Inventory / Debtor days"
+    "Company", "Live price", "1Y return", "ROCE", "EBITDA margin", "EV/Revenue", "EV/EBITDA", "P/E", "FCF", "Receivable / Inventory / Debtor / Net WC days"
   ], rows);
 }
 
@@ -1219,17 +1262,25 @@ function renderCallSummary() {
 function renderComparison() {
   if (!els.comparisonPanel) return;
   els.comparisonPanel.innerHTML = `<div class="chart-grid">
-    <article class="chart-card">${chartTitle("Peer Valuation Multiples")}${barChart(dashboard.map((item) => ({ id: item.meta.id, label: extraData[item.meta.id]?.label || item.meta.nse, a: extraData[item.meta.id]?.pe || 0, b: extraData[item.meta.id]?.pb || 0 })), "P/E", "P/B")}</article>
+    <article class="chart-card wide">${chartTitle("Peer Valuation Multiples")}${groupedBarChart(dashboard.map((item) => {
+      const extra = extraData[item.meta.id] || {};
+      const valuation = valuationMetrics(extra);
+      return { id: item.meta.id, label: extra.label || item.meta.nse, values: [valuation.rawEvRevenue, valuation.rawEvEbitda, valuation.rawPe] };
+    }), ["EV/Revenue", "EV/EBITDA", "P/E"], "Multiple (x)")}</article>
     <article class="chart-card">${chartTitle("Profitability vs Leverage")}${scatterChart(dashboard.map((item) => ({ id: item.meta.id, label: extraData[item.meta.id]?.label || item.meta.nse, x: extraData[item.meta.id]?.debtEquity, y: extraData[item.meta.id]?.patMargin })), "D/E", "PAT margin")}</article>
   </div>` + table([
-    "Company", "Focus", "Revenue", "PAT margin", "ROE", "D/E", "Commentary"
+    "Company", "Focus", "Revenue", "EV/Revenue", "EV/EBITDA", "P/E", "PAT margin", "ROE", "D/E", "Commentary"
   ], dashboard.map((item) => {
     const extra = extraData[item.meta.id] || {};
+    const valuation = valuationMetrics(extra);
     const f = item.yahoo?.financials || {};
     return [
       `<strong>${escapeHtml(item.meta.name)}</strong>`,
       escapeHtml(extra.focus || item.meta.segment || ""),
       Number.isFinite(extra.revenue) ? `\u20b9${compact(extra.revenue)} Cr` : compact(f.revenue),
+      valuation.evRevenue,
+      valuation.evEbitda,
+      valuation.pe,
       Number.isFinite(extra.patMargin) ? pct(extra.patMargin) : pct((f.profitMargins || NaN) * 100),
       Number.isFinite(extra.roe) ? pct(extra.roe) : pct((f.returnOnEquity || NaN) * 100),
       Number.isFinite(extra.debtEquity) ? `${formatNum.format(extra.debtEquity)}x` : "--",
@@ -1434,6 +1485,45 @@ function barChart(rows, labelA, labelB) {
   }).join("");
   const grid = yTicks.map((tick) => `<line class="grid-line" x1="45" x2="590" y1="${yFor(tick)}" y2="${yFor(tick)}"/><text x="38" y="${yFor(tick) + 4}" text-anchor="end" fill="#9ea99c" font-size="10">${compact(tick)}</text>`).join("");
   return `<svg viewBox="0 0 620 250"><text class="axis-label" x="45" y="20">Y: ${escapeHtml(labelA)} / ${escapeHtml(labelB)}</text><text class="axis-label" x="575" y="238" text-anchor="end">X: Company</text>${grid}<line class="axis-line" x1="45" x2="590" y1="190" y2="190"/><line class="axis-line" x1="45" x2="45" y1="36" y2="190"/><circle cx="452" cy="18" r="5" fill="#77c7d5"/><text x="462" y="22" fill="#cdd5ca" font-size="11">${escapeHtml(labelA)}</text><circle cx="530" cy="18" r="5" fill="#d9b45f"/><text x="540" y="22" fill="#cdd5ca" font-size="11">${escapeHtml(labelB)}</text>${bars}</svg>`;
+}
+
+function groupedBarChart(rows, labels, yLabel) {
+  const colors = ["#77c7d5", "#d9b45f", "#65d08c", "#ff7b7b"];
+  const values = rows.flatMap((row) => row.values || []).filter(Number.isFinite);
+  const max = Math.max(...values, 1);
+  const group = 535 / Math.max(rows.length, 1);
+  const barCount = Math.max(labels.length, 1);
+  const yFor = (value) => 196 - (Math.max(value, 0) / max) * 138;
+  const yTicks = [0, max / 2, max];
+  const legendLabel = (label) => String(label).replace(" days", "").replace(" cycle", "");
+  const grid = yTicks.map((tick) => `<line class="grid-line" x1="52" x2="592" y1="${yFor(tick)}" y2="${yFor(tick)}"/><text x="45" y="${yFor(tick) + 4}" text-anchor="end" fill="#9ea99c" font-size="10">${compact(tick)}</text>`).join("");
+  const legend = labels.map((label, index) => {
+    const x = 242 + (index % 4) * 86;
+    const y = 18 + Math.floor(index / 4) * 15;
+    return `<circle cx="${x}" cy="${y - 4}" r="5" fill="${colors[index % colors.length]}"/><text x="${x + 10}" y="${y}" fill="#cdd5ca" font-size="9">${escapeHtml(legendLabel(label))}</text>`;
+  }).join("");
+  const bars = rows.map((row, i) => {
+    const x = 56 + i * group;
+    const w = Math.max(6, Math.min(10, (group - 12) / barCount));
+    const gap = 2;
+    const tip = labels.map((label, index) => `${label} ${compact(row.values?.[index])}`).join(", ");
+    const series = labels.map((label, index) => {
+      const value = row.values?.[index];
+      const height = Number.isFinite(value) ? 196 - yFor(value) : 0;
+      const y = Number.isFinite(value) ? yFor(value) : 196;
+      return `<rect class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(`${row.label}: ${tip}`)}" x="${x + index * (w + gap)}" y="${y}" width="${w}" height="${height}" rx="3" fill="${colors[index % colors.length]}"/>`;
+    }).join("");
+    return `${series}<text x="${x + ((barCount - 1) * (w + gap)) / 2}" y="220" text-anchor="middle" fill="#9ea99c" font-size="10">${escapeHtml(chartLabel(row.label))}</text>`;
+  }).join("");
+  return `<svg viewBox="0 0 620 260">
+    <text class="axis-label" x="52" y="20">Y: ${escapeHtml(yLabel)}</text>
+    <text class="axis-label" x="590" y="246" text-anchor="end">X: Company</text>
+    ${grid}
+    <line class="axis-line" x1="52" x2="592" y1="196" y2="196"/>
+    <line class="axis-line" x1="52" x2="52" y1="52" y2="196"/>
+    <g class="chart-legend">${legend}</g>
+    ${bars}
+  </svg>`;
 }
 
 function tripleBarChart(rows, labelA, labelB, labelC) {
