@@ -20,13 +20,16 @@ const els = {
   selectedMove: document.querySelector("#selectedMove"),
   chart: document.querySelector("#priceChart"),
   fundamentals: document.querySelector("#fundamentals"),
-  insightList: document.querySelector("#insightList")
+  insightList: document.querySelector("#insightList"),
+  topWatchlist: document.querySelector("#topWatchlist"),
+  topSelectedName: document.querySelector("#topSelectedName")
 };
 
 els.tabs = document.querySelectorAll("[data-tab]");
 els.panels = document.querySelectorAll("[data-panel]");
 els.historicalPanel = document.querySelector("#historicalPanel");
 els.companyInfoPanel = document.querySelector("#companyInfoPanel");
+els.businessPanel = document.querySelector("#businessPanel");
 els.earningsPanel = document.querySelector("#earningsPanel");
 els.callSummaryPanel = document.querySelector("#callSummaryPanel");
 els.comparisonPanel = document.querySelector("#comparisonPanel");
@@ -94,6 +97,89 @@ const companyUpdates = {
   astra: [
     { date: "2025-12-31", title: "Latest period tracked", detail: "Track RF/microwave order book, defence electronics execution and margin progression." }
   ]
+};
+
+const businessProfiles = {
+  zentec: {
+    model: "R&D-led defence technology company selling simulators, anti-drone systems and training solutions to defence and security customers.",
+    description: "Zen Technologies builds training simulators, counter-drone solutions and combat training systems. The business is driven by indigenous product IP, defence procurement cycles and order-book conversion rather than commodity manufacturing volume.",
+    products: [
+      { name: "Anti-drone systems", icon: "target", detail: "Detection, jamming and hard-kill counter-UAS solutions." },
+      { name: "Training simulators", icon: "radar", detail: "Live-fire, driving, gunnery and mission training platforms." },
+      { name: "Autonomous systems", icon: "drone", detail: "Interceptor drones, UGVs and battlefield training products." }
+    ],
+    shareholding: [["Promoter group", 55], ["Institutional", 18], ["Public / others", 27]]
+  },
+  ideaforge: {
+    model: "Drone OEM focused on UAV platforms, payload integration and software-led field deployment for defence, homeland security and enterprise use cases.",
+    description: "ideaForge designs and manufactures UAVs used for surveillance, mapping, security and tactical intelligence. Revenue is order-led and can be volatile, but operating leverage is high when procurement converts into deliveries.",
+    products: [
+      { name: "Tactical UAVs", icon: "drone", detail: "Field-deployable drones for surveillance and reconnaissance." },
+      { name: "Mapping platforms", icon: "grid", detail: "Enterprise-grade survey and geospatial data capture." },
+      { name: "Payload systems", icon: "camera", detail: "EO/IR sensors, control stations and mission software." }
+    ],
+    shareholding: [["Promoter group", 31], ["Institutional", 25], ["Public / others", 44]]
+  },
+  mtar: {
+    model: "Precision engineering platform serving clean energy, civil nuclear, aerospace and defence programmes with high-value components and assemblies.",
+    description: "MTAR manufactures complex precision systems and assemblies. The business is shifting from component supply toward integrated systems, with clean energy and civil nuclear providing scale and aerospace/defence adding strategic optionality.",
+    products: [
+      { name: "Precision assemblies", icon: "gear", detail: "High-tolerance build-to-print and integrated assemblies." },
+      { name: "Clean energy systems", icon: "energy", detail: "Components and assemblies for fuel-cell and clean-energy customers." },
+      { name: "Aerospace components", icon: "aircraft", detail: "Aerospace and defence machining, systems and sub-assemblies." }
+    ],
+    shareholding: [["Promoter group", 36], ["Institutional", 30], ["Public / others", 34]]
+  },
+  datapatterns: {
+    model: "Defence electronics specialist with design-led exposure to radar, electronic warfare, avionics and high-reliability systems.",
+    description: "Data Patterns is a vertically integrated defence electronics company. Its margin profile benefits from design capability, programme complexity and high-value electronics rather than pure manufacturing throughput.",
+    products: [
+      { name: "Radar electronics", icon: "radar", detail: "Radar processing, control and high-reliability electronics." },
+      { name: "EW systems", icon: "signal", detail: "Electronic warfare and communication intelligence subsystems." },
+      { name: "Avionics", icon: "aircraft", detail: "Aerospace-grade electronics for defence and space platforms." }
+    ],
+    shareholding: [["Promoter group", 42], ["Institutional", 29], ["Public / others", 29]]
+  },
+  azad: {
+    model: "Precision manufacturing platform for aerospace, defence, energy and turbine components with long-cycle global OEM relationships.",
+    description: "Azad manufactures complex turbine and aerospace components for global customers. Its investment case depends on facility ramp-up, qualification cycles and converting long-duration customer programmes into profitable scale.",
+    products: [
+      { name: "Turbine components", icon: "turbine", detail: "Hot-section and rotating components for energy and aerospace." },
+      { name: "Aerospace machining", icon: "aircraft", detail: "Precision parts for global OEM programmes." },
+      { name: "Dedicated facilities", icon: "factory", detail: "Customer-specific capacity and process infrastructure." }
+    ],
+    shareholding: [["Promoter group", 65], ["Institutional", 18], ["Public / others", 17]]
+  },
+  aequs: {
+    model: "Integrated aerospace manufacturing ecosystem spanning forging, machining, surface treatment, assembly and precision components.",
+    description: "Aequs operates an aerospace-focused manufacturing ecosystem with growing scale and operating leverage. The company is still moving toward full profitability, so utilisation and segment mix matter heavily.",
+    products: [
+      { name: "Aerospace structures", icon: "aircraft", detail: "Machined and assembled components for aerospace platforms." },
+      { name: "Special processing", icon: "factory", detail: "Forging, treatment and precision manufacturing ecosystem." },
+      { name: "Consumer precision", icon: "grid", detail: "Scaled contract manufacturing beyond aerospace." }
+    ],
+    shareholding: [["Promoter group", 61], ["Institutional", 16], ["Public / others", 23]]
+  },
+  paras: {
+    model: "Defence and space engineering company focused on optics, optronics, EMP solutions and specialised electronics.",
+    description: "Paras Defence participates in defence optics, space engineering and electronics. The business benefits from indigenisation but remains milestone-led, with order mix and execution timing shaping quarterly performance.",
+    products: [
+      { name: "Defence optics", icon: "lens", detail: "Optical and optronic systems for defence applications." },
+      { name: "Space engineering", icon: "satellite", detail: "Specialised components and systems for space programmes." },
+      { name: "EMP protection", icon: "shield", detail: "Electromagnetic pulse protection and defence electronics." }
+    ],
+    shareholding: [["Promoter group", 58], ["Institutional", 14], ["Public / others", 28]]
+  },
+  astra: {
+    model: "RF and microwave electronics supplier serving defence, space, meteorology and communications programmes.",
+    description: "Astra Microwave designs and manufactures RF, microwave and defence electronics. The business is order-book driven, with growth tied to defence and space programme execution.",
+    products: [
+      { name: "RF modules", icon: "signal", detail: "High-frequency modules and microwave subsystems." },
+      { name: "Defence electronics", icon: "radar", detail: "Electronics for radar, missile, telemetry and EW platforms." },
+      { name: "Space systems", icon: "satellite", detail: "Microwave and payload electronics for space applications." }
+    ],
+    shareholding: [["Promoter group", 6], ["Institutional", 42], ["Public / others", 52]]
+  }
 };
 
 const callSummaries = {
@@ -459,6 +545,7 @@ function render() {
   const moves = dashboard.map((d) => d.yahoo?.quote?.regularMarketChangePercent).filter(Number.isFinite);
   const avg = moves.length ? moves.reduce((a, b) => a + b, 0) / moves.length : NaN;
   renderWatchlist();
+  renderTopWatchlist();
   renderCards();
   renderDetail();
   renderSectorSnapshot(avg);
@@ -535,6 +622,26 @@ function renderWatchlist() {
   });
 }
 
+function renderTopWatchlist() {
+  if (!els.topWatchlist) return;
+  const selected = dashboard.find((item) => item.meta.id === selectedId) || dashboard[0];
+  if (els.topSelectedName) els.topSelectedName.textContent = selected?.meta.name || "Select a company";
+  els.topWatchlist.innerHTML = dashboard.map((item) => {
+    const q = item.yahoo?.quote || {};
+    const extra = extraData[item.meta.id] || {};
+    return `<button class="top-watch-chip ${item.meta.id === selectedId ? "is-active" : ""}" data-top-select="${item.meta.id}">
+      <strong>${escapeHtml(extra.label || item.meta.nse || item.meta.name)}</strong>
+      <span class="${moveClass(q.regularMarketChangePercent)}">${pct(q.regularMarketChangePercent)}</span>
+    </button>`;
+  }).join("");
+  els.topWatchlist.querySelectorAll("[data-top-select]").forEach((node) => {
+    node.addEventListener("click", () => {
+      selectedId = node.dataset.topSelect;
+      render();
+    });
+  });
+}
+
 function renderCards() {
   els.cards.innerHTML = dashboard.map((item) => {
     const q = item.yahoo?.quote || {};
@@ -594,24 +701,37 @@ function renderChart(points) {
   const min = Math.min(...values);
   const max = Math.max(...values);
   const span = max - min || 1;
+  const xFor = (index) => pad + (index / Math.max(points.length - 1, 1)) * (w - pad * 2);
+  const yFor = (value) => h - pad - ((value - min) / span) * (h - pad * 2);
   const d = points.map((p, i) => {
-    const x = pad + (i / Math.max(points.length - 1, 1)) * (w - pad * 2);
-    const y = h - pad - ((p.close - min) / span) * (h - pad * 2);
+    const x = xFor(i);
+    const y = yFor(p.close);
     return `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`;
   }).join(" ");
   const marks = points.filter((_, index) => index % Math.max(Math.floor(points.length / 18), 1) === 0 || index === points.length - 1).map((p, index) => {
     const actualIndex = points.indexOf(p);
-    const x = pad + (actualIndex / Math.max(points.length - 1, 1)) * (w - pad * 2);
-    const y = h - pad - ((p.close - min) / span) * (h - pad * 2);
+    const x = xFor(actualIndex);
+    const y = yFor(p.close);
     const date = new Date(p.time * 1000).toLocaleDateString();
     return `<circle class="chart-mark" data-tip="${escapeHtml(`${date}: close ${money(p.close)}, volume ${compact(p.volume)}`)}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${index === points.length - 1 ? 5 : 3}" fill="#d9b45f"/>`;
   }).join("");
+  const firstDate = new Date(points[0].time * 1000).toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+  const lastDate = new Date(points.at(-1).time * 1000).toLocaleDateString(undefined, { month: "short", year: "2-digit" });
   els.chart.innerHTML = `
     <defs><linearGradient id="lineGlow" x1="0" x2="1"><stop stop-color="#77c7d5"/><stop offset="1" stop-color="#d9b45f"/></linearGradient></defs>
+    <line class="grid-line" x1="24" x2="696" y1="${yFor(min)}" y2="${yFor(min)}"/>
+    <line class="grid-line" x1="24" x2="696" y1="${yFor((min + max) / 2)}" y2="${yFor((min + max) / 2)}"/>
+    <line class="grid-line" x1="24" x2="696" y1="${yFor(max)}" y2="${yFor(max)}"/>
+    <line class="axis-line" x1="24" x2="696" y1="${h - pad}" y2="${h - pad}"/>
+    <line class="axis-line" x1="24" x2="24" y1="24" y2="${h - pad}"/>
     <path d="${d}" fill="none" stroke="rgba(119,199,213,.18)" stroke-width="12" stroke-linecap="round"/>
     <path d="${d}" fill="none" stroke="url(#lineGlow)" stroke-width="3" stroke-linecap="round"/>
     ${marks}
-    <text x="24" y="34" fill="#9ea99c">1Y close</text>
+    <text class="axis-label" x="30" y="22">Y: Price</text>
+    <text class="axis-label" x="696" y="248" text-anchor="end">X: Date</text>
+    <text x="30" y="246" fill="#9ea99c" font-size="11">${escapeHtml(firstDate)}</text>
+    <text x="646" y="246" fill="#9ea99c" font-size="11">${escapeHtml(lastDate)}</text>
+    <text x="24" y="46" fill="#9ea99c">1Y close</text>
     <text x="24" y="62" fill="#f3f5ee">${money(values.at(-1))}</text>
     <text x="600" y="34" fill="#9ea99c">High ${money(max)}</text>
     <text x="600" y="58" fill="#9ea99c">Low ${money(min)}</text>`;
@@ -721,6 +841,7 @@ function oneYearReturn(item) {
 
 function renderDataTabs() {
   renderCompanyInfo();
+  renderBusiness();
   renderHistorical();
   renderEarnings();
   renderCallSummary();
@@ -755,6 +876,110 @@ function renderCompanyInfo() {
       <div class="update-list">${updates.map((row) => `<div class="update-item"><small>${escapeHtml(row.source)} &middot; ${escapeHtml(row.date)}</small><strong>${escapeHtml(row.title)}</strong><p>${escapeHtml(row.detail)}</p>${row.link ? `<a href="${row.link}" target="_blank" rel="noreferrer">Open source</a>` : ""}</div>`).join("") || `<div class="empty">No live Yahoo/BSE news returned yet.</div>`}</div>
     </article>
   </div>`;
+}
+
+function renderBusiness() {
+  if (!els.businessPanel) return;
+  const selected = dashboard.find((item) => item.meta.id === selectedId) || dashboard[0];
+  if (!selected) {
+    els.businessPanel.innerHTML = `<div class="empty">Waiting for live company data...</div>`;
+    return;
+  }
+  const extra = extraData[selected.meta.id] || {};
+  const profile = businessProfiles[selected.meta.id] || {
+    model: selected.meta.segment || "Custom watchlist company",
+    description: selected.meta.segment || "Business profile will appear here once added.",
+    products: [{ name: selected.meta.segment || "Custom business", icon: "grid", detail: "Add a sub-sector in Manage to enrich this profile." }],
+    shareholding: [["Public / others", 100]]
+  };
+  const q = selected.yahoo?.quote || {};
+  const financialRows = [
+    ["Revenue", Number.isFinite(extra.revenue) ? `Rs ${compact(extra.revenue)}crs` : compact(selected.yahoo?.financials?.revenue)],
+    ["PAT margin", Number.isFinite(extra.patMargin) ? pct(extra.patMargin) : pct((selected.yahoo?.financials?.profitMargins || NaN) * 100)],
+    ["ROCE", Number.isFinite(extra.roce) ? pct(extra.roce) : "--"],
+    ["D/E", Number.isFinite(extra.debtEquity) ? `${formatNum.format(extra.debtEquity)}x` : "--"],
+    ["P/E", Number.isFinite(extra.pe) ? formatNum.format(extra.pe) : compact(q.trailingPE)],
+    ["1Y return", pct(oneYearReturn(selected))]
+  ];
+  els.businessPanel.innerHTML = `<div class="business-layout">
+    <article class="business-hero">
+      <div>
+        <small>${escapeHtml(selected.meta.nse || selected.meta.symbol)} &middot; ${escapeHtml(extra.focus || selected.meta.segment || "Defence platform")}</small>
+        <strong>${escapeHtml(selected.meta.name)}</strong>
+        <p>${escapeHtml(profile.description)}</p>
+      </div>
+      <div class="business-visual" aria-hidden="true">${productIcon(profile.products[0]?.icon || "grid", selected.meta.id)}</div>
+    </article>
+
+    <article class="brief-card">
+      <small>Business model</small>
+      <strong>How the company makes money</strong>
+      <p>${escapeHtml(profile.model)}</p>
+      <div class="business-kpis">
+        <div><small>Live price</small><strong>${money(q.regularMarketPrice)}</strong></div>
+        <div><small>Day move</small><strong class="${moveClass(q.regularMarketChangePercent)}">${pct(q.regularMarketChangePercent)}</strong></div>
+        <div><small>Market cap</small><strong>${Number.isFinite(extra.marketCap) ? `Rs ${compact(extra.marketCap)}crs` : compact(q.marketCap)}</strong></div>
+      </div>
+    </article>
+
+    <article class="brief-card">
+      <small>Key financials</small>
+      <strong>Operating snapshot</strong>
+      ${table(["Metric", "Value"], financialRows.map(([label, value]) => [escapeHtml(label), escapeHtml(value)]))}
+    </article>
+
+    <article class="brief-card">
+      <small>Shareholding snapshot</small>
+      <strong>Ownership mix</strong>
+      ${shareholdingChart(profile.shareholding)}
+      <p class="fine-print">Model snapshot for dashboard analysis. Reconcile with the latest exchange shareholding filing before investment use.</p>
+    </article>
+
+    <article class="brief-card business-products">
+      <small>Key products</small>
+      <strong>Product and capability map</strong>
+      <div class="product-grid">${profile.products.map((product) => `<div class="product-card">
+        <div class="product-art">${productIcon(product.icon, selected.meta.id)}</div>
+        <strong>${escapeHtml(product.name)}</strong>
+        <p>${escapeHtml(product.detail)}</p>
+      </div>`).join("")}</div>
+    </article>
+  </div>`;
+}
+
+function shareholdingChart(rows = []) {
+  const total = rows.reduce((sum, row) => sum + Number(row[1] || 0), 0) || 1;
+  let offset = 25;
+  const colors = ["#d9b45f", "#77c7d5", "#65d08c", "#ff7b7b"];
+  const circles = rows.map((row, index) => {
+    const value = Number(row[1] || 0);
+    const length = (value / total) * 100;
+    const node = `<circle r="15.9" cx="18" cy="18" fill="transparent" stroke="${colors[index % colors.length]}" stroke-width="6" stroke-dasharray="${length} ${100 - length}" stroke-dashoffset="${offset}"/>`;
+    offset -= length;
+    return node;
+  }).join("");
+  const legend = rows.map((row, index) => `<div><span style="background:${colors[index % colors.length]}"></span><strong>${escapeHtml(row[0])}</strong><small>${formatNum.format(Number(row[1] || 0))}%</small></div>`).join("");
+  return `<div class="shareholding-wrap"><svg class="shareholding-chart" viewBox="0 0 36 36" aria-label="Shareholding chart">${circles}<text x="18" y="19.5" text-anchor="middle" fill="#f3f5ee" font-size="4.5">${rows.length}</text></svg><div class="shareholding-legend">${legend}</div></div>`;
+}
+
+function productIcon(type = "grid", id = "") {
+  const seed = escapeHtml(`${id}-${type}`);
+  const icons = {
+    drone: `<path d="M30 50h60M60 20v60M42 32l36 36M78 32L42 68"/><circle cx="30" cy="50" r="12"/><circle cx="90" cy="50" r="12"/><circle cx="60" cy="20" r="12"/><circle cx="60" cy="80" r="12"/><rect x="50" y="40" width="20" height="20" rx="5"/>`,
+    radar: `<path d="M25 85h70M60 85V35M37 58a32 32 0 0 1 46 0M28 45a45 45 0 0 1 64 0"/><circle cx="60" cy="35" r="8"/>`,
+    signal: `<path d="M30 82h60M42 82V55M60 82V35M78 82V48M25 28c23-16 47-16 70 0M36 42c16-10 32-10 48 0"/>`,
+    aircraft: `<path d="M18 62l84-32-28 72-16-30-28 16zM58 72l16 30"/><path d="M30 88l20-18"/>`,
+    gear: `<circle cx="60" cy="60" r="18"/><path d="M60 24v14M60 82v14M24 60h14M82 60h14M34 34l10 10M76 76l10 10M86 34L76 44M44 76L34 86"/>`,
+    energy: `<path d="M64 16L30 65h26l-8 39 42-58H63z"/>`,
+    camera: `<rect x="24" y="40" width="72" height="45" rx="8"/><path d="M42 40l7-10h22l7 10"/><circle cx="60" cy="62" r="14"/>`,
+    turbine: `<circle cx="60" cy="60" r="9"/><path d="M60 51c10-24 32-10 18 6M69 65c24 10 10 32-6 18M54 69c-10 24-32 10-18-6M51 55c-24-10-10-32 6-18"/>`,
+    factory: `<path d="M20 88h80V48L76 62V48L52 62V38H20zM34 88V68h16v20M60 72h10M80 72h10"/>`,
+    lens: `<circle cx="60" cy="60" r="33"/><circle cx="60" cy="60" r="17"/><path d="M42 42l36 36M78 42L42 78"/>`,
+    satellite: `<rect x="48" y="48" width="24" height="24" rx="4"/><path d="M42 42L20 24M78 78l22 18M78 42l22-18M42 78L20 96M26 18l18 18M94 18L76 36M26 102l18-18M94 102L76 84"/>`,
+    shield: `<path d="M60 18l36 12v26c0 24-14 40-36 50-22-10-36-26-36-50V30z"/><path d="M44 60l11 11 23-25"/>`,
+    grid: `<rect x="26" y="26" width="28" height="28" rx="5"/><rect x="66" y="26" width="28" height="28" rx="5"/><rect x="26" y="66" width="28" height="28" rx="5"/><rect x="66" y="66" width="28" height="28" rx="5"/>`
+  };
+  return `<svg viewBox="0 0 120 120" role="img" aria-label="Product graphic"><defs><linearGradient id="pg-${seed}" x1="0" x2="1"><stop stop-color="#77c7d5"/><stop offset="1" stop-color="#d9b45f"/></linearGradient></defs><rect width="120" height="120" rx="18" fill="rgba(119,199,213,.08)"/><g fill="none" stroke="url(#pg-${seed})" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">${icons[type] || icons.grid}</g></svg>`;
 }
 
 function renderHistorical() {
@@ -1045,22 +1270,29 @@ function barChart(rows, labelA, labelB) {
   const values = rows.flatMap((row) => [row.a, row.b]).filter(Number.isFinite);
   const max = Math.max(...values, 1);
   const group = 520 / Math.max(rows.length, 1);
+  const yTicks = [0, max / 2, max];
+  const yFor = (value) => 190 - (Math.max(value, 0) / max) * 150;
   const bars = rows.map((row, i) => {
     const x = 45 + i * group;
-    const hA = (Math.max(row.a, 0) / max) * 155;
-    const hB = (Math.max(row.b, 0) / max) * 155;
+    const hA = 190 - yFor(row.a);
+    const hB = 190 - yFor(row.b);
     const tip = `${row.label}: ${labelA} ${compact(row.a)}, ${labelB} ${compact(row.b)}`;
-    return `<rect class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(tip)}" x="${x}" y="${190 - hA}" width="16" height="${hA}" fill="#77c7d5"/><rect class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(tip)}" x="${x + 18}" y="${190 - hB}" width="16" height="${hB}" fill="#d9b45f"/><text x="${x + 17}" y="216" text-anchor="middle" fill="#9ea99c" font-size="10">${escapeHtml(row.label)}</text>`;
+    return `<rect class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(tip)}" x="${x}" y="${yFor(row.a)}" width="16" height="${hA}" rx="4" fill="#77c7d5"/><rect class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(tip)}" x="${x + 20}" y="${yFor(row.b)}" width="16" height="${hB}" rx="4" fill="#d9b45f"/><text x="${x + 18}" y="216" text-anchor="middle" fill="#9ea99c" font-size="10">${escapeHtml(row.label)}</text>`;
   }).join("");
-  return `<svg viewBox="0 0 620 240"><text x="45" y="22" fill="#9ea99c">${escapeHtml(labelA)} / ${escapeHtml(labelB)}</text><line x1="38" x2="590" y1="190" y2="190" stroke="rgba(224,229,218,.2)"/>${bars}</svg>`;
+  const grid = yTicks.map((tick) => `<line class="grid-line" x1="45" x2="590" y1="${yFor(tick)}" y2="${yFor(tick)}"/><text x="38" y="${yFor(tick) + 4}" text-anchor="end" fill="#9ea99c" font-size="10">${compact(tick)}</text>`).join("");
+  return `<svg viewBox="0 0 620 250"><text class="axis-label" x="45" y="20">Y: ${escapeHtml(labelA)} / ${escapeHtml(labelB)}</text><text class="axis-label" x="575" y="238" text-anchor="end">X: Company</text>${grid}<line class="axis-line" x1="45" x2="590" y1="190" y2="190"/><line class="axis-line" x1="45" x2="45" y1="36" y2="190"/><circle cx="452" cy="18" r="5" fill="#77c7d5"/><text x="462" y="22" fill="#cdd5ca" font-size="11">${escapeHtml(labelA)}</text><circle cx="530" cy="18" r="5" fill="#d9b45f"/><text x="540" y="22" fill="#cdd5ca" font-size="11">${escapeHtml(labelB)}</text>${bars}</svg>`;
 }
 
 function lineChart(labels, values, label) {
   const nums = values.filter(Number.isFinite);
   const min = Math.min(...nums, 0);
   const max = Math.max(...nums, 1);
-  const points = values.map((value, i) => `${scale(i, 0, values.length - 1, 600, 45).toFixed(1)},${(200 - ((value - min) / (max - min || 1)) * 150).toFixed(1)}`);
-  return `<svg viewBox="0 0 620 240"><text x="45" y="22" fill="#9ea99c">${escapeHtml(label)}</text><polyline points="${points.join(" ")}" fill="none" stroke="#77c7d5" stroke-width="4" stroke-linecap="round"/>${points.map((p, i) => `<circle class="chart-mark" data-tip="${escapeHtml(`${labels[i]}: ${label} ${compact(values[i])}`)}" cx="${p.split(",")[0]}" cy="${p.split(",")[1]}" r="5" fill="#d9b45f"/><text x="${p.split(",")[0]}" y="220" text-anchor="middle" fill="#9ea99c" font-size="11">${labels[i]}</text>`).join("")}</svg>`;
+  const gradientId = `lineArea-${String(label).replace(/[^a-z0-9]/gi, "-")}`;
+  const yFor = (value) => 198 - ((value - min) / (max - min || 1)) * 150;
+  const points = values.map((value, i) => `${scale(i, 0, values.length - 1, 600, 55).toFixed(1)},${yFor(value).toFixed(1)}`);
+  const area = `M${points[0]} L${points.slice(1).join(" L")} L${scale(values.length - 1, 0, values.length - 1, 600, 55).toFixed(1)},198 L55,198 Z`;
+  const grid = [min, (min + max) / 2, max].map((tick) => `<line class="grid-line" x1="55" x2="590" y1="${yFor(tick)}" y2="${yFor(tick)}"/><text x="48" y="${yFor(tick) + 4}" text-anchor="end" fill="#9ea99c" font-size="10">${compact(tick)}</text>`).join("");
+  return `<svg viewBox="0 0 620 250"><defs><linearGradient id="${gradientId}" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#77c7d5" stop-opacity=".38"/><stop offset="1" stop-color="#77c7d5" stop-opacity="0"/></linearGradient></defs><text class="axis-label" x="55" y="20">Y: ${escapeHtml(label)}</text><text class="axis-label" x="575" y="238" text-anchor="end">X: Fiscal year</text>${grid}<line class="axis-line" x1="55" x2="590" y1="198" y2="198"/><line class="axis-line" x1="55" x2="55" y1="42" y2="198"/><path d="${area}" fill="url(#${gradientId})"/><polyline points="${points.join(" ")}" fill="none" stroke="#77c7d5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>${points.map((p, i) => `<circle class="chart-mark" data-tip="${escapeHtml(`${labels[i]}: ${label} ${compact(values[i])}`)}" cx="${p.split(",")[0]}" cy="${p.split(",")[1]}" r="5" fill="#d9b45f"/><text x="${p.split(",")[0]}" y="220" text-anchor="middle" fill="#9ea99c" font-size="11">${labels[i]}</text>`).join("")}</svg>`;
 }
 
 function scatterChart(rows, labelX, labelY) {
@@ -1070,12 +1302,14 @@ function scatterChart(rows, labelX, labelY) {
   const maxX = Math.max(...xs, 1);
   const minY = Math.min(...ys, 0);
   const maxY = Math.max(...ys, 1);
+  const xFor = (value) => scale(value, minX, maxX, 610, 55);
+  const yFor = (value) => 198 - ((value - minY) / (maxY - minY || 1)) * 150;
   const dots = rows.filter((row) => Number.isFinite(row.x) && Number.isFinite(row.y)).map((row) => {
-    const x = scale(row.x, minX, maxX, 610, 45);
-    const y = 200 - ((row.y - minY) / (maxY - minY || 1)) * 150;
-    return `<circle class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(`${row.label}: ${labelX} ${compact(row.x)}, ${labelY} ${pct(row.y)}`)}" cx="${x}" cy="${y}" r="7" fill="#d9b45f"/><text x="${x + 10}" y="${y + 4}" fill="#cdd5ca" font-size="11">${escapeHtml(row.label)}</text>`;
+    const x = xFor(row.x);
+    const y = yFor(row.y);
+    return `<circle class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(`${row.label}: ${labelX} ${compact(row.x)}, ${labelY} ${pct(row.y)}`)}" cx="${x}" cy="${y}" r="8" fill="#d9b45f" fill-opacity=".9"/><text x="${x + 11}" y="${y + 4}" fill="#cdd5ca" font-size="11">${escapeHtml(row.label)}</text>`;
   }).join("");
-  return `<svg viewBox="0 0 620 240"><text x="45" y="22" fill="#9ea99c">${escapeHtml(labelX)} vs ${escapeHtml(labelY)}</text><line x1="38" x2="590" y1="200" y2="200" stroke="rgba(224,229,218,.2)"/><line x1="45" x2="45" y1="38" y2="205" stroke="rgba(224,229,218,.2)"/>${dots}</svg>`;
+  return `<svg viewBox="0 0 620 250"><text class="axis-label" x="55" y="20">Y: ${escapeHtml(labelY)}</text><text class="axis-label" x="575" y="238" text-anchor="end">X: ${escapeHtml(labelX)}</text><line class="grid-line" x1="55" x2="590" y1="${yFor((minY + maxY) / 2)}" y2="${yFor((minY + maxY) / 2)}"/><line class="grid-line" x1="${xFor((minX + maxX) / 2)}" x2="${xFor((minX + maxX) / 2)}" y1="42" y2="198"/><line class="axis-line" x1="55" x2="590" y1="198" y2="198"/><line class="axis-line" x1="55" x2="55" y1="42" y2="198"/><text x="48" y="202" text-anchor="end" fill="#9ea99c" font-size="10">${compact(minY)}</text><text x="48" y="48" text-anchor="end" fill="#9ea99c" font-size="10">${compact(maxY)}</text><text x="55" y="214" text-anchor="middle" fill="#9ea99c" font-size="10">${compact(minX)}</text><text x="590" y="214" text-anchor="middle" fill="#9ea99c" font-size="10">${compact(maxX)}</text>${dots}</svg>`;
 }
 
 function heatmap(rows) {
@@ -1084,7 +1318,7 @@ function heatmap(rows) {
     const hue = value >= 0 ? 140 : 0;
     const alpha = Math.min(.45, .08 + Math.abs(value) / 220);
     return `<div class="heat-cell" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(`${row.label}: 1Y return ${pct(value)}`)}" style="background: hsla(${hue}, 55%, 45%, ${alpha})"><strong>${escapeHtml(row.label)}</strong><span class="${moveClass(value)}">${pct(value)}</span></div>`;
-  }).join("")}</div>`;
+  }).join("")}<div class="chart-caption">Tiles: company &middot; Colour: 1Y return</div></div>`;
 }
 
 function treemap(rows) {
@@ -1092,7 +1326,7 @@ function treemap(rows) {
   return `<div class="heatmap">${rows.map((row) => {
     const pctSize = Math.max(72, (row.value / total) * 600);
     return `<div class="heat-cell" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(`${row.label}: market cap INR ${compact(row.value)} Cr`)}" style="min-height:${pctSize}px"><strong>${escapeHtml(row.label)}</strong><span>\u20b9${compact(row.value)} Cr</span></div>`;
-  }).join("")}</div>`;
+  }).join("")}<div class="chart-caption">Tiles: company &middot; Size: market cap</div></div>`;
 }
 
 const metrics = {

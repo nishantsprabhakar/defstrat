@@ -53,9 +53,18 @@
       </section>
       <p class="data-note">Live prices and history use Yahoo Finance chart feeds. Peer financial metrics are DefStrat model values for dashboard analysis and should be reconciled with original exchange filings before investment use.</p>
 
+      <section class="top-watchbar" aria-label="Selected company watchlist">
+        <div class="top-watchbar__label">
+          <small>Selected company</small>
+          <strong id="topSelectedName">Loading...</strong>
+        </div>
+        <div id="topWatchlist" class="top-watchlist"></div>
+      </section>
+
       <nav class="app-tabs" aria-label="Dashboard tabs">
         <button class="is-active" data-tab="charts">Charts</button>
         <button data-tab="companyInfo">Company Info</button>
+        <button data-tab="business">Business</button>
         <button data-tab="historical">Historical</button>
         <button data-tab="earnings">Earnings</button>
         <button data-tab="callSummary">Earnings Call</button>
@@ -113,6 +122,14 @@
           <span>Business basics, key updates and live news</span>
         </div>
         <div id="companyInfoPanel"></div>
+      </section>
+
+      <section class="tab-panel data-panel" data-panel="business">
+        <div class="section-title">
+          <h2>Business</h2>
+          <span>Business description, financials, shareholding and product map</span>
+        </div>
+        <div id="businessPanel"></div>
       </section>
 
       <section class="tab-panel data-panel" data-panel="historical">
