@@ -182,6 +182,65 @@ const businessProfiles = {
   }
 };
 
+const businessDeepDives = {
+  zentec: {
+    lines: ["Counter-drone systems with detection, jamming and hard-kill options", "Training simulators for land forces, police and security agencies", "Emerging unmanned and autonomous products for tactical use"],
+    customers: ["Indian defence forces", "State police and paramilitary users", "Export and security agencies"],
+    drivers: ["Drone-warfare demand", "Indigenisation of training systems", "Order-book conversion from anti-drone and simulator programmes"],
+    watch: ["Milestone-led revenue timing", "Receivable cycle", "Export execution and margin normalisation"],
+    capabilities: "Product IP, R&D-led design, software, embedded electronics, field training content and systems integration."
+  },
+  ideaforge: {
+    lines: ["Tactical UAV platforms", "Enterprise mapping and survey drones", "Payloads, ground-control software and service support"],
+    customers: ["Defence and homeland security", "Survey, mining and infrastructure users", "International drone programmes"],
+    drivers: ["Border surveillance", "US and export opportunity", "Repeat enterprise adoption beyond one-off tenders"],
+    watch: ["Tender volatility", "Order replenishment after execution", "Gross margin and working-capital discipline"],
+    capabilities: "In-house UAV design, autopilot software, payload integration, flight analytics and field deployment support."
+  },
+  mtar: {
+    lines: ["Clean-energy assemblies", "Civil nuclear systems", "Aerospace and defence precision components"],
+    customers: ["Clean-energy OEMs", "Nuclear and space programmes", "Global aerospace and defence customers"],
+    drivers: ["Large FY27 clean-energy order inflows", "Integrated systems shift", "New aerospace customer additions"],
+    watch: ["Customer concentration", "Greenfield facility timing", "Margin delivery against higher guidance"],
+    capabilities: "High-tolerance machining, assemblies, special processes, clean-room execution and programme-qualified manufacturing."
+  },
+  datapatterns: {
+    lines: ["Radar electronics", "Electronic warfare subsystems", "Avionics and space-grade electronics"],
+    customers: ["Defence laboratories and PSUs", "Indian armed forces programmes", "Space and aerospace platforms"],
+    drivers: ["High-value electronics indigenisation", "Radar and EW programme scaling", "Design-led operating leverage"],
+    watch: ["Product mix sustainability", "Large programme acceptance timing", "Receivables and order inflow"],
+    capabilities: "Design ownership, embedded systems, RF/electronics integration, testing and high-reliability production."
+  },
+  azad: {
+    lines: ["Aerospace turbine parts", "Energy and industrial turbine components", "Customer-dedicated precision manufacturing"],
+    customers: ["Global aerospace OEMs", "Energy turbine customers", "Long-cycle single-source programmes"],
+    drivers: ["Facility ramp-up", "Multi-year rolling order book", "Qualification-led wallet-share expansion"],
+    watch: ["Capacity absorption", "Customer qualification timelines", "Working capital and customer concentration"],
+    capabilities: "Complex machining, hot-section component capability, customer-dedicated cells and quality-certified production."
+  },
+  aequs: {
+    lines: ["Aerospace machining and assemblies", "Forging and special processing", "Consumer precision manufacturing"],
+    customers: ["Global aerospace supply chains", "Consumer durable and precision customers", "Joint-venture ecosystem partners"],
+    drivers: ["Aerospace utilisation", "Integrated ecosystem operating leverage", "Consumer vertical scale-up"],
+    watch: ["Path to PAT profitability", "Consumer vertical losses", "Capacity utilisation and customer concentration"],
+    capabilities: "Aerospace SEZ ecosystem, forging, treatment, machining, assembly and vertically integrated manufacturing."
+  },
+  paras: {
+    lines: ["Defence optics and optronics", "Space engineering components", "EMP protection and defence electronics"],
+    customers: ["Defence forces and PSUs", "Space-sector programmes", "Specialised electronics customers"],
+    drivers: ["Optics indigenisation", "Space-sector demand", "Order-book conversion entering FY27"],
+    watch: ["Quarterly execution lumpiness", "Receivables", "Margin sustainability across order mix"],
+    capabilities: "Optics, optronics, high-reliability mechanical systems, EMP protection and niche defence electronics."
+  },
+  astra: {
+    lines: ["RF and microwave modules", "Radar and telemetry electronics", "Space payload and communication systems"],
+    customers: ["Defence and space programmes", "Radar, missile and EW platforms", "Meteorology and communication users"],
+    drivers: ["Defence electronics programmes", "Space payload demand", "Order-book conversion across radar and missile systems"],
+    watch: ["Execution timing", "Margin movement by programme mix", "Receivables and order concentration"],
+    capabilities: "RF design, microwave modules, antenna subsystems, payload electronics, testing and programme integration."
+  }
+};
+
 const callSummaries = {
   zentec: {
     title: "Zen Technologies earnings call summary",
@@ -894,6 +953,13 @@ function renderBusiness() {
     products: [{ name: selected.meta.segment || "Custom business", icon: "grid", detail: "Add a sub-sector in Manage to enrich this profile." }],
     shareholding: [["Public / others", 100]]
   };
+  const deep = businessDeepDives[selected.meta.id] || {
+    lines: [selected.meta.segment || "Company-specific business line"],
+    customers: ["Listed company investors", "Operating customers to be added"],
+    drivers: ["Live quote monitoring", "Upcoming filings and investor updates"],
+    watch: ["Data availability", "Execution and working capital"],
+    capabilities: selected.meta.segment || "Capability profile will appear here once added."
+  };
   const q = selected.yahoo?.quote || {};
   const financialRows = [
     ["Revenue", Number.isFinite(extra.revenue) ? `Rs ${compact(extra.revenue)}crs` : compact(selected.yahoo?.financials?.revenue)],
@@ -909,8 +975,11 @@ function renderBusiness() {
         <small>${escapeHtml(selected.meta.nse || selected.meta.symbol)} &middot; ${escapeHtml(extra.focus || selected.meta.segment || "Defence platform")}</small>
         <strong>${escapeHtml(selected.meta.name)}</strong>
         <p>${escapeHtml(profile.description)}</p>
+        <div class="business-tags">
+          ${deep.lines.slice(0, 3).map((line) => `<span>${escapeHtml(line)}</span>`).join("")}
+        </div>
       </div>
-      <div class="business-visual" aria-hidden="true">${productIcon(profile.products[0]?.icon || "grid", selected.meta.id)}</div>
+      <div class="business-visual" aria-hidden="true">${productPhoto(profile.products[0] || { name: selected.meta.name, icon: "grid" }, selected.meta.id, "hero")}</div>
     </article>
 
     <article class="brief-card">
@@ -922,6 +991,24 @@ function renderBusiness() {
         <div><small>Day move</small><strong class="${moveClass(q.regularMarketChangePercent)}">${pct(q.regularMarketChangePercent)}</strong></div>
         <div><small>Market cap</small><strong>${Number.isFinite(extra.marketCap) ? `Rs ${compact(extra.marketCap)}crs` : compact(q.marketCap)}</strong></div>
       </div>
+    </article>
+
+    <article class="brief-card">
+      <small>Business lines</small>
+      <strong>Revenue engine</strong>
+      ${detailList(deep.lines)}
+    </article>
+
+    <article class="brief-card">
+      <small>Customers and end markets</small>
+      <strong>Demand channels</strong>
+      ${detailList(deep.customers)}
+    </article>
+
+    <article class="brief-card">
+      <small>Capabilities</small>
+      <strong>What differentiates the company</strong>
+      <p>${escapeHtml(deep.capabilities)}</p>
     </article>
 
     <article class="brief-card">
@@ -937,16 +1024,34 @@ function renderBusiness() {
       <p class="fine-print">Model snapshot for dashboard analysis. Reconcile with the latest exchange shareholding filing before investment use.</p>
     </article>
 
+    <article class="brief-card">
+      <small>Growth drivers</small>
+      <strong>What can move the business</strong>
+      ${detailList(deep.drivers)}
+    </article>
+
+    <article class="brief-card">
+      <small>Risks and monitoring</small>
+      <strong>What to track</strong>
+      ${detailList(deep.watch)}
+    </article>
+
     <article class="brief-card business-products">
       <small>Key products</small>
-      <strong>Product and capability map</strong>
-      <div class="product-grid">${profile.products.map((product) => `<div class="product-card">
-        <div class="product-art">${productIcon(product.icon, selected.meta.id)}</div>
-        <strong>${escapeHtml(product.name)}</strong>
-        <p>${escapeHtml(product.detail)}</p>
+      <strong>Product picture gallery and capability map</strong>
+      <div class="product-grid">${profile.products.map((product, index) => `<div class="product-card">
+        <div class="product-photo">${productPhoto(product, selected.meta.id, index)}</div>
+        <div class="product-copy">
+          <strong>${escapeHtml(product.name)}</strong>
+          <p>${escapeHtml(product.detail)}</p>
+        </div>
       </div>`).join("")}</div>
     </article>
   </div>`;
+}
+
+function detailList(items = []) {
+  return `<ul class="detail-list">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
 }
 
 function shareholdingChart(rows = []) {
@@ -962,6 +1067,44 @@ function shareholdingChart(rows = []) {
   }).join("");
   const legend = rows.map((row, index) => `<div><span style="background:${colors[index % colors.length]}"></span><strong>${escapeHtml(row[0])}</strong><small>${formatNum.format(Number(row[1] || 0))}%</small></div>`).join("");
   return `<div class="shareholding-wrap"><svg class="shareholding-chart" viewBox="0 0 36 36" aria-label="Shareholding chart">${circles}<text x="18" y="19.5" text-anchor="middle" fill="#f3f5ee" font-size="4.5">${rows.length}</text></svg><div class="shareholding-legend">${legend}</div></div>`;
+}
+
+function productPhoto(product = {}, id = "", variant = 0) {
+  const type = product.icon || "grid";
+  const title = escapeHtml(product.name || "Product");
+  const seed = escapeHtml(`${id}-${type}-${variant}`);
+  const scenes = {
+    drone: `<g transform="translate(54 54)"><path d="M-78 2h156M0-58v116M-44-36l88 72M44-36l-88 72" stroke="#e6edf0" stroke-width="5"/><circle cx="-78" cy="2" r="22" fill="#101812" stroke="#77c7d5" stroke-width="6"/><circle cx="78" cy="2" r="22" fill="#101812" stroke="#77c7d5" stroke-width="6"/><circle cx="0" cy="-58" r="22" fill="#101812" stroke="#d9b45f" stroke-width="6"/><circle cx="0" cy="58" r="22" fill="#101812" stroke="#d9b45f" stroke-width="6"/><rect x="-22" y="-17" width="44" height="34" rx="8" fill="#dfe8e4"/></g>`,
+    radar: `<g transform="translate(138 128)" fill="none" stroke-linecap="round"><path d="M-78 50h156M0 50V-44" stroke="#e6edf0" stroke-width="7"/><path d="M-50 10a72 72 0 0 1 100 0M-76-18a108 108 0 0 1 152 0" stroke="#77c7d5" stroke-width="7"/><circle cx="0" cy="-48" r="15" fill="#d9b45f" stroke="#fff" stroke-width="4"/></g>`,
+    target: `<g transform="translate(140 124)" fill="none"><circle r="72" stroke="#77c7d5" stroke-width="7"/><circle r="44" stroke="#d9b45f" stroke-width="7"/><circle r="16" fill="#e8f0ec"/><path d="M-100 0h62M38 0h62M0-100v62M0 38v62" stroke="#e8f0ec" stroke-width="5"/></g>`,
+    aircraft: `<g transform="translate(130 128) rotate(-12)" fill="#e7ece7"><path d="M-98 14L92-54 32 72 4 16-62 54z"/><path d="M4 16l28 56" fill="none" stroke="#77c7d5" stroke-width="8"/></g>`,
+    gear: `<g transform="translate(140 124)" fill="none" stroke-linecap="round"><circle r="42" stroke="#d9b45f" stroke-width="11"/><circle r="18" fill="#e8f0ec"/><path d="M0-82v25M0 57v25M-82 0h25M57 0h25M-58-58l18 18M40 40l18 18M58-58L40-40M-40 40l-18 18" stroke="#77c7d5" stroke-width="9"/></g>`,
+    energy: `<g transform="translate(140 126)"><path d="M16-98L-54 8h50l-18 88L70-26H12z" fill="#d9b45f" stroke="#fff" stroke-width="5"/></g>`,
+    camera: `<g transform="translate(140 126)"><rect x="-78" y="-40" width="156" height="92" rx="18" fill="#e8f0ec"/><path d="M-38-40l16-22h48l16 22" fill="#c7d6d2"/><circle r="34" fill="#101812"/><circle r="18" fill="#77c7d5"/></g>`,
+    turbine: `<g transform="translate(140 126)" fill="#e8f0ec"><circle r="17" fill="#d9b45f"/><path d="M0-17c23-68 88-36 50 16C38 15 18 12 0-17z"/><path d="M15 9c68 23 36 88-16 50C-15 47-12 27 15 9z"/><path d="M-9 15c-23 68-88 36-50-16C-47-15-27-12-9 15z"/><path d="M-15-9c-68-23-36-88 16-50C15-47 12-27-15-9z"/></g>`,
+    factory: `<g transform="translate(140 128)" fill="#e8f0ec"><path d="M-94 62H94v-92L42 2v-32L-10 2v-60h-84z"/><rect x="-66" y="18" width="34" height="44" fill="#101812"/><rect x="-6" y="20" width="20" height="16" fill="#77c7d5"/><rect x="38" y="20" width="20" height="16" fill="#d9b45f"/></g>`,
+    lens: `<g transform="translate(140 126)" fill="none"><circle r="72" stroke="#e8f0ec" stroke-width="9"/><circle r="36" stroke="#77c7d5" stroke-width="8"/><path d="M-46-46l92 92M46-46l-92 92" stroke="#d9b45f" stroke-width="7"/></g>`,
+    satellite: `<g transform="translate(140 126)" fill="none" stroke-linecap="round"><rect x="-24" y="-24" width="48" height="48" rx="7" fill="#e8f0ec"/><path d="M-38-38l-66-52M38 38l66 52M38-38l66-52M-38 38l-66 52" stroke="#77c7d5" stroke-width="7"/><path d="M-116-102l42 34M116-102L74-68M-116 102l42-34M116 102L74 68" stroke="#d9b45f" stroke-width="7"/></g>`,
+    shield: `<g transform="translate(140 126)"><path d="M0-94l80 28v58c0 54-31 90-80 112-49-22-80-58-80-112v-58z" fill="#e8f0ec"/><path d="M-34 8l25 25 52-62" fill="none" stroke="#65d08c" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/></g>`,
+    signal: `<g transform="translate(140 126)" fill="none" stroke-linecap="round"><path d="M-82 68h164M-50 68V10M0 68v-98M50 68V-8" stroke="#e8f0ec" stroke-width="11"/><path d="M-92-62c61-38 123-38 184 0M-58-26c39-24 77-24 116 0" stroke="#77c7d5" stroke-width="7"/></g>`,
+    grid: `<g transform="translate(140 126)" fill="#e8f0ec"><rect x="-72" y="-72" width="58" height="58" rx="12"/><rect x="14" y="-72" width="58" height="58" rx="12"/><rect x="-72" y="14" width="58" height="58" rx="12"/><rect x="14" y="14" width="58" height="58" rx="12"/></g>`
+  };
+  return `<svg class="product-picture" viewBox="0 0 280 190" role="img" aria-label="${title} product picture">
+    <defs>
+      <linearGradient id="photo-${seed}" x1="0" x2="1" y1="0" y2="1">
+        <stop stop-color="#18231d"/><stop offset=".56" stop-color="#102029"/><stop offset="1" stop-color="#5a4720"/>
+      </linearGradient>
+      <radialGradient id="flare-${seed}" cx=".78" cy=".18" r=".52">
+        <stop stop-color="#77c7d5" stop-opacity=".45"/><stop offset="1" stop-color="#77c7d5" stop-opacity="0"/>
+      </radialGradient>
+    </defs>
+    <rect width="280" height="190" rx="16" fill="url(#photo-${seed})"/>
+    <rect width="280" height="190" rx="16" fill="url(#flare-${seed})"/>
+    <path d="M0 154c48-28 83-25 128-10 51 17 89 14 152-24v70H0z" fill="rgba(217,180,95,.18)"/>
+    <g opacity=".18" stroke="#f3f5ee"><path d="M18 36h244M18 78h244M18 120h244"/><path d="M42 18v150M96 18v150M150 18v150M204 18v150"/></g>
+    ${scenes[type] || scenes.grid}
+    <text x="18" y="172" fill="#f3f5ee" font-size="13" font-weight="800">${title}</text>
+  </svg>`;
 }
 
 function productIcon(type = "grid", id = "") {
