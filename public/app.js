@@ -68,7 +68,7 @@ const extraData = {
   astra: { label: "Astra", focus: "RF, microwave and defence electronics", revenue: 1150, pat: 128, patMargin: 11.1, ebitdaMargin: 18, roe: 13, roa: 7, roce: 16, debtEquity: 0.18, pe: 61, pb: 7, marketCap: 8500, eps: 13.6, divYield: 0.25, debtorDays: 112, inventoryDays: 138, fcf: 28, period: "2025-12-31", verdict: "Steady", oneLine: "RF and microwave electronics supplier for defence, space and meteorology applications." }
 };
 
-const years = ["FY21", "FY22", "FY23", "FY24", "FY25"];
+const years = ["FY21", "FY22", "FY23", "FY24", "FY25", "FY26"];
 
 const companyUpdates = {
   zentec: [
@@ -560,10 +560,11 @@ function render() {
 function seededSeries(item, key) {
   const extra = extraData[item.meta.id] || {};
   const latest = Number.isFinite(extra[key]) ? extra[key] : 0;
-  if (key === "revenue") return years.map((_, i) => Math.max(0, latest * (0.45 + i * 0.14)));
-  if (key === "pat") return years.map((_, i) => latest * (0.35 + i * 0.16));
-  if (key === "fcf") return years.map((_, i) => latest * (0.25 + i * 0.18));
-  if (key === "roce") return years.map((_, i) => Math.max(0, latest - (4 - i) * 1.8));
+  const lastIndex = Math.max(years.length - 1, 1);
+  if (key === "revenue") return years.map((_, i) => Math.max(0, latest * (0.38 + (i / lastIndex) * 0.62)));
+  if (key === "pat") return years.map((_, i) => latest * (0.28 + (i / lastIndex) * 0.72));
+  if (key === "fcf") return years.map((_, i) => latest * (0.2 + (i / lastIndex) * 0.8));
+  if (key === "roce") return years.map((_, i) => Math.max(0, latest - (lastIndex - i) * 1.8));
   return years.map(() => latest);
 }
 
@@ -1008,9 +1009,9 @@ function renderHistorical() {
     <article class="chart-card">${chartTitle("EBITDA vs PAT Margins")}${barChart([{ id: selected?.meta.id, label: selectedExtra.label || selected?.meta.nse, a: selectedExtra.ebitdaMargin || 0, b: selectedExtra.patMargin || 0 }], "EBITDA", "PAT")}</article>
     <article class="chart-card">${chartTitle("Free Cash Flow Generation")}${lineChart(years, seededSeries(selected, "fcf"), "FCF")}</article>
     <article class="chart-card">${chartTitle("Peer Valuation Multiples")}${barChart(dashboard.map((item) => ({ id: item.meta.id, label: extraData[item.meta.id]?.label || item.meta.nse, a: extraData[item.meta.id]?.pe || 0, b: extraData[item.meta.id]?.pb || 0 })), "P/E", "P/B")}</article>
-    <article class="chart-card">${chartTitle("Working Capital - Debtor & Inventory Days")}${barChart(dashboard.map((item) => ({ id: item.meta.id, label: extraData[item.meta.id]?.label || item.meta.nse, a: extraData[item.meta.id]?.debtorDays || 0, b: extraData[item.meta.id]?.inventoryDays || 0 })), "Debtor", "Inventory")}</article>
+    <article class="chart-card">${chartTitle("Working Capital - Receivable & Inventory Days")}${barChart(dashboard.map((item) => ({ id: item.meta.id, label: extraData[item.meta.id]?.label || item.meta.nse, a: extraData[item.meta.id]?.debtorDays || 0, b: extraData[item.meta.id]?.inventoryDays || 0 })), "Receivable days", "Inventory days")}</article>
   </div>` + table([
-    "Company", "Live price", "1Y return", "ROCE", "EBITDA margin", "FCF", "Debtor / Inventory days"
+    "Company", "Live price", "1Y return", "ROCE", "EBITDA margin", "FCF", "Receivable / Inventory days"
   ], rows);
 }
 
