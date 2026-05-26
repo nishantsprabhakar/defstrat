@@ -642,6 +642,44 @@ h2 {
   font-size: 44px;
 }
 
+.price-chart-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 7px;
+  margin: 10px 0 2px;
+}
+
+.price-chart-toolbar button {
+  min-height: 30px;
+  padding: 0 10px;
+  color: var(--muted);
+  background: rgba(255,255,255,.035);
+}
+
+.price-chart-toolbar button.is-active {
+  color: var(--text);
+  border-color: rgba(217, 180, 95, .8);
+  background: rgba(217, 180, 95, .14);
+}
+
+.price-hover-zone .price-crosshair,
+.price-hover-zone .price-focus,
+.price-hover-zone .price-callout {
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+
+.price-hover-zone:hover .price-crosshair,
+.price-hover-zone:hover .price-focus,
+.price-hover-zone:hover .price-callout {
+  opacity: 1;
+}
+
+.price-hover-zone rect[data-tip] {
+  cursor: crosshair;
+}
+
 svg {
   width: 100%;
   min-height: 230px;

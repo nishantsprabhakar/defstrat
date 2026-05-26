@@ -56,6 +56,7 @@ let selectedId = watchIds[0];
 let searchTimer;
 let activeTab = "charts";
 let activeSectorMetric = "revenue";
+let activePriceRange = "1Y";
 
 const extraData = {
   zentec: { label: "Zen", focus: "Training simulators, anti-drone systems", revenue: 687.69, pat: 193.45, patMargin: 28.1, ebitdaMargin: 48.37, roe: 28, roa: 18, roce: 32, debtEquity: 0, pe: 72, pb: 18, marketCap: 14500, eps: 21.5, divYield: 0.05, debtorDays: 92, inventoryDays: 104, fcf: 65, period: "FY26", source: "Company Q4 FY26 release / BSE filing", verdict: "Positive", oneLine: "High-growth defence electronics and simulation play with order visibility tied to domestic procurement." },
@@ -757,51 +758,109 @@ function renderDetail() {
 }
 
 function renderChart(points) {
-  if (!points.length) {
+  const filteredPoints = filterPricePoints(points, activePriceRange);
+  document.querySelectorAll("[data-price-range]").forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.priceRange === activePriceRange);
+  });
+  if (!filteredPoints.length) {
     els.chart.innerHTML = `<text x="28" y="130" fill="#9ea99c">No chart data returned by Yahoo Finance.</text>`;
     return;
   }
   const w = 720;
   const h = 260;
-  const pad = 24;
-  const values = points.map((p) => p.close);
+  const padX = 34;
+  const top = 30;
+  const bottom = 226;
+  const chartW = w - padX * 2;
+  const chartH = bottom - top;
+  const values = filteredPoints.map((p) => p.close).filter(Number.isFinite);
   const min = Math.min(...values);
   const max = Math.max(...values);
+  const lowPoint = filteredPoints.find((point) => point.close === min) || filteredPoints[0];
+  const highPoint = filteredPoints.find((point) => point.close === max) || filteredPoints[0];
+  const first = filteredPoints[0];
+  const last = filteredPoints.at(-1);
+  const rangeMove = first?.close ? ((last.close - first.close) / first.close) * 100 : NaN;
   const span = max - min || 1;
-  const xFor = (index) => pad + (index / Math.max(points.length - 1, 1)) * (w - pad * 2);
-  const yFor = (value) => h - pad - ((value - min) / span) * (h - pad * 2);
-  const d = points.map((p, i) => {
+  const xFor = (index) => padX + (index / Math.max(filteredPoints.length - 1, 1)) * chartW;
+  const yFor = (value) => bottom - ((value - min) / span) * chartH;
+  const d = filteredPoints.map((p, i) => {
     const x = xFor(i);
     const y = yFor(p.close);
     return `${i ? "L" : "M"}${x.toFixed(1)} ${y.toFixed(1)}`;
   }).join(" ");
-  const marks = points.filter((_, index) => index % Math.max(Math.floor(points.length / 18), 1) === 0 || index === points.length - 1).map((p, index) => {
-    const actualIndex = points.indexOf(p);
-    const x = xFor(actualIndex);
+  const area = `${d} L${xFor(filteredPoints.length - 1).toFixed(1)} ${bottom} L${padX} ${bottom} Z`;
+  const maxVolume = Math.max(...filteredPoints.map((p) => p.volume || 0), 1);
+  const hoverStep = chartW / Math.max(filteredPoints.length - 1, 1);
+  const hoverZones = filteredPoints.map((p, index) => {
+    const x = xFor(index);
     const y = yFor(p.close);
-    const date = new Date(p.time * 1000).toLocaleDateString();
-    return `<circle class="chart-mark" data-tip="${escapeHtml(`${date}: close ${money(p.close)}, volume ${compact(p.volume)}`)}" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${index === points.length - 1 ? 5 : 3}" fill="#d9b45f"/>`;
+    const date = formatEpochDate(p.time, { day: "2-digit", month: "short", year: "2-digit" });
+    const volumeHeight = Math.max(1, ((p.volume || 0) / maxVolume) * 34);
+    const rangeStart = Math.max(padX, x - hoverStep / 2);
+    const rangeWidth = index === filteredPoints.length - 1 ? Math.max(6, w - padX - rangeStart) : Math.max(6, hoverStep);
+    const calloutX = x > w - 178 ? x - 146 : x + 10;
+    const calloutY = y < 76 ? y + 14 : y - 56;
+    const tip = `${date}: close ${money(p.close)}, volume ${compact(p.volume)}, ${activePriceRange} move ${pct(rangeMove)}`;
+    return `<g class="price-hover-zone">
+      <rect data-tip="${escapeHtml(tip)}" x="${rangeStart.toFixed(1)}" y="${top}" width="${rangeWidth.toFixed(1)}" height="${chartH}" fill="transparent"/>
+      <line class="price-crosshair" x1="${x.toFixed(1)}" x2="${x.toFixed(1)}" y1="${top}" y2="${bottom}" stroke="#d9b45f" stroke-width="1" stroke-dasharray="3 4"/>
+      <circle class="price-focus" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="5" fill="#d9b45f" stroke="#0c100d" stroke-width="2"/>
+      <g class="price-callout">
+        <rect x="${calloutX.toFixed(1)}" y="${calloutY.toFixed(1)}" width="136" height="42" rx="7" fill="rgba(8,10,8,.92)" stroke="rgba(217,180,95,.55)"/>
+        <text x="${(calloutX + 9).toFixed(1)}" y="${(calloutY + 17).toFixed(1)}" fill="#f3f5ee" font-size="10">${escapeHtml(date)}</text>
+        <text x="${(calloutX + 9).toFixed(1)}" y="${(calloutY + 32).toFixed(1)}" fill="#d9b45f" font-size="11">${escapeHtml(money(p.close))}</text>
+      </g>
+      <rect x="${Math.max(padX, x - 1.5).toFixed(1)}" y="${(bottom - volumeHeight).toFixed(1)}" width="3" height="${volumeHeight.toFixed(1)}" fill="rgba(119,199,213,.22)"/>
+    </g>`;
   }).join("");
-  const firstDate = new Date(points[0].time * 1000).toLocaleDateString(undefined, { month: "short", year: "2-digit" });
-  const lastDate = new Date(points.at(-1).time * 1000).toLocaleDateString(undefined, { month: "short", year: "2-digit" });
+  const firstDate = formatEpochDate(first.time, { month: "short", year: "2-digit" });
+  const lastDate = formatEpochDate(last.time, { month: "short", year: "2-digit" });
+  const yTicks = [min, (min + max) / 2, max];
+  const xTicks = [0, Math.floor((filteredPoints.length - 1) / 2), filteredPoints.length - 1]
+    .filter((value, index, list) => list.indexOf(value) === index);
   els.chart.innerHTML = `
-    <defs><linearGradient id="lineGlow" x1="0" x2="1"><stop stop-color="#77c7d5"/><stop offset="1" stop-color="#d9b45f"/></linearGradient></defs>
-    <line class="grid-line" x1="24" x2="696" y1="${yFor(min)}" y2="${yFor(min)}"/>
-    <line class="grid-line" x1="24" x2="696" y1="${yFor((min + max) / 2)}" y2="${yFor((min + max) / 2)}"/>
-    <line class="grid-line" x1="24" x2="696" y1="${yFor(max)}" y2="${yFor(max)}"/>
-    <line class="axis-line" x1="24" x2="696" y1="${h - pad}" y2="${h - pad}"/>
-    <line class="axis-line" x1="24" x2="24" y1="24" y2="${h - pad}"/>
+    <defs>
+      <linearGradient id="lineGlow" x1="0" x2="1"><stop stop-color="#77c7d5"/><stop offset="1" stop-color="#d9b45f"/></linearGradient>
+      <linearGradient id="priceArea" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#77c7d5" stop-opacity=".28"/><stop offset="1" stop-color="#77c7d5" stop-opacity="0"/></linearGradient>
+    </defs>
+    ${yTicks.map((tick) => `<line class="grid-line" x1="${padX}" x2="${w - padX}" y1="${yFor(tick)}" y2="${yFor(tick)}"/><text x="${padX - 6}" y="${yFor(tick) + 4}" text-anchor="end" fill="#9ea99c" font-size="10">${escapeHtml(money(tick))}</text>`).join("")}
+    <line class="axis-line" x1="${padX}" x2="${w - padX}" y1="${bottom}" y2="${bottom}"/>
+    <line class="axis-line" x1="${padX}" x2="${padX}" y1="${top}" y2="${bottom}"/>
+    <path d="${area}" fill="url(#priceArea)"/>
     <path d="${d}" fill="none" stroke="rgba(119,199,213,.18)" stroke-width="12" stroke-linecap="round"/>
     <path d="${d}" fill="none" stroke="url(#lineGlow)" stroke-width="3" stroke-linecap="round"/>
-    ${marks}
+    ${hoverZones}
+    <circle class="chart-mark" data-tip="${escapeHtml(`Range high: ${money(max)} on ${formatEpochDate(highPoint.time)}`)}" cx="${xFor(filteredPoints.indexOf(highPoint)).toFixed(1)}" cy="${yFor(max).toFixed(1)}" r="5" fill="#65d08c"/>
+    <circle class="chart-mark" data-tip="${escapeHtml(`Range low: ${money(min)} on ${formatEpochDate(lowPoint.time)}`)}" cx="${xFor(filteredPoints.indexOf(lowPoint)).toFixed(1)}" cy="${yFor(min).toFixed(1)}" r="5" fill="#ff7b7b"/>
+    <circle class="chart-mark" data-tip="${escapeHtml(`Latest close: ${money(last.close)} on ${formatEpochDate(last.time)}`)}" cx="${xFor(filteredPoints.length - 1).toFixed(1)}" cy="${yFor(last.close).toFixed(1)}" r="6" fill="#d9b45f" stroke="#0c100d" stroke-width="2"/>
     <text class="axis-label" x="30" y="22">Y: Price</text>
-    <text class="axis-label" x="696" y="248" text-anchor="end">X: Date</text>
-    <text x="30" y="246" fill="#9ea99c" font-size="11">${escapeHtml(firstDate)}</text>
-    <text x="646" y="246" fill="#9ea99c" font-size="11">${escapeHtml(lastDate)}</text>
-    <text x="24" y="46" fill="#9ea99c">1Y close</text>
-    <text x="24" y="62" fill="#f3f5ee">${money(values.at(-1))}</text>
-    <text x="600" y="34" fill="#9ea99c">High ${money(max)}</text>
-    <text x="600" y="58" fill="#9ea99c">Low ${money(min)}</text>`;
+    <text class="axis-label" x="${w - padX}" y="248" text-anchor="end">X: Date</text>
+    ${xTicks.map((tick) => `<text x="${xFor(tick).toFixed(1)}" y="242" text-anchor="${tick === 0 ? "start" : tick === filteredPoints.length - 1 ? "end" : "middle"}" fill="#9ea99c" font-size="10">${escapeHtml(formatEpochDate(filteredPoints[tick].time, { month: "short", day: "2-digit" }))}</text>`).join("")}
+    <text x="44" y="50" fill="#9ea99c">${escapeHtml(activePriceRange)} close</text>
+    <text x="44" y="68" fill="#f3f5ee" font-size="15">${money(last.close)}</text>
+    <text x="44" y="86" class="${moveClass(rangeMove)}" font-size="12">${pct(rangeMove)} over range</text>
+    <text x="592" y="46" fill="#65d08c">High ${money(max)}</text>
+    <text x="592" y="66" fill="#ff7b7b">Low ${money(min)}</text>`;
+}
+
+function filterPricePoints(points, range) {
+  const valid = (points || []).filter((point) => Number.isFinite(point.close) && Number.isFinite(point.time));
+  if (!valid.length || range === "1Y") return valid;
+  const last = valid.at(-1).time * 1000;
+  const day = 24 * 60 * 60 * 1000;
+  if (range === "1M") return valid.filter((point) => point.time * 1000 >= last - 31 * day);
+  if (range === "3M") return valid.filter((point) => point.time * 1000 >= last - 93 * day);
+  if (range === "6M") return valid.filter((point) => point.time * 1000 >= last - 186 * day);
+  if (range === "YTD") {
+    const start = new Date(new Date(last).getFullYear(), 0, 1).getTime();
+    return valid.filter((point) => point.time * 1000 >= start);
+  }
+  return valid;
+}
+
+function formatEpochDate(time, options = { day: "2-digit", month: "short", year: "2-digit" }) {
+  return new Date(time * 1000).toLocaleDateString(undefined, options);
 }
 
 function renderInsights(item) {
@@ -1712,6 +1771,13 @@ function wireInteractiveCharts() {
     if (metricButton) {
       activeSectorMetric = metricButton.dataset.sectorMetric;
       renderSectorCharts();
+      return;
+    }
+    const priceRangeButton = event.target.closest?.("[data-price-range]");
+    if (priceRangeButton) {
+      activePriceRange = priceRangeButton.dataset.priceRange;
+      const item = dashboard.find((d) => d.meta.id === selectedId) || dashboard[0];
+      renderChart(item?.chart || []);
       return;
     }
     const target = event.target.closest?.("[data-select]");
