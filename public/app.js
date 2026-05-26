@@ -103,12 +103,12 @@ const callSummaries = {
     period: "Q4 FY26 and FY26",
     source: "Zen investor page / Q4 FY26 transcript filing",
     sections: [
-      { heading: "Financial Performance", text: "Zen reported Q4 FY26 consolidated revenue of Rs 178.08crs and PAT of Rs 31.53crs. FY26 revenue stood at Rs 687.69crs, with EBITDA margin reported at 48.37%. The quarter was optically weaker on YoY growth because execution timing shifted revenue into FY27, but profitability remained strong relative to peers." },
-      { heading: "Order Book and Pipeline", text: "The consolidated order book stood at approximately Rs 1,336.04crs as of 31 March 2026. Q4 FY26 order inflows were approximately Rs 431.36crs. Management commentary indicated that a large portion of the order book is scheduled for execution from FY27 onwards, particularly around Q2 and Q3." },
-      { heading: "Segment Performance and Strategic Direction", text: "The call emphasised anti-drone systems, simulators, hard-kill options, interceptor drones, unmanned ground vehicles and smart ammunition. The strategic thrust remains self-funded defence R&D, indigenous private-sector innovation and widening product coverage against evolving drone threats." },
-      { heading: "FY27 Guidance", text: "Management commentary points to stronger execution visibility in FY27 from the current order book. Exact revenue guidance was not disclosed in the current source snippets, but the order book provides a clear base for monitoring quarterly conversion." },
-      { heading: "Key Positives from the Call", text: "Large order book, strong EBITDA margin, product breadth across anti-drone/simulators, and increasing relevance of indigenous defence technology." },
-      { heading: "Key Concerns and Watch Points", text: "Quarterly revenue can be lumpy due to execution timing. Working capital days were elevated around 196 days as of 31 March 2026. Investors should track order conversion, receivables and margin sustainability." }
+      { heading: "Financial Performance", text: "Q4 FY26 revenue was Rs 178.08crs and PAT was Rs 31.53crs. FY26 revenue was Rs 687.69crs, lower than FY25 because order execution was pushed out, but profitability remained unusually strong with FY26 EBITDA margin at 48.37%. The key read-through is that the quarter was not a demand-collapse story; it was an execution-timing story with high margins intact." },
+      { heading: "Order Book and Pipeline", text: "The consolidated order book was Rs 1,336.04crs as of 31 March 2026. Q4 order inflow was Rs 431.36crs, while Q4 execution was Rs 178.08crs. Domestic orders were the dominant part of the backlog, with export orders still smaller but strategically important. The management commentary points to materially higher conversion from FY27, especially as larger anti-drone and simulator programmes move into execution." },
+      { heading: "Segment Performance and Strategic Direction", text: "The call focused on anti-drone systems, simulators, hard-kill options, interceptor drones, unmanned ground vehicles and smart ammunition. Zen continues to position itself as an indigenous defence technology platform rather than a low-margin build-to-print supplier. The operating model remains R&D-led, and the strategic bet is that drone warfare and training simulation become recurring procurement categories." },
+      { heading: "FY27 Guidance", text: "Management did not provide a single conservative revenue number in the summary sources, but commentary points to a step-up in execution from the existing backlog. The practical investor framework is to track how much of the Rs 1,336crs order book converts during FY27 and whether EBITDA margin normalises toward the mid-30s as scale rises." },
+      { heading: "Key Positives from the Call", text: "Large order book, high EBITDA margin, meaningful Q4 order inflow, strong balance-sheet positioning and product breadth across anti-drone and simulator categories. The backlog is already large relative to FY26 revenue, giving a clearer base for FY27 monitoring." },
+      { heading: "Key Concerns and Watch Points", text: "Revenue can be lumpy because defence orders are milestone-driven. Working capital days were elevated around 196 days as of 31 March 2026. Investors should track receivables, order-to-revenue conversion, export traction and whether margins remain strong after execution accelerates." }
     ],
     q4: [
       ["Revenue", "Rs 178.08crs", "Not disclosed in current source", "Q4 FY26 reported"],
@@ -127,12 +127,12 @@ const callSummaries = {
     period: "Q4 FY26 and FY26",
     source: "Q4 FY26 transcript filing / investor materials",
     sections: [
-      { heading: "Financial Performance", text: "ideaForge delivered its strongest quarterly performance in Q4 FY26, with revenue of approximately Rs 141crs versus Rs 20.3crs in the prior-year quarter. Q4 FY26 PAT was reported at approximately Rs 60crs, implying a PAT margin of about 42.5%. FY26 EBITDA was reported at approximately Rs 27crs." },
-      { heading: "Order Book and Pipeline", text: "The company entered FY27 with an opening order book of approximately Rs 310crs, scheduled for execution within roughly three quarters. The call/transcript commentary highlighted open order book conversion as a key driver of the Q4 improvement." },
-      { heading: "Segment Performance and Strategic Direction", text: "The company is positioned around UAV platforms and drone solutions, with expansion into the US market noted in Q4 commentary. Execution of the order book, product mix and scaling of international opportunities remain key strategic variables." },
-      { heading: "FY27 Guidance", text: "Specific FY27 revenue guidance was not disclosed in the current source snippets. The near-term visibility comes from the Rs 310crs opening order book and management's commentary around execution within three quarters." },
-      { heading: "Key Positives from the Call", text: "Record quarterly revenue, positive profitability, debt-free status as of 31 March 2026 per reported commentary, and order book visibility for near-term execution." },
-      { heading: "Key Concerns and Watch Points", text: "Revenue has historically been lumpy. Investors should track order conversion, repeatability of the Q4 margin profile, drone procurement timing and international expansion execution." }
+      { heading: "Financial Performance", text: "ideaForge delivered a sharp Q4 FY26 recovery, with revenue of approximately Rs 141crs versus Rs 20.3crs in Q4 FY25. PAT was approximately Rs 60crs, implying a very high quarterly PAT margin of about 42.5%, helped by strong order conversion and operating leverage. FY26 EBITDA was approximately Rs 27crs, marking a return to positive operating profitability after a difficult demand cycle." },
+      { heading: "Order Book and Pipeline", text: "The company entered FY27 with an opening order book of approximately Rs 310crs, expected to execute over roughly three quarters. Q4 was important because it demonstrated that order-book conversion can quickly change the P&L profile. The key pipeline question is whether fresh government and enterprise drone orders replenish the book fast enough after the current execution cycle." },
+      { heading: "Segment Performance and Strategic Direction", text: "The business remains centred on UAV platforms, drone systems and related solutions. Management commentary highlighted order conversion and the US opportunity. Strategically, ideaForge needs to prove that drone procurement can become more repeatable across defence, homeland security, mapping, surveillance and enterprise applications rather than remaining a lumpy tender-led business." },
+      { heading: "FY27 Guidance", text: "Specific FY27 revenue guidance was not disclosed in the source snippets. The visible base is the Rs 310crs opening order book, which should support near-term revenue if execution remains on schedule. Investors should compare quarterly revenue against order inflow to judge whether FY27 is a sustained recovery or a one-quarter catch-up." },
+      { heading: "Key Positives from the Call", text: "Record quarterly revenue, strong swing back to profitability, debt-free status as of 31 March 2026 and a visible opening FY27 order book. The Q4 performance shows the operating leverage available when revenue scales." },
+      { heading: "Key Concerns and Watch Points", text: "The Q4 margin profile may not be repeatable every quarter. Drone procurement remains tender-led and can be volatile. Watch order inflow, order execution cadence, gross margin, working capital, export traction and whether revenue concentration reduces over time." }
     ],
     q4: [
       ["Revenue", "Rs 141crs", "Rs 20.3crs", "Strong YoY growth"],
@@ -193,12 +193,12 @@ const callSummaries = {
     period: "Q4 FY26 and FY26",
     source: "Company-hosted Q4 FY26 earnings call transcript PDF",
     sections: [
-      { heading: "Financial Performance", text: "Data Patterns reported Q4 FY26 revenue of approximately Rs 345crs. Gross margin for Q4 FY26 improved significantly to around 73% versus 49% in Q4 FY25. Q4 PAT stood at approximately Rs 139crs, translating to a PAT margin of around 40%." },
-      { heading: "Order Book and Pipeline", text: "Detailed order book values were not captured in the current source snippets. The company remains positioned around defence electronics, radar, EW and avionics programmes where execution timing can influence quarterly revenue mix." },
-      { heading: "Segment Performance and Strategic Direction", text: "The transcript highlights strong margin performance and operating leverage. The strategic direction remains electronics-led defence systems, with emphasis on maintaining profitability while scaling revenue." },
-      { heading: "FY27 Guidance", text: "Specific FY27 revenue guidance was not captured in the current source snippets. Investors should track order inflows, execution cadence and whether Q4's elevated gross margin is sustainable." },
-      { heading: "Key Positives from the Call", text: "High Q4 gross margin, strong PAT margin, full-year scale, and high-quality defence electronics exposure." },
-      { heading: "Key Concerns and Watch Points", text: "Quarterly revenue mix can shift materially depending on programme execution. Sustainability of 73% gross margin and timing of large defence orders are the key watch points." }
+      { heading: "Financial Performance", text: "Data Patterns reported Q4 FY26 revenue of approximately Rs 345crs. Gross margin improved sharply to around 73% versus 49% in Q4 FY25, and Q4 PAT was approximately Rs 139crs, implying a PAT margin near 40%. For FY26, revenue was approximately Rs 925crs, EBITDA Rs 371crs and PAT Rs 271crs, showing strong scale with high profitability." },
+      { heading: "Order Book and Pipeline", text: "The call discussion referenced order-book composition and services share, with management fielding questions around margins from the current backlog. The business is programme-led across defence electronics, radar, EW, avionics and related systems, so quarterly revenue can move meaningfully depending on delivery milestones and acceptance timelines." },
+      { heading: "Segment Performance and Strategic Direction", text: "The transcript highlights the strength of electronics-led defence systems where design ownership and programme complexity support better margins. The strategic direction is to sustain high-value defence electronics exposure while scaling revenue without diluting gross margin quality. Q4's margin uplift suggests favourable mix and operating leverage." },
+      { heading: "FY27 Guidance", text: "Specific FY27 revenue guidance was not captured in the current source snippets. The practical monitoring framework is order inflow, backlog conversion, gross margin sustainability and whether high-margin deliveries repeat beyond Q4." },
+      { heading: "Key Positives from the Call", text: "High Q4 gross margin, strong PAT margin, Rs 925crs FY26 revenue scale, Rs 371crs EBITDA, Rs 271crs PAT and exposure to high-value defence electronics. The company continues to screen as a quality compounder within listed defence electronics." },
+      { heading: "Key Concerns and Watch Points", text: "The 73% Q4 gross margin is excellent but may be mix-driven. Investors should watch order inflow, services/product mix, execution of large programmes, receivable cycle and whether FY27 growth comes with similar profitability." }
     ],
     q4: [
       ["Revenue", "Rs 345crs", "Not disclosed in current source", "Q4 FY26"],
@@ -217,12 +217,12 @@ const callSummaries = {
     period: "Q4 FY26 and FY26",
     source: "Azad IR transcript page / Q4 FY26 call transcript",
     sections: [
-      { heading: "Financial Performance", text: "Azad delivered a strong Q4 FY26, with revenue of approximately Rs 157crs, up 26.4% YoY. EBITDA margin improved to approximately 36.7% and PAT margin to approximately 22.3%. FY26 revenue reached approximately Rs 590crs versus Rs 453crs in FY25, with EBITDA margin at 36.9% and PAT margin at 22.4%." },
-      { heading: "Order Book and Pipeline", text: "Management indicated a rolling order book of approximately Rs 6,500crs, with delivery schedules extending over roughly five to six years. This gives the business unusually long revenue visibility for a precision manufacturing platform." },
-      { heading: "Segment Performance and Strategic Direction", text: "FY26 was described as a year of consolidation and investment, with around 70% to 80% of infrastructure build-out complete and four dedicated facilities operational. The Mitsubishi Heavy Industries eight-year single-source contract validates technical capability in hot-section components." },
-      { heading: "FY27 Guidance", text: "Management reiterated approximately 25% plus top-line growth, with potential upside as new plants stabilise." },
-      { heading: "Key Positives from the Call", text: "Strong revenue growth, high EBITDA/PAT margins, long-duration order visibility, new dedicated facilities and strategic validation from Mitsubishi Heavy Industries." },
-      { heading: "Key Concerns and Watch Points", text: "Capacity ramp-up execution, customer concentration, working capital and how quickly new plants stabilise will be important to monitor." }
+      { heading: "Financial Performance", text: "Azad delivered a strong Q4 FY26, with revenue of approximately Rs 157crs, up 26.4% YoY. EBITDA margin was approximately 36.7% and PAT margin was approximately 22.3%. FY26 revenue reached approximately Rs 590crs versus Rs 453crs in FY25, with EBITDA margin at 36.9% and PAT margin at 22.4%, reflecting strong operating discipline during an investment phase." },
+      { heading: "Order Book and Pipeline", text: "Management indicated a rolling order book of approximately Rs 6,500crs, with delivery schedules over roughly five to six years. This is the central investment argument: Azad has multi-year visibility from global OEM programmes, while execution capacity is still ramping. The company delivered around Rs 600crs in FY26 while keeping the rolling book at roughly the same level, implying continued replenishment." },
+      { heading: "Segment Performance and Strategic Direction", text: "FY26 was described as a year of consolidation and infrastructure investment, with around 70% to 80% of build-out complete and four dedicated facilities operational. The Mitsubishi Heavy Industries eight-year single-source contract is strategically important because it validates capability in complex hot-section components and supports long-cycle customer stickiness." },
+      { heading: "FY27 Guidance", text: "Management reiterated approximately 25% plus top-line growth, with potential upside as new plants stabilise. The second-half skew is important: investors should expect quarterly ramp-up to depend on capacity qualification, customer approvals and utilisation of the newly commissioned facilities." },
+      { heading: "Key Positives from the Call", text: "Strong revenue growth, high EBITDA/PAT margins, long-duration order visibility, dedicated facilities, global OEM validation and a visible path to scale. The order book provides a stronger planning base than most precision manufacturing peers." },
+      { heading: "Key Concerns and Watch Points", text: "Execution risk is tied to capacity ramp-up, customer qualification cycles and working capital. Customer concentration remains a watch point, and margins must be monitored as new facilities absorb fixed costs before reaching optimal utilisation." }
     ],
     q4: [
       ["Revenue", "Rs 157crs", "Not disclosed in current source", "+26.4% YoY"],
@@ -239,24 +239,28 @@ const callSummaries = {
     title: "Aequs earnings call summary",
     callDate: "29 January 2026",
     period: "Q3 FY26 and 9M FY26",
+    quarterTitle: "Q3 FY26 Metrics",
+    fullYearTitle: "9M FY26 Metrics",
+    quarterHeaders: ["Metric", "Q3 FY26", "Q3 FY25", "Change"],
+    fullYearHeaders: ["Metric", "9M FY26", "9M FY25", "Change"],
     source: "Company-hosted investor meet transcript dated 29 January 2026",
     sections: [
-      { heading: "Financial Performance", text: "The Q3 FY26 investor meet transcript notes strong 51% YoY quarterly revenue growth, described as the highest quarterly revenue for Aequs Limited. The commentary also refers to a 15% margin, revenue growth of 29% and EBITDA growth of 75% in the relevant period." },
-      { heading: "Order Book and Pipeline", text: "Detailed order book values were not captured in the current source snippets. The business is tied to aerospace precision components and contract manufacturing, where customer programme ramps and capacity utilisation drive revenue conversion." },
-      { heading: "Segment Performance and Strategic Direction", text: "The key strategic theme is scaling aerospace manufacturing with improved utilisation and operating leverage. The transcript highlights revenue growth and EBITDA growth as signs of improving scale." },
-      { heading: "FY27 Guidance", text: "Specific FY27 revenue guidance was not captured in the current source snippets. Investors should track capacity utilisation, margin improvement and customer concentration." },
-      { heading: "Key Positives from the Call", text: "Highest quarterly revenue, strong YoY revenue growth, EBITDA growth and aerospace manufacturing exposure." },
-      { heading: "Key Concerns and Watch Points", text: "Profitability still needs monitoring, and the scale-up profile may remain sensitive to utilisation, customer schedules and working capital." }
+      { heading: "Financial Performance", text: "Aequs reported Q3 FY26 revenue from operations of Rs 3,262mn, up 51% YoY and described as the highest quarterly revenue for the company. Q3 EBITDA was Rs 381mn, up 353% YoY, with EBITDA margin at 12%. PAT remained negative at Rs 426mn, but adjusted PAT loss was lower at Rs 259mn after excluding labour-code and IPO-related one-offs." },
+      { heading: "Order Book and Pipeline", text: "The transcript did not provide a conventional order-book figure. For Aequs, the relevant pipeline indicator is programme ramp-up across aerospace and consumer verticals, plus utilisation across the integrated manufacturing ecosystem. Revenue conversion depends on customer schedules, qualification cycles and capacity absorption rather than a disclosed fixed order book." },
+      { heading: "Segment Performance and Strategic Direction", text: "Aerospace contributed Rs 2,685mn in Q3, around 82% of consolidated revenue, with aerospace revenue up 38% YoY and segment EBITDA up 163% YoY. The consumer vertical grew rapidly from a small base, but losses widened as the segment remains in scale-up. Management's strategic message is that the integrated ecosystem from forging and special processing to machining and assembly supports differentiation." },
+      { heading: "FY27 Guidance", text: "Specific FY27 revenue guidance was not captured in the current source snippets. The key monitor is whether the 9M FY26 operating leverage continues into the next year: revenue including JVs grew 29%, EBITDA grew 75% and margin reached 15% on the 9M base." },
+      { heading: "Key Positives from the Call", text: "Highest quarterly revenue, strong 51% YoY Q3 revenue growth, 353% YoY Q3 EBITDA growth, aerospace segment strength and improving 9M EBITDA margin. The aerospace ecosystem continues to show operating leverage as scale rises." },
+      { heading: "Key Concerns and Watch Points", text: "PAT remains negative, even after adjusting for one-offs. Consumer vertical losses, utilisation, customer concentration, working capital and the pace of margin improvement are the main watch points." }
     ],
     q4: [
-      ["Revenue", "Not applicable", "Not applicable", "Latest source is Q3 FY26"],
-      ["EBITDA", "Not applicable", "Not applicable", "Latest source is Q3 FY26"],
-      ["PAT", "Not applicable", "Not applicable", "Latest source is Q3 FY26"]
+      ["Revenue", "Rs 3,262mn", "Not disclosed in current source", "+51% YoY"],
+      ["EBITDA", "Rs 381mn", "Not disclosed in current source", "+353% YoY"],
+      ["PAT", "Rs -426mn", "Not disclosed in current source", "Adjusted PAT loss Rs -259mn"]
     ],
     fy: [
-      ["Revenue growth", "29%", "Not disclosed in current source", "Period per transcript snippet"],
-      ["EBITDA growth", "75%", "Not disclosed in current source", "Period per transcript snippet"],
-      ["Margin", "15%", "Not disclosed in current source", "Period per transcript snippet"]
+      ["Revenue", "Rs 8,633mn", "Not disclosed in current source", "+28% YoY"],
+      ["EBITDA", "Rs 1,222mn", "Rs 662mn", "+85% YoY"],
+      ["PAT loss", "Rs -593mn", "Rs -1,115mn", "47% improvement YoY"]
     ]
   },
   paras: {
@@ -265,12 +269,12 @@ const callSummaries = {
     period: "Q4 FY26",
     source: "Q4 FY26 results/news and investor presentation material",
     sections: [
-      { heading: "Financial Performance", text: "Paras Defence reported Q4 FY26 revenue from operations of approximately Rs 171.31crs, up 58.3% YoY from Rs 108.23crs. Net profit was approximately Rs 38.88crs, up around 75% YoY. EBITDA was reported to have increased by approximately 51%." },
-      { heading: "Order Book and Pipeline", text: "Detailed earnings-call order book values were not confirmed in the current source snippets. The business remains exposed to optics, defence electronics and space engineering." },
-      { heading: "Segment Performance and Strategic Direction", text: "The results reflect accelerating defence indigenisation demand and stronger execution. Investor presentation material indicates continuing emphasis on defence and space engineering capabilities." },
-      { heading: "FY27 Guidance", text: "Specific FY27 guidance was not captured in the current source snippets. Investors should track order intake, execution timelines and margin conversion." },
-      { heading: "Key Positives from the Call", text: "Strong Q4 revenue growth, PAT growth, improving EBITDA, and exposure to optics/space/defence electronics." },
-      { heading: "Key Concerns and Watch Points", text: "Latest transcript link still needs direct confirmation. Quarterly revenue may remain lumpy, and margins should be monitored as order mix evolves." }
+      { heading: "Financial Performance", text: "Paras Defence reported Q4 FY26 revenue from operations of approximately Rs 171.31crs, up 58.3% YoY from Rs 108.23crs. Consolidated EBITDA was approximately Rs 42.6crs and PAT was approximately Rs 38.88crs. FY26 revenue was approximately Rs 478crs, up around 31% YoY, and FY26 net profit was approximately Rs 88crs, up around 40% YoY." },
+      { heading: "Order Book and Pipeline", text: "Investor presentation/news sources indicate a consolidated order book close to Rs 986crs entering FY27. This is about two times FY26 revenue and gives visible execution cover, subject to delivery schedules. The key question is how quickly the company converts optics, defence engineering and space-related orders into revenue without diluting margins." },
+      { heading: "Segment Performance and Strategic Direction", text: "The results reflect stronger execution in optics, defence electronics and space engineering. The strategic direction is aligned with defence indigenisation, anti-drone/optics opportunities and space-sector demand. Presentation material points to improving profitability, with FY26 EBITDA margin around 26% and PAT margin around 19%." },
+      { heading: "FY27 Guidance", text: "Specific FY27 guidance was not captured in the source snippets. The investor framework should focus on order inflow, Rs 986crs order book conversion, margin sustainability and whether Q4's strong execution pace can continue." },
+      { heading: "Key Positives from the Call", text: "Strong Q4 revenue growth, strong PAT growth, Rs 42.6crs Q4 EBITDA, FY26 revenue growth, order book visibility and exposure to optics/space/defence electronics. The Q4 print shows improved execution and operating leverage." },
+      { heading: "Key Concerns and Watch Points", text: "Latest transcript link still needs direct confirmation, so the summary is based on results and presentation material. Quarterly revenue may remain lumpy, and investors should monitor order mix, receivables, execution timelines and whether FY26 margin levels sustain." }
     ],
     q4: [
       ["Revenue", "Rs 171.31crs", "Rs 108.23crs", "+58.3% YoY"],
@@ -278,23 +282,27 @@ const callSummaries = {
       ["EBITDA", "Not disclosed in current source", "Not disclosed in current source", "+51% YoY"]
     ],
     fy: [
-      ["Revenue", "Not disclosed in current source", "Not disclosed in current source", "FY26"],
-      ["PAT", "Not disclosed in current source", "Not disclosed in current source", "FY26"],
-      ["Order book", "Not disclosed in current source", "N/A", "FY26"]
+      ["Revenue", "Approx. Rs 478crs", "Approx. Rs 365crs", "+31% YoY"],
+      ["PAT", "Approx. Rs 88crs", "Approx. Rs 63crs", "+40% YoY"],
+      ["Order book", "Approx. Rs 986crs", "N/A", "Entering FY27"]
     ]
   },
   astra: {
     title: "Astra Microwave earnings call summary",
     callDate: "13 February 2026",
     period: "Q3 FY26",
+    quarterTitle: "Q3 FY26 Metrics",
+    fullYearTitle: "FY26 / FY27 Outlook Metrics",
+    quarterHeaders: ["Metric", "Q3 FY26", "Prior period", "Change / note"],
+    fullYearHeaders: ["Metric", "Current outlook", "Prior period", "Change / note"],
     source: "Astra Microwave transcript listing / Q3 FY26 transcript highlights",
     sections: [
-      { heading: "Financial Performance", text: "Astra Microwave's Q3 FY26 transcript highlights record performance, strong margins and a robust order book exceeding Rs 2,200crs. Q1 FY26 revenue was previously reported at Rs 197crs, up 28.1% YoY, and Q2 FY26 commentary noted H1 revenue up 7.2% YoY and PAT up 13.5%." },
-      { heading: "Order Book and Pipeline", text: "Order book exceeded Rs 2,200crs in Q3 FY26. Management highlighted major wins in defence and space and expected order additions of approximately Rs 1,500crs plus for FY27." },
-      { heading: "Segment Performance and Strategic Direction", text: "The company remains focused on RF, microwave and defence electronics across defence, space and meteorology. Management expects to double turnover over three to four years." },
-      { heading: "FY27 Guidance", text: "Transcript highlights indicate around 15% revenue growth expected for FY27 and order book additions of around Rs 1,500crs plus." },
-      { heading: "Key Positives from the Call", text: "Record Q3 performance, strong margins, order book over Rs 2,200crs, major defence/space wins and multi-year growth ambition." },
-      { heading: "Key Concerns and Watch Points", text: "Execution of large order book, quarterly mix, defence order timing and conversion of long-term $1bn aspiration into near-term revenue are key watch points." }
+      { heading: "Financial Performance", text: "Astra Microwave's Q3 FY26 transcript highlights record performance with strong margins and a robust order book above Rs 2,200crs. Earlier FY26 commentary noted Q1 revenue of Rs 197crs, up 28.1% YoY, and H1 revenue up 7.2% YoY with H1 PAT up 13.5%. The result profile shows steady execution in a programme-led defence electronics business." },
+      { heading: "Order Book and Pipeline", text: "Order book exceeded Rs 2,200crs in Q3 FY26. Management highlighted major wins in defence and space and expected order additions of approximately Rs 1,500crs plus for FY27. This order visibility is the core support for the company's medium-term growth ambition." },
+      { heading: "Segment Performance and Strategic Direction", text: "The company remains focused on RF, microwave and defence electronics across defence, space and meteorology. Management expects to double turnover over three to four years, implying sustained order inflow and execution capacity. The long-term aspiration remains meaningfully larger than the current revenue base, but conversion will be milestone-led." },
+      { heading: "FY27 Guidance", text: "Transcript highlights indicate around 15% revenue growth expected for FY27 and order-book additions of around Rs 1,500crs plus. Management also continues to refer to a multi-year 2x turnover ambition, which makes order inflow, margin consistency and working-capital discipline the key FY27 checks." },
+      { heading: "Key Positives from the Call", text: "Record Q3 performance, strong margins, order book over Rs 2,200crs, major defence/space wins, Rs 1,500crs plus expected FY27 additions and a credible multi-year growth ambition." },
+      { heading: "Key Concerns and Watch Points", text: "Execution of the large order book, quarterly mix, defence order timing, receivables and conversion of the longer-term growth aspiration into near-term revenue are the key watch points. The business is attractive but milestone timing can make quarterly numbers uneven." }
     ],
     q4: [
       ["Revenue", "Not applicable", "Not applicable", "Latest source is Q3 FY26"],
@@ -628,7 +636,7 @@ function renderInsights(item) {
     title: row.title,
     date: formatDate(row.date),
     category: row.publisher || "Yahoo Finance news",
-    notes: summarizeText(row.summary || row.title),
+    notes: newsDetail(row),
     attachment: row.link
   }));
   const links = [
@@ -660,7 +668,7 @@ function liveNewsRows(item, limit = 6) {
   const yahooRows = (item.news || []).map((row) => ({
     date: formatDate(row.date),
     title: row.title || "Yahoo Finance news",
-    detail: summarizeText(row.summary || row.title),
+    detail: newsDetail(row),
     source: row.publisher || row.source || "Yahoo Finance",
     link: row.link
   }));
@@ -685,6 +693,16 @@ function summarizeText(value, max = 210) {
   const text = String(value || "").replace(/&nbsp;/g, " ").replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
   if (!text) return "Latest item available from the live feed; open the source for the full article or filing.";
   return text.length > max ? `${text.slice(0, max - 1).trim()}...` : text;
+}
+
+function newsDetail(row) {
+  const title = String(row.title || "").replace(/\s+/g, " ").trim().toLowerCase();
+  const summary = String(row.summary || "").replace(/\s+/g, " ").trim();
+  const normalized = summary.toLowerCase();
+  if (!summary || normalized === title || normalized.startsWith(title)) {
+    return "Open the source for the full article; this live feed returned a headline-only summary.";
+  }
+  return summarizeText(summary);
 }
 
 function formatDate(value) {
@@ -815,13 +833,13 @@ function renderCallSummary() {
     <strong>Latest earnings-call transcript sources</strong>
     ${table(["Company", "Availability", "Date / period", "Source"], transcriptRows)}
   </article>
-  <article class="brief-card">
+  <article class="brief-card call-summary-card">
     ${note}
     <small>${escapeHtml(summary.period)} &middot; Call date/period: ${escapeHtml(summary.callDate)} &middot; Source: ${escapeHtml(summary.source)}</small>
     <strong>${escapeHtml(summary.title)}</strong>
     ${summary.sections.map((section) => `<div class="call-section"><h3>${escapeHtml(section.heading)}</h3><p>${escapeHtml(section.text)}</p></div>`).join("")}
-    <div class="call-section"><h3>Q4 FY26 Metrics</h3>${table(["Metric", "Q4 FY26", "Q4 FY25", "Change"], summary.q4)}</div>
-    <div class="call-section"><h3>FY26 Metrics</h3>${table(["Metric", "FY26", "FY25", "Change"], summary.fy)}</div>
+    <div class="call-section"><h3>${escapeHtml(summary.quarterTitle || "Q4 FY26 Metrics")}</h3>${table(summary.quarterHeaders || ["Metric", "Q4 FY26", "Q4 FY25", "Change"], summary.q4)}</div>
+    <div class="call-section"><h3>${escapeHtml(summary.fullYearTitle || "FY26 Metrics")}</h3>${table(summary.fullYearHeaders || ["Metric", "FY26", "FY25", "Change"], summary.fy)}</div>
   </article>`;
 }
 
@@ -857,6 +875,8 @@ function renderAiBrief() {
     <button data-ai-prompt="Which company has the highest ROCE?">Which company has the highest ROCE?</button>
     <button data-ai-prompt="Compare all companies by PAT margin">Compare all companies by PAT margin</button>
     <button data-ai-prompt="Best P/E relative to growth?">Best P/E relative to growth?</button>
+    <button data-ai-prompt="Summarise latest news for selected company">Selected news</button>
+    <button data-ai-prompt="Summarise earnings call for selected company">Selected call summary</button>
     <button data-ai-prompt="Summarise latest news for all companies">Latest news summary</button>
     <button data-ai-prompt="IC verdict summary - all companies">IC verdict summary - all companies</button>
   </div>
@@ -896,62 +916,84 @@ async function answerAi(prompt) {
   const normalized = prompt.toLowerCase();
   const answer = document.querySelector("#aiAnswer");
   if (!answer) return;
+  if (!normalized.trim()) {
+    renderAiResponse("Ask DefStrat AI", [{ heading: "Ready", body: "Ask for a company, metric, comparison, latest price, news, BSE filing, or earnings-call summary." }]);
+    return;
+  }
   answer.innerHTML = `<small>Searching live sources</small><p>Refreshing Yahoo Finance quote/chart data, live internet news and BSE filing context before answering...</p>`;
   await refreshYahooContext(normalized);
   const rows = getAnalystRows();
   const metric = inferMetric(normalized);
-  const allRequested = normalized.includes("all compan") || normalized.includes("compare") || normalized.includes("peer") || normalized.includes("sector");
-  const mentioned = allRequested ? rows : mentionedRows(rows, normalized);
+  const allRequested = wantsAllCompanies(normalized);
+  const mentioned = resolveTargetRows(rows, normalized, allRequested);
   const newsRequested = normalized.includes("news") || normalized.includes("article") || normalized.includes("internet") || normalized.includes("latest update");
-  const priceLead = (normalized.includes("price") || normalized.includes("quote") || normalized.includes("yahoo") || normalized.includes("latest"))
-    ? mentioned.map((row) => `${row.name} latest Yahoo-backed quote: ${money(row.price)} (${pct(row.dayMove)} today, ${pct(row.return1y)} 1Y).`).join(" ")
-    : "";
+  const callRequested = normalized.includes("earnings call") || normalized.includes("transcript") || normalized.includes("call summary");
+  const priceRequested = normalized.includes("price") || normalized.includes("quote") || (normalized.includes("latest") && !newsRequested && !callRequested);
   let title = "Analyst response";
-  let text = "";
+  let lines = [];
   if (newsRequested) {
-    title = "Latest Yahoo/BSE news summary";
-    text = mentioned.map((row) => {
+    title = allRequested ? "Latest News Summary" : `Latest News Summary - ${mentioned[0]?.name || "Selected Company"}`;
+    lines = mentioned.map((row) => {
       const item = dashboard.find((entry) => entry.meta.id === row.id);
-      const news = item ? liveNewsRows(item, 3) : [];
-      const bullets = news.length ? news.map((entry) => `${entry.title} (${entry.source}, ${entry.date}): ${entry.detail}`).join("  ") : "No live Yahoo/BSE article returned in the latest refresh.";
-      return `${row.name}: ${bullets}`;
-    }).join("  ");
+      const news = item ? liveNewsRows(item, allRequested ? 2 : 4) : [];
+      const body = news.length
+        ? news.map((entry) => `${entry.date} | ${entry.source}: ${entry.title}. ${entry.detail}`).join("\n")
+        : "No relevant live article or BSE filing returned in the latest refresh.";
+      return { heading: row.name, body };
+    });
+  } else if (callRequested) {
+    title = allRequested ? "Earnings Call Summary Check" : `Earnings Call Summary - ${mentioned[0]?.name || "Selected Company"}`;
+    lines = mentioned.map((row) => {
+      const summary = callSummaries[row.id];
+      if (!summary) return { heading: row.name, body: "No earnings-call summary has been added for this company yet." };
+      const financial = summary.sections.find((section) => section.heading === "Financial Performance")?.text || "";
+      const guidance = summary.sections.find((section) => section.heading === "FY27 Guidance")?.text || "";
+      return { heading: row.name, body: `${summary.period}; call date/period: ${summary.callDate}. ${financial} ${guidance}` };
+    });
   } else if (normalized.includes("highest") || normalized.includes("best") || normalized.includes("leader")) {
     const best = rankRows(rows, metric, "desc")[0];
     title = `Highest ${metric.label}`;
-    text = best ? `${best.name} ranks highest on ${metric.label} at ${metric.format(best[metric.key])}. ${best.oneLine}` : `I do not have enough data to rank ${metric.label}.`;
+    lines = best ? [{ heading: best.name, body: `${best.name} ranks highest on ${metric.label} at ${metric.format(best[metric.key])}. ${best.oneLine}` }] : [{ heading: "Not enough data", body: `I do not have enough data to rank ${metric.label}.` }];
   } else if (normalized.includes("lowest") || normalized.includes("cheap") || normalized.includes("value")) {
     const best = rankRows(rows, metric, "asc")[0];
     title = `Lowest ${metric.label}`;
-    text = best ? `${best.name} screens lowest on ${metric.label} at ${metric.format(best[metric.key])}. Check quality, order book and working capital before calling it cheap.` : `I do not have enough data to rank ${metric.label}.`;
+    lines = best ? [{ heading: best.name, body: `${best.name} screens lowest on ${metric.label} at ${metric.format(best[metric.key])}. Check quality, order book and working capital before calling it cheap.` }] : [{ heading: "Not enough data", body: `I do not have enough data to rank ${metric.label}.` }];
   } else if (normalized.includes("compare") || normalized.includes("all companies")) {
     title = `Peer comparison by ${metric.label}`;
-    text = rankRows(rows, metric, "desc").map((row, index) => `${index + 1}. ${row.name}: ${metric.format(row[metric.key])}`).join("  ");
+    lines = rankRows(rows, metric, "desc").map((row, index) => ({ heading: `${index + 1}. ${row.name}`, body: `${metric.label}: ${metric.format(row[metric.key])}. ${row.oneLine}` }));
   } else if (normalized.includes("verdict") || normalized.includes("summary")) {
     title = "IC verdict summary";
-    text = rows.map((row) => `${row.name}: ${row.verdict} - ${row.oneLine}`).join("  ");
+    lines = (allRequested ? rows : mentioned).map((row) => ({ heading: `${row.name}: ${row.verdict}`, body: row.oneLine }));
   } else if (normalized.includes("selected") || normalized.includes("this company")) {
     const row = rows.find((item) => item.id === selectedId) || rows[0];
     title = row ? `${row.name} briefing` : "Company briefing";
-    text = row ? `${row.name}: live price ${money(row.price)}, 1Y return ${pct(row.return1y)}, ROCE ${pct(row.roce)}, PAT margin ${pct(row.patMargin)}. ${row.oneLine}` : "Select a company first.";
+    lines = row ? [{ heading: row.name, body: `Live price ${money(row.price)}, 1Y return ${pct(row.return1y)}, ROCE ${pct(row.roce)}, PAT margin ${pct(row.patMargin)}. ${row.oneLine}` }] : [{ heading: "No company selected", body: "Select a company first." }];
   } else {
     title = `DefStrat view`;
     const leader = rankRows(rows, metrics.return1y, "desc")[0];
     const quality = rankRows(rows, metrics.roce, "desc")[0];
-    text = `Momentum leader: ${leader?.name || "N/A"} (${leader ? pct(leader.return1y) : "--"} 1Y). Quality leader: ${quality?.name || "N/A"} (${quality ? pct(quality.roce) : "--"} ROCE). Ask for a metric like PAT margin, ROCE, P/E, 1Y return, debt, revenue, or market cap for a precise ranking.`;
+    lines = [
+      { heading: "Momentum leader", body: `${leader?.name || "N/A"} (${leader ? pct(leader.return1y) : "--"} 1Y).` },
+      { heading: "Quality leader", body: `${quality?.name || "N/A"} (${quality ? pct(quality.roce) : "--"} ROCE).` },
+      { heading: "Try a precise question", body: "Ask for PAT margin, ROCE, P/E, 1Y return, debt, revenue, market cap, latest news, or earnings call summary." }
+    ];
   }
-  if (priceLead) text = `${priceLead} ${text}`;
+  if (priceRequested) {
+    lines = [
+      ...mentioned.map((row) => ({ heading: `${row.name} live quote`, body: `${money(row.price)} (${pct(row.dayMove)} today, ${pct(row.return1y)} 1Y), refreshed from Yahoo-backed chart context.` })),
+      ...lines
+    ];
+  }
   const refreshed = dashboard.find((item) => item.meta.id === (mentioned[0]?.id || selectedId))?.refreshedAt;
   const stamp = refreshed ? `Latest refresh: ${formatDate(refreshed)}` : `Latest refresh: ${new Date().toLocaleString()}`;
-  answer.innerHTML = `<small>${escapeHtml(title)} &middot; ${escapeHtml(stamp)}</small><p>${escapeHtml(text)}</p>`;
+  renderAiResponse(`${title} - ${stamp}`, lines);
 }
 
 async function refreshYahooContext(text) {
-  const matches = dashboard.filter((item) => {
-    const haystack = `${item.meta.name} ${item.meta.nse} ${extraData[item.meta.id]?.label || ""}`.toLowerCase();
-    return text && haystack.split(/\s+/).some((part) => part.length > 2 && text.includes(part));
-  });
-  const wantsAll = text.includes("all compan") || text.includes("compare") || text.includes("peer") || text.includes("sector") || text.includes("news") || text.includes("article");
+  const rows = getAnalystRows();
+  const targetRows = resolveTargetRows(rows, text, wantsAllCompanies(text));
+  const matches = dashboard.filter((item) => targetRows.some((row) => row.id === item.meta.id));
+  const wantsAll = wantsAllCompanies(text) || text.includes("news") || text.includes("article");
   const selected = dashboard.find((item) => item.meta.id === selectedId);
   const targets = wantsAll ? dashboard : matches.length ? matches : (selected ? [selected] : []);
   await Promise.all(targets.map(async (item) => {
@@ -963,6 +1005,16 @@ async function refreshYahooContext(text) {
       // Keep existing dashboard data when Yahoo is temporarily unavailable.
     }
   }));
+}
+
+function renderAiResponse(title, lines) {
+  const answer = document.querySelector("#aiAnswer");
+  if (!answer) return;
+  const cards = (lines || []).map((line) => `<div class="ai-response-item">
+    <strong>${escapeHtml(line.heading || "Insight")}</strong>
+    <p>${escapeHtml(line.body || "").replace(/\n/g, "<br>")}</p>
+  </div>`).join("");
+  answer.innerHTML = `<small>${escapeHtml(title)}</small><div class="ai-response-list">${cards || `<div class="empty">No response generated.</div>`}</div>`;
 }
 
 function addFromManage() {
@@ -1076,13 +1128,31 @@ function getAnalystRows() {
 }
 
 function mentionedRows(rows, text) {
+  return resolveTargetRows(rows, text, false);
+}
+
+function wantsAllCompanies(text) {
+  return text.includes("all compan") || text.includes("compare") || text.includes("peer") || text.includes("sector") || text.includes("watchlist") || text.includes("portfolio");
+}
+
+function resolveTargetRows(rows, text, forceAll) {
+  if (forceAll) return rows;
   const generic = new Set(["limited", "ltd", "technologies", "technology", "engineering", "defence", "defense", "systems", "micro", "company"]);
-  const matches = rows.filter((row) => {
+  const normalizedText = String(text || "").toLowerCase();
+  const exactMatches = rows.filter((row) => {
+    const meta = dashboard.find((item) => item.meta.id === row.id)?.meta || {};
     const extra = extraData[row.id] || {};
-    const terms = [row.name, extra.label, row.id, dashboard.find((item) => item.meta.id === row.id)?.meta.nse].filter(Boolean)
+    const phrases = [row.name, meta.nse, meta.symbol, row.id, extra.label].filter(Boolean).map((value) => String(value).toLowerCase());
+    return phrases.some((phrase) => phrase.length > 2 && normalizedText.includes(phrase));
+  });
+  if (exactMatches.length) return exactMatches;
+  const matches = rows.filter((row) => {
+    const meta = dashboard.find((item) => item.meta.id === row.id)?.meta || {};
+    const extra = extraData[row.id] || {};
+    const terms = [row.name, extra.label, row.id, meta.nse].filter(Boolean)
       .flatMap((value) => String(value).toLowerCase().split(/[^a-z0-9]+/))
       .filter((term) => term.length > 2 && !generic.has(term));
-    return terms.some((term) => term.length > 2 && text.includes(term));
+    return terms.some((term) => normalizedText.includes(term));
   });
   if (matches.length) return matches;
   const selected = rows.find((row) => row.id === selectedId);

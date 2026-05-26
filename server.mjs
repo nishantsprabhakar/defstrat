@@ -187,18 +187,7 @@ async function yahooNews(meta) {
   const json = await fetchJson(`https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=0&newsCount=8`, {
     headers: { origin: "https://finance.yahoo.com", referer: "https://finance.yahoo.com/" }
   });
-  const generic = new Set(["limited", "ltd", "technologies", "technology", "engineering", "defence", "defense", "india", "micro", "systems"]);
-  const nameTokens = String(meta.name || "").toLowerCase().split(/[^a-z0-9]+/).filter((term) => term.length > 2 && !generic.has(term));
-  const strictTerms = [
-    String(meta.name || "").toLowerCase(),
-    String(meta.nse || "").toLowerCase(),
-    String(meta.symbol || "").replace(/\..+$/, "").toLowerCase()
-  ].filter(Boolean);
-  const relevant = (json.news || []).filter((row) => {
-    const haystack = `${row.title || ""} ${row.summary || ""} ${row.publisher || ""}`.toLowerCase();
-    if (strictTerms.some((term) => term && haystack.includes(term))) return true;
-    return nameTokens.length > 1 && nameTokens.filter((term) => haystack.includes(term)).length >= 2;
-  });
+  const relevant = (json.news || []).filter((row) => isRelevantNews(meta, row));
   return relevant.slice(0, 8).map((row) => ({
     title: row.title || "Yahoo Finance news",
     publisher: row.publisher || "Yahoo Finance",
@@ -221,14 +210,20 @@ async function googleNews(meta) {
     const source = decodeXml(item.match(/<source[^>]*>([\s\S]*?)<\/source>/)?.[1] || "Google News");
     const description = decodeXml(item.match(/<description>([\s\S]*?)<\/description>/)?.[1] || title);
     return {
-      title,
+      title: cleanNewsTitle(title, source),
       publisher: source,
       date: date ? new Date(date).toISOString() : "",
       link,
       summary: description || title,
       source: "Google News"
     };
-  }).filter((row) => row.title);
+  }).filter((row) => row.title && isRelevantNews(meta, row));
+}
+
+function cleanNewsTitle(title, source) {
+  const clean = String(title || "").trim();
+  const suffix = ` - ${source}`;
+  return source && clean.endsWith(suffix) ? clean.slice(0, -suffix.length).trim() : clean;
 }
 
 async function companyNews(meta) {
@@ -244,6 +239,20 @@ async function companyNews(meta) {
     seen.add(key);
     return true;
   }).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0)).slice(0, 10);
+}
+
+function isRelevantNews(meta, row) {
+  const generic = new Set(["limited", "ltd", "technologies", "technology", "engineering", "defence", "defense", "india", "micro", "systems", "products"]);
+  const haystack = `${row.title || ""} ${row.summary || ""} ${row.publisher || ""}`.toLowerCase();
+  const fullName = String(meta.name || "").toLowerCase();
+  const symbol = String(meta.symbol || "").replace(/\..+$/, "").toLowerCase();
+  const ticker = String(meta.nse || "").toLowerCase();
+  if (fullName && haystack.includes(fullName)) return true;
+  if (ticker && haystack.includes(ticker)) return true;
+  if (symbol && haystack.includes(symbol)) return true;
+  const nameTokens = fullName.split(/[^a-z0-9]+/).filter((term) => term.length > 2 && !generic.has(term));
+  if (nameTokens.length === 1) return haystack.includes(nameTokens[0]);
+  return nameTokens.length > 1 && nameTokens.filter((term) => haystack.includes(term)).length >= 2;
 }
 
 function yahooFromChart(symbol, chartResult) {
