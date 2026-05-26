@@ -155,6 +155,9 @@ h1 {
   grid-template-columns: minmax(260px, 560px) 1fr;
   gap: 22px;
   align-items: end;
+  position: relative;
+  z-index: 60;
+  overflow: visible;
 }
 
 label {
@@ -173,6 +176,7 @@ label {
 .search-wrap {
   position: relative;
   min-width: 0;
+  z-index: 70;
 }
 
 input {
@@ -201,7 +205,7 @@ input:focus {
   border: 1px solid var(--line);
   border-radius: 8px;
   overflow-y: auto;
-  z-index: 30;
+  z-index: 200;
   display: none;
   box-shadow: 0 18px 44px rgba(0,0,0,.32);
 }
@@ -289,6 +293,10 @@ input:focus {
 }
 
 .tab-panel {
+  display: none;
+}
+
+.tab-panel:not(.is-active) {
   display: none;
 }
 

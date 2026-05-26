@@ -68,6 +68,39 @@ async function fetchJson(url, options = {}) {
   return data;
 }
 
+async function fetchText(url, options = {}) {
+  const key = `text:${url}`;
+  const cached = cache.get(key);
+  if (cached && Date.now() - cached.time < TTL) return cached.data;
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      "accept": "application/rss+xml,text/xml,text/html,text/plain,*/*",
+      "user-agent": "Mozilla/5.0 DefenceDashboard/1.0",
+      ...(options.headers || {})
+    }
+  });
+  if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+  const data = await response.text();
+  cache.set(key, { time: Date.now(), data });
+  return data;
+}
+
+function decodeXml(value = "") {
+  return String(value)
+    .replace(/<!\[CDATA\[(.*?)\]\]>/gs, "$1")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, "\"")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&#39;/g, "'")
+    .replace(/&#(\d+);/g, (_, code) => String.fromCharCode(Number(code)))
+    .replace(/<[^>]*>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 async function yahooCompany(symbol) {
   const modules = [
     "price",
@@ -149,6 +182,70 @@ async function yahooChart(symbol) {
   return { meta, points };
 }
 
+async function yahooNews(meta) {
+  const query = `"${meta.name}" ${meta.nse || meta.symbol} stock`;
+  const json = await fetchJson(`https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=0&newsCount=8`, {
+    headers: { origin: "https://finance.yahoo.com", referer: "https://finance.yahoo.com/" }
+  });
+  const generic = new Set(["limited", "ltd", "technologies", "technology", "engineering", "defence", "defense", "india", "micro", "systems"]);
+  const nameTokens = String(meta.name || "").toLowerCase().split(/[^a-z0-9]+/).filter((term) => term.length > 2 && !generic.has(term));
+  const strictTerms = [
+    String(meta.name || "").toLowerCase(),
+    String(meta.nse || "").toLowerCase(),
+    String(meta.symbol || "").replace(/\..+$/, "").toLowerCase()
+  ].filter(Boolean);
+  const relevant = (json.news || []).filter((row) => {
+    const haystack = `${row.title || ""} ${row.summary || ""} ${row.publisher || ""}`.toLowerCase();
+    if (strictTerms.some((term) => term && haystack.includes(term))) return true;
+    return nameTokens.length > 1 && nameTokens.filter((term) => haystack.includes(term)).length >= 2;
+  });
+  return relevant.slice(0, 8).map((row) => ({
+    title: row.title || "Yahoo Finance news",
+    publisher: row.publisher || "Yahoo Finance",
+    date: row.providerPublishTime ? new Date(row.providerPublishTime * 1000).toISOString() : "",
+    link: row.link || row.url || null,
+    summary: row.summary || row.title || "",
+    source: "Yahoo Finance news"
+  }));
+}
+
+async function googleNews(meta) {
+  const query = `"${meta.name}" OR "${meta.nse}" stock`;
+  const rss = await fetchText(`https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-IN&gl=IN&ceid=IN:en`);
+  const items = [...rss.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 8);
+  return items.map((match) => {
+    const item = match[1];
+    const title = decodeXml(item.match(/<title>([\s\S]*?)<\/title>/)?.[1] || "");
+    const link = decodeXml(item.match(/<link>([\s\S]*?)<\/link>/)?.[1] || "");
+    const date = decodeXml(item.match(/<pubDate>([\s\S]*?)<\/pubDate>/)?.[1] || "");
+    const source = decodeXml(item.match(/<source[^>]*>([\s\S]*?)<\/source>/)?.[1] || "Google News");
+    const description = decodeXml(item.match(/<description>([\s\S]*?)<\/description>/)?.[1] || title);
+    return {
+      title,
+      publisher: source,
+      date: date ? new Date(date).toISOString() : "",
+      link,
+      summary: description || title,
+      source: "Google News"
+    };
+  }).filter((row) => row.title);
+}
+
+async function companyNews(meta) {
+  const [yahoo, google] = await Promise.allSettled([yahooNews(meta), googleNews(meta)]);
+  const rows = [
+    ...(yahoo.status === "fulfilled" ? yahoo.value : []),
+    ...(google.status === "fulfilled" ? google.value : [])
+  ];
+  const seen = new Set();
+  return rows.filter((row) => {
+    const key = String(row.title || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0)).slice(0, 10);
+}
+
 function yahooFromChart(symbol, chartResult) {
   const meta = chartResult?.meta || {};
   const points = chartResult?.points || [];
@@ -227,10 +324,11 @@ async function bseAnnouncements(scrip) {
 }
 
 async function companyPayload(meta) {
-  const [chart, richYahoo, bse] = await Promise.allSettled([
+  const [chart, richYahoo, bse, news] = await Promise.allSettled([
     yahooChart(meta.symbol),
     yahooCompany(meta.symbol),
-    bseAnnouncements(meta.bse)
+    bseAnnouncements(meta.bse),
+    companyNews(meta)
   ]);
   const chartValue = chart.status === "fulfilled" ? chart.value : { meta: {}, points: [] };
   const yahooValue = richYahoo.status === "fulfilled" ? richYahoo.value : yahooFromChart(meta.symbol, chartValue);
@@ -239,6 +337,7 @@ async function companyPayload(meta) {
     yahoo: yahooValue,
     chart: chartValue.points,
     bse: bse.status === "fulfilled" ? bse.value : [],
+    news: news.status === "fulfilled" ? news.value : [],
     refreshedAt: new Date().toISOString()
   };
 }
@@ -265,6 +364,18 @@ async function routeApi(req, res, url) {
       headers: { origin: "https://finance.yahoo.com", referer: "https://finance.yahoo.com/" }
     });
     return send(res, 200, { results: (json.quotes || []).filter((x) => x.symbol).slice(0, 8) });
+  }
+  if (url.pathname === "/api/news") {
+    const id = url.searchParams.get("id") || "";
+    const meta = companies.find((c) => c.id === id || c.symbol === id || c.nse === id.toUpperCase());
+    if (!meta) return send(res, 404, { error: "Unknown company" });
+    const [news, bse] = await Promise.allSettled([companyNews(meta), bseAnnouncements(meta.bse)]);
+    return send(res, 200, {
+      meta,
+      news: news.status === "fulfilled" ? news.value : [],
+      bse: bse.status === "fulfilled" ? bse.value : [],
+      refreshedAt: new Date().toISOString()
+    });
   }
   return send(res, 404, { error: "Unknown API endpoint" });
 }

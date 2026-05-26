@@ -624,6 +624,13 @@ function renderInsights(item) {
     notes: row.notes,
     attachment: row.attachment
   }));
+  const news = (item.news || []).map((row) => ({
+    title: row.title,
+    date: formatDate(row.date),
+    category: row.publisher || "Yahoo Finance news",
+    notes: summarizeText(row.summary || row.title),
+    attachment: row.link
+  }));
   const links = [
     {
       title: "Open BSE corporate filings",
@@ -640,13 +647,51 @@ function renderInsights(item) {
       notes: "Yahoo quote, price chart, statistics and financial statement modules."
     }
   ];
-  const all = [...earnings, ...filings, ...links].slice(0, 18);
+  const all = [...news, ...earnings, ...filings, ...links].slice(0, 20);
   els.insightList.innerHTML = all.length ? all.map((row) => `<div class="insight">
     <small>${escapeHtml(row.category || "Note")} &middot; ${escapeHtml(row.date || "")}</small>
     <strong>${escapeHtml(row.title || "Untitled")}</strong>
     <p>${escapeHtml((row.notes || "").toString()).slice(0, 220)}</p>
     ${row.attachment ? `<a href="${row.attachment}" target="_blank" rel="noreferrer">Open source</a>` : ""}
   </div>`).join("") : `<div class="empty">No BSE filings or Yahoo earnings trend returned yet.</div>`;
+}
+
+function liveNewsRows(item, limit = 6) {
+  const yahooRows = (item.news || []).map((row) => ({
+    date: formatDate(row.date),
+    title: row.title || "Yahoo Finance news",
+    detail: summarizeText(row.summary || row.title),
+    source: row.publisher || row.source || "Yahoo Finance",
+    link: row.link
+  }));
+  const bseRows = (item.bse || []).slice(0, 5).map((row) => ({
+    date: formatDate(row.date),
+    title: row.title || "BSE announcement",
+    detail: summarizeText(row.notes || row.category || row.title),
+    source: row.category || "BSE",
+    link: row.attachment
+  }));
+  const staticRows = (companyUpdates[item.meta.id] || []).map((row) => ({
+    date: formatDate(row.date),
+    title: row.title,
+    detail: row.detail,
+    source: "DefStrat note",
+    link: null
+  }));
+  return [...yahooRows, ...bseRows, ...staticRows].slice(0, limit);
+}
+
+function summarizeText(value, max = 210) {
+  const text = String(value || "").replace(/&nbsp;/g, " ").replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
+  if (!text) return "Latest item available from the live feed; open the source for the full article or filing.";
+  return text.length > max ? `${text.slice(0, max - 1).trim()}...` : text;
+}
+
+function formatDate(value) {
+  if (!value) return "Live";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value).slice(0, 24);
+  return date.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
 }
 
 function oneYearReturn(item) {
@@ -672,7 +717,7 @@ function renderCompanyInfo() {
   if (!selected) return;
   const extra = extraData[selected.meta.id] || {};
   const q = selected.yahoo?.quote || {};
-  const updates = companyUpdates[selected.meta.id] || [];
+  const updates = liveNewsRows(selected, 8);
   els.companyInfoPanel.innerHTML = `<div class="info-grid">
     <article class="brief-card">
       <small>${escapeHtml(selected.meta.nse || selected.meta.symbol)} &middot; BSE ${escapeHtml(selected.meta.bse || "custom")}</small>
@@ -688,8 +733,8 @@ function renderCompanyInfo() {
     </article>
     <article class="brief-card">
       <small>Recent updates and news</small>
-      <strong>Key dated items</strong>
-      <div class="update-list">${updates.map((row) => `<div class="update-item"><small>${escapeHtml(row.date)}</small><strong>${escapeHtml(row.title)}</strong><p>${escapeHtml(row.detail)}</p></div>`).join("") || `<div class="empty">No dated updates added yet.</div>`}</div>
+      <strong>Live news and BSE summary</strong>
+      <div class="update-list">${updates.map((row) => `<div class="update-item"><small>${escapeHtml(row.source)} &middot; ${escapeHtml(row.date)}</small><strong>${escapeHtml(row.title)}</strong><p>${escapeHtml(row.detail)}</p>${row.link ? `<a href="${row.link}" target="_blank" rel="noreferrer">Open source</a>` : ""}</div>`).join("") || `<div class="empty">No live Yahoo/BSE news returned yet.</div>`}</div>
     </article>
   </div>`;
 }
@@ -697,6 +742,10 @@ function renderCompanyInfo() {
 function renderHistorical() {
   if (!els.historicalPanel) return;
   const selected = dashboard.find((item) => item.meta.id === selectedId) || dashboard[0];
+  if (!selected) {
+    els.historicalPanel.innerHTML = `<div class="empty">Waiting for live company data...</div>`;
+    return;
+  }
   const selectedExtra = extraData[selected?.meta.id] || {};
   const rows = dashboard.map((item) => {
     const extra = extraData[item.meta.id] || {};
@@ -808,6 +857,7 @@ function renderAiBrief() {
     <button data-ai-prompt="Which company has the highest ROCE?">Which company has the highest ROCE?</button>
     <button data-ai-prompt="Compare all companies by PAT margin">Compare all companies by PAT margin</button>
     <button data-ai-prompt="Best P/E relative to growth?">Best P/E relative to growth?</button>
+    <button data-ai-prompt="Summarise latest news for all companies">Latest news summary</button>
     <button data-ai-prompt="IC verdict summary - all companies">IC verdict summary - all companies</button>
   </div>
   <div class="brief-grid">
@@ -815,8 +865,8 @@ function renderAiBrief() {
     <article class="brief-card"><small>Momentum leader</small><strong>${leader ? escapeHtml(leader.meta.name) : "Awaiting data"}</strong><p>${leader ? `The current 1Y return is ${pct(oneYearReturn(leader))}, based on Yahoo chart history.` : "Live chart history has not returned enough data yet."}</p></article>
     <article class="brief-card"><small>Selected company</small><strong>${escapeHtml(selected?.meta.name || "No company")}</strong><p>${escapeHtml(selectedExtra.oneLine || selected?.meta.segment || "Select a company to view the briefing.")}</p></article>
   </div>
-  <div class="ai-box"><input id="aiPrompt" placeholder="Ask about financials, valuations, earnings, or comparisons"><button id="aiAskBtn">Ask DefStrat AI</button></div>
-  <article class="brief-card" id="aiAnswer"><small>Analyst response</small><p>Choose a prompt or ask a question. This local version generates a deterministic IC-style briefing from the dashboard data.</p></article>`;
+  <div class="ai-box"><input id="aiPrompt" placeholder="Ask about latest prices, Yahoo news, BSE filings, valuations or comparisons"><button id="aiAskBtn">Ask DefStrat AI</button></div>
+  <article class="brief-card" id="aiAnswer"><small>Analyst response</small><p>Choose a prompt or ask a question. DefStrat refreshes live Yahoo Finance, BSE and current news context before answering.</p></article>`;
   document.querySelectorAll("[data-ai-prompt]").forEach((button) => button.addEventListener("click", () => answerAi(button.dataset.aiPrompt)));
   document.querySelector("#aiAskBtn")?.addEventListener("click", () => answerAi(document.querySelector("#aiPrompt")?.value || ""));
 }
@@ -826,7 +876,7 @@ function renderManage() {
   els.managePanel.innerHTML = `<div class="brief-grid">
     <article class="brief-card"><small>AI analyst settings</small><strong>Local deterministic mode</strong><p>Groq/Llama-style prompt chips are mirrored from DefStrat. Add a key later if you want cloud LLM responses.</p></article>
     <article class="brief-card"><small>Tracked companies</small><strong>${watchIds.length}</strong><p>${watchIds.map((id) => escapeHtml(metaFor(id)?.name || id)).join(", ")}</p></article>
-    <article class="brief-card"><small>Data sources</small><strong>Yahoo Finance + BSE</strong><p>Quote history comes from Yahoo Finance. Filings, presentations and exchange notes link back to BSE where available.</p></article>
+    <article class="brief-card"><small>Data sources</small><strong>Yahoo Finance + BSE + live news</strong><p>Quote history comes from Yahoo Finance. Filings, presentations and exchange notes link back to BSE where available. Article summaries use current news feeds.</p></article>
   </div>
   <div class="brief-card">
     <small>Company universe</small><strong>Add company</strong>
@@ -846,17 +896,27 @@ async function answerAi(prompt) {
   const normalized = prompt.toLowerCase();
   const answer = document.querySelector("#aiAnswer");
   if (!answer) return;
-  answer.innerHTML = `<small>Searching Yahoo Finance</small><p>Refreshing live quote and chart context before answering...</p>`;
+  answer.innerHTML = `<small>Searching live sources</small><p>Refreshing Yahoo Finance quote/chart data, live internet news and BSE filing context before answering...</p>`;
   await refreshYahooContext(normalized);
   const rows = getAnalystRows();
   const metric = inferMetric(normalized);
-  const mentioned = mentionedRows(rows, normalized);
+  const allRequested = normalized.includes("all compan") || normalized.includes("compare") || normalized.includes("peer") || normalized.includes("sector");
+  const mentioned = allRequested ? rows : mentionedRows(rows, normalized);
+  const newsRequested = normalized.includes("news") || normalized.includes("article") || normalized.includes("internet") || normalized.includes("latest update");
   const priceLead = (normalized.includes("price") || normalized.includes("quote") || normalized.includes("yahoo") || normalized.includes("latest"))
     ? mentioned.map((row) => `${row.name} latest Yahoo-backed quote: ${money(row.price)} (${pct(row.dayMove)} today, ${pct(row.return1y)} 1Y).`).join(" ")
     : "";
   let title = "Analyst response";
   let text = "";
-  if (normalized.includes("highest") || normalized.includes("best") || normalized.includes("leader")) {
+  if (newsRequested) {
+    title = "Latest Yahoo/BSE news summary";
+    text = mentioned.map((row) => {
+      const item = dashboard.find((entry) => entry.meta.id === row.id);
+      const news = item ? liveNewsRows(item, 3) : [];
+      const bullets = news.length ? news.map((entry) => `${entry.title} (${entry.source}, ${entry.date}): ${entry.detail}`).join("  ") : "No live Yahoo/BSE article returned in the latest refresh.";
+      return `${row.name}: ${bullets}`;
+    }).join("  ");
+  } else if (normalized.includes("highest") || normalized.includes("best") || normalized.includes("leader")) {
     const best = rankRows(rows, metric, "desc")[0];
     title = `Highest ${metric.label}`;
     text = best ? `${best.name} ranks highest on ${metric.label} at ${metric.format(best[metric.key])}. ${best.oneLine}` : `I do not have enough data to rank ${metric.label}.`;
@@ -881,7 +941,9 @@ async function answerAi(prompt) {
     text = `Momentum leader: ${leader?.name || "N/A"} (${leader ? pct(leader.return1y) : "--"} 1Y). Quality leader: ${quality?.name || "N/A"} (${quality ? pct(quality.roce) : "--"} ROCE). Ask for a metric like PAT margin, ROCE, P/E, 1Y return, debt, revenue, or market cap for a precise ranking.`;
   }
   if (priceLead) text = `${priceLead} ${text}`;
-  answer.innerHTML = `<small>${escapeHtml(title)}</small><p>${escapeHtml(text)}</p>`;
+  const refreshed = dashboard.find((item) => item.meta.id === (mentioned[0]?.id || selectedId))?.refreshedAt;
+  const stamp = refreshed ? `Latest refresh: ${formatDate(refreshed)}` : `Latest refresh: ${new Date().toLocaleString()}`;
+  answer.innerHTML = `<small>${escapeHtml(title)} &middot; ${escapeHtml(stamp)}</small><p>${escapeHtml(text)}</p>`;
 }
 
 async function refreshYahooContext(text) {
@@ -889,7 +951,9 @@ async function refreshYahooContext(text) {
     const haystack = `${item.meta.name} ${item.meta.nse} ${extraData[item.meta.id]?.label || ""}`.toLowerCase();
     return text && haystack.split(/\s+/).some((part) => part.length > 2 && text.includes(part));
   });
-  const targets = matches.length ? matches : (dashboard.find((item) => item.meta.id === selectedId) ? [dashboard.find((item) => item.meta.id === selectedId)] : []);
+  const wantsAll = text.includes("all compan") || text.includes("compare") || text.includes("peer") || text.includes("sector") || text.includes("news") || text.includes("article");
+  const selected = dashboard.find((item) => item.meta.id === selectedId);
+  const targets = wantsAll ? dashboard : matches.length ? matches : (selected ? [selected] : []);
   await Promise.all(targets.map(async (item) => {
     try {
       const fresh = await getJson(`/api/company?symbol=${encodeURIComponent(item.meta.symbol)}&bse=${encodeURIComponent(item.meta.bse || "")}&name=${encodeURIComponent(item.meta.name)}`);
@@ -1012,9 +1076,12 @@ function getAnalystRows() {
 }
 
 function mentionedRows(rows, text) {
+  const generic = new Set(["limited", "ltd", "technologies", "technology", "engineering", "defence", "defense", "systems", "micro", "company"]);
   const matches = rows.filter((row) => {
     const extra = extraData[row.id] || {};
-    const terms = [row.name, extra.label, row.id].filter(Boolean).flatMap((value) => String(value).toLowerCase().split(/\s+/));
+    const terms = [row.name, extra.label, row.id, dashboard.find((item) => item.meta.id === row.id)?.meta.nse].filter(Boolean)
+      .flatMap((value) => String(value).toLowerCase().split(/[^a-z0-9]+/))
+      .filter((term) => term.length > 2 && !generic.has(term));
     return terms.some((term) => term.length > 2 && text.includes(term));
   });
   if (matches.length) return matches;
