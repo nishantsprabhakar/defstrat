@@ -544,6 +544,10 @@ function pct(value) {
   return Number.isFinite(value) ? `${value >= 0 ? "+" : ""}${formatNum.format(value)}%` : "--";
 }
 
+function ratioPct(value) {
+  return Number.isFinite(value) && value > 0 ? pct(value * 100) : "--";
+}
+
 function moveClass(value) {
   return Number(value) >= 0 ? "up" : "down";
 }
@@ -968,8 +972,8 @@ function renderBusiness() {
   const period = extra.period || "latest period";
   const financialRows = [
     [`Revenue (${period})`, Number.isFinite(extra.revenue) ? `Rs ${compact(extra.revenue)}crs` : compact(selected.yahoo?.financials?.revenue)],
-    [`Gross margin (${period})`, Number.isFinite(extra.grossMargin) ? pct(extra.grossMargin) : pct(Number(f.grossMargins) * 100)],
-    [`EBITDA margin (${period})`, Number.isFinite(extra.ebitdaMargin) ? pct(extra.ebitdaMargin) : pct(Number(f.operatingMargins) * 100)],
+    [`Gross margin (${period})`, Number.isFinite(extra.grossMargin) ? pct(extra.grossMargin) : ratioPct(f.grossMargins)],
+    [`EBITDA margin (${period})`, Number.isFinite(extra.ebitdaMargin) ? pct(extra.ebitdaMargin) : ratioPct(f.operatingMargins)],
     [`PAT margin (${period})`, Number.isFinite(extra.patMargin) ? pct(extra.patMargin) : pct((selected.yahoo?.financials?.profitMargins || NaN) * 100)],
     [`ROCE (${period})`, Number.isFinite(extra.roce) ? pct(extra.roce) : "--"],
     [`Debt (${period})`, Number.isFinite(extra.debt) ? `Rs ${compact(extra.debt)}crs` : (Number.isFinite(f.totalDebt) ? `Rs ${compact(f.totalDebt)}` : "--")],
