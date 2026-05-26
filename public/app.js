@@ -558,6 +558,7 @@ function render() {
 }
 
 function seededSeries(item, key) {
+  if (!item?.meta) return years.map(() => 0);
   const extra = extraData[item.meta.id] || {};
   const latest = Number.isFinite(extra[key]) ? extra[key] : 0;
   const lastIndex = Math.max(years.length - 1, 1);
@@ -1000,7 +1001,7 @@ function renderHistorical() {
       Number.isFinite(extra.roce) ? pct(extra.roce) : "--",
       Number.isFinite(extra.ebitdaMargin) ? pct(extra.ebitdaMargin) : "--",
       Number.isFinite(extra.fcf) ? `\u20b9${compact(extra.fcf)} Cr` : "--",
-      `${extra.debtorDays || "--"} / ${extra.inventoryDays || "--"}`
+      `${extra.receivableDays || extra.debtorDays || "--"} / ${extra.inventoryDays || "--"} / ${extra.debtorDays || "--"}`
     ];
   });
   els.historicalPanel.innerHTML = `<div class="chart-grid">
@@ -1009,9 +1010,12 @@ function renderHistorical() {
     <article class="chart-card">${chartTitle("EBITDA vs PAT Margins")}${barChart([{ id: selected?.meta.id, label: selectedExtra.label || selected?.meta.nse, a: selectedExtra.ebitdaMargin || 0, b: selectedExtra.patMargin || 0 }], "EBITDA", "PAT")}</article>
     <article class="chart-card">${chartTitle("Free Cash Flow Generation")}${lineChart(years, seededSeries(selected, "fcf"), "FCF")}</article>
     <article class="chart-card">${chartTitle("Peer Valuation Multiples")}${barChart(dashboard.map((item) => ({ id: item.meta.id, label: extraData[item.meta.id]?.label || item.meta.nse, a: extraData[item.meta.id]?.pe || 0, b: extraData[item.meta.id]?.pb || 0 })), "P/E", "P/B")}</article>
-    <article class="chart-card">${chartTitle("Working Capital - Receivable & Inventory Days")}${barChart(dashboard.map((item) => ({ id: item.meta.id, label: extraData[item.meta.id]?.label || item.meta.nse, a: extraData[item.meta.id]?.debtorDays || 0, b: extraData[item.meta.id]?.inventoryDays || 0 })), "Receivable days", "Inventory days")}</article>
+    <article class="chart-card wide">${chartTitle("Working Capital - Receivable, Inventory & Debtor Days")}${tripleBarChart(dashboard.map((item) => {
+      const extra = extraData[item.meta.id] || {};
+      return { id: item.meta.id, label: extra.label || item.meta.nse, a: extra.receivableDays || extra.debtorDays || 0, b: extra.inventoryDays || 0, c: extra.debtorDays || 0 };
+    }), "Receivable days", "Inventory days", "Debtor days")}</article>
   </div>` + table([
-    "Company", "Live price", "1Y return", "ROCE", "EBITDA margin", "FCF", "Receivable / Inventory days"
+    "Company", "Live price", "1Y return", "ROCE", "EBITDA margin", "FCF", "Receivable / Inventory / Debtor days"
   ], rows);
 }
 
@@ -1262,6 +1266,11 @@ function chartTitle(text) {
   return `<h3>${escapeHtml(text)}</h3>`;
 }
 
+function chartLabel(label) {
+  const text = String(label || "");
+  return text.length > 9 ? `${text.slice(0, 8)}...` : text;
+}
+
 function scale(value, min, max, size, pad = 26) {
   if (!Number.isFinite(value)) return pad;
   return pad + ((value - min) / (max - min || 1)) * (size - pad * 2);
@@ -1278,10 +1287,45 @@ function barChart(rows, labelA, labelB) {
     const hA = 190 - yFor(row.a);
     const hB = 190 - yFor(row.b);
     const tip = `${row.label}: ${labelA} ${compact(row.a)}, ${labelB} ${compact(row.b)}`;
-    return `<rect class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(tip)}" x="${x}" y="${yFor(row.a)}" width="16" height="${hA}" rx="4" fill="#77c7d5"/><rect class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(tip)}" x="${x + 20}" y="${yFor(row.b)}" width="16" height="${hB}" rx="4" fill="#d9b45f"/><text x="${x + 18}" y="216" text-anchor="middle" fill="#9ea99c" font-size="10">${escapeHtml(row.label)}</text>`;
+    return `<rect class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(tip)}" x="${x}" y="${yFor(row.a)}" width="16" height="${hA}" rx="4" fill="#77c7d5"/><rect class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(tip)}" x="${x + 20}" y="${yFor(row.b)}" width="16" height="${hB}" rx="4" fill="#d9b45f"/><text x="${x + 18}" y="216" text-anchor="middle" fill="#9ea99c" font-size="10">${escapeHtml(chartLabel(row.label))}</text>`;
   }).join("");
   const grid = yTicks.map((tick) => `<line class="grid-line" x1="45" x2="590" y1="${yFor(tick)}" y2="${yFor(tick)}"/><text x="38" y="${yFor(tick) + 4}" text-anchor="end" fill="#9ea99c" font-size="10">${compact(tick)}</text>`).join("");
   return `<svg viewBox="0 0 620 250"><text class="axis-label" x="45" y="20">Y: ${escapeHtml(labelA)} / ${escapeHtml(labelB)}</text><text class="axis-label" x="575" y="238" text-anchor="end">X: Company</text>${grid}<line class="axis-line" x1="45" x2="590" y1="190" y2="190"/><line class="axis-line" x1="45" x2="45" y1="36" y2="190"/><circle cx="452" cy="18" r="5" fill="#77c7d5"/><text x="462" y="22" fill="#cdd5ca" font-size="11">${escapeHtml(labelA)}</text><circle cx="530" cy="18" r="5" fill="#d9b45f"/><text x="540" y="22" fill="#cdd5ca" font-size="11">${escapeHtml(labelB)}</text>${bars}</svg>`;
+}
+
+function tripleBarChart(rows, labelA, labelB, labelC) {
+  const values = rows.flatMap((row) => [row.a, row.b, row.c]).filter(Number.isFinite);
+  const max = Math.max(...values, 1);
+  const group = 535 / Math.max(rows.length, 1);
+  const yFor = (value) => 196 - (Math.max(value, 0) / max) * 142;
+  const yTicks = [0, max / 2, max];
+  const grid = yTicks.map((tick) => `<line class="grid-line" x1="52" x2="592" y1="${yFor(tick)}" y2="${yFor(tick)}"/><text x="45" y="${yFor(tick) + 4}" text-anchor="end" fill="#9ea99c" font-size="10">${compact(tick)}</text>`).join("");
+  const bars = rows.map((row, i) => {
+    const x = 56 + i * group;
+    const w = Math.max(8, Math.min(12, group / 5));
+    const gap = 3;
+    const tip = `${row.label}: ${labelA} ${compact(row.a)}, ${labelB} ${compact(row.b)}, ${labelC} ${compact(row.c)}`;
+    const hA = 196 - yFor(row.a);
+    const hB = 196 - yFor(row.b);
+    const hC = 196 - yFor(row.c);
+    return `<rect class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(tip)}" x="${x}" y="${yFor(row.a)}" width="${w}" height="${hA}" rx="3" fill="#77c7d5"/>
+      <rect class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(tip)}" x="${x + w + gap}" y="${yFor(row.b)}" width="${w}" height="${hB}" rx="3" fill="#d9b45f"/>
+      <rect class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(tip)}" x="${x + (w + gap) * 2}" y="${yFor(row.c)}" width="${w}" height="${hC}" rx="3" fill="#65d08c"/>
+      <text x="${x + w + gap}" y="220" text-anchor="middle" fill="#9ea99c" font-size="10">${escapeHtml(chartLabel(row.label))}</text>`;
+  }).join("");
+  return `<svg viewBox="0 0 620 260">
+    <text class="axis-label" x="52" y="20">Y: Days</text>
+    <text class="axis-label" x="590" y="246" text-anchor="end">X: Company</text>
+    ${grid}
+    <line class="axis-line" x1="52" x2="592" y1="196" y2="196"/>
+    <line class="axis-line" x1="52" x2="52" y1="48" y2="196"/>
+    <g class="chart-legend">
+      <circle cx="318" cy="18" r="5" fill="#77c7d5"/><text x="328" y="22" fill="#cdd5ca" font-size="10">${escapeHtml(labelA)}</text>
+      <circle cx="430" cy="18" r="5" fill="#d9b45f"/><text x="440" y="22" fill="#cdd5ca" font-size="10">${escapeHtml(labelB)}</text>
+      <circle cx="542" cy="18" r="5" fill="#65d08c"/><text x="552" y="22" fill="#cdd5ca" font-size="10">${escapeHtml(labelC)}</text>
+    </g>
+    ${bars}
+  </svg>`;
 }
 
 function lineChart(labels, values, label) {
@@ -1308,7 +1352,7 @@ function scatterChart(rows, labelX, labelY) {
   const dots = rows.filter((row) => Number.isFinite(row.x) && Number.isFinite(row.y)).map((row) => {
     const x = xFor(row.x);
     const y = yFor(row.y);
-    return `<circle class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(`${row.label}: ${labelX} ${compact(row.x)}, ${labelY} ${pct(row.y)}`)}" cx="${x}" cy="${y}" r="8" fill="#d9b45f" fill-opacity=".9"/><text x="${x + 11}" y="${y + 4}" fill="#cdd5ca" font-size="11">${escapeHtml(row.label)}</text>`;
+    return `<circle class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(`${row.label}: ${labelX} ${compact(row.x)}, ${labelY} ${pct(row.y)}`)}" cx="${x}" cy="${y}" r="8" fill="#d9b45f" fill-opacity=".9"/><text x="${x + 11}" y="${y + 4}" fill="#cdd5ca" font-size="11">${escapeHtml(chartLabel(row.label))}</text>`;
   }).join("");
   return `<svg viewBox="0 0 620 250"><text class="axis-label" x="55" y="20">Y: ${escapeHtml(labelY)}</text><text class="axis-label" x="575" y="238" text-anchor="end">X: ${escapeHtml(labelX)}</text><line class="grid-line" x1="55" x2="590" y1="${yFor((minY + maxY) / 2)}" y2="${yFor((minY + maxY) / 2)}"/><line class="grid-line" x1="${xFor((minX + maxX) / 2)}" x2="${xFor((minX + maxX) / 2)}" y1="42" y2="198"/><line class="axis-line" x1="55" x2="590" y1="198" y2="198"/><line class="axis-line" x1="55" x2="55" y1="42" y2="198"/><text x="48" y="202" text-anchor="end" fill="#9ea99c" font-size="10">${compact(minY)}</text><text x="48" y="48" text-anchor="end" fill="#9ea99c" font-size="10">${compact(maxY)}</text><text x="55" y="214" text-anchor="middle" fill="#9ea99c" font-size="10">${compact(minX)}</text><text x="590" y="214" text-anchor="middle" fill="#9ea99c" font-size="10">${compact(maxX)}</text>${dots}</svg>`;
 }

@@ -443,10 +443,12 @@ h2 {
 
 .chart-card {
   min-height: 300px;
+  min-width: 0;
   padding: 14px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255,255,255,.035);
+  overflow: hidden;
 }
 
 .chart-card.wide {
@@ -459,9 +461,29 @@ h2 {
 }
 
 .chart-card svg {
+  display: block;
+  width: 100%;
+  height: auto;
   min-height: 220px;
   background: transparent;
   border: 0;
+}
+
+.chart-card.wide svg {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.chart-card text {
+  paint-order: stroke;
+  stroke: rgba(7, 9, 7, .72);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.chart-card .axis-label,
+.chart-card .chart-legend text {
+  stroke-width: 2px;
 }
 
 .axis-label {
