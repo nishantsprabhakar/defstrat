@@ -58,14 +58,14 @@ let activeTab = "charts";
 let activeSectorMetric = "revenue";
 
 const extraData = {
-  zentec: { label: "Zen", focus: "Training simulators, anti-drone systems", revenue: 430, pat: 129, patMargin: 30.0, ebitdaMargin: 34, roe: 28, roa: 18, roce: 32, debtEquity: 0.03, pe: 72, pb: 18, marketCap: 14500, eps: 14.8, divYield: 0.05, debtorDays: 92, inventoryDays: 104, fcf: 65, period: "2026-03-31", verdict: "Positive", oneLine: "High-growth defence electronics and simulation play with order visibility tied to domestic procurement." },
-  ideaforge: { label: "ideaForge", focus: "UAVs and drone platforms", revenue: 315, pat: 18, patMargin: 5.7, ebitdaMargin: 13, roe: 5, roa: 3, roce: 8, debtEquity: 0.02, pe: 115, pb: 6.5, marketCap: 2900, eps: 4.2, divYield: 0, debtorDays: 118, inventoryDays: 152, fcf: -22, period: "2026-03-31", verdict: "Watch", oneLine: "Drone specialist with strategic relevance across surveillance, mapping and tactical use cases." },
-  mtar: { label: "MTAR", focus: "Precision Engineering", revenue: 865, pat: 94, patMargin: 10.9, ebitdaMargin: 22, roe: 14, roa: 8, roce: 18, debtEquity: 0.46, pe: 88, pb: 8.2, marketCap: 7800, eps: 31.1, divYield: 0, debtorDays: 76, inventoryDays: 178, fcf: 41, period: "2026-03-31", verdict: "Constructive", oneLine: "High-precision components for defence, space and nuclear programmes." },
-  datapatterns: { label: "Data", focus: "Defence electronics and radar systems", revenue: 708, pat: 206, patMargin: 29.1, ebitdaMargin: 38, roe: 21, roa: 17, roce: 25, debtEquity: 0.01, pe: 70, pb: 12, marketCap: 14500, eps: 36, divYield: 0.2, debtorDays: 86, inventoryDays: 126, fcf: 78, period: "2026-03-31", verdict: "Positive", oneLine: "Electronics-led platform supplier with exposure to radar, EW and avionics programmes." },
-  azad: { label: "Azad", focus: "Precision aerospace and turbine components", revenue: 568, pat: 122, patMargin: 21.5, ebitdaMargin: 33, roe: 16, roa: 8, roce: 19, debtEquity: 0.32, pe: 117, pb: 14, marketCap: 14496, eps: 19.18, divYield: 0, debtorDays: 72, inventoryDays: 210, fcf: 35, period: "2026-03-31", verdict: "Growth", oneLine: "Aerospace and turbine component platform with export-led precision manufacturing exposure." },
-  aequs: { label: "Aequs", focus: "Aerospace precision components", revenue: 1010, pat: -74, patMargin: -7.3, ebitdaMargin: 12, roe: -8, roa: -4, roce: 5, debtEquity: 0.8, pe: null, pb: 5.4, marketCap: 8200, eps: -1.8, divYield: 0, debtorDays: 69, inventoryDays: 184, fcf: -95, period: "2025-12-31", verdict: "Scale-up", oneLine: "Aerospace manufacturing platform tied to precision machining and supply-chain localization." },
-  paras: { label: "Paras", focus: "Optics, defence electronics and space engineering", revenue: 330, pat: 42, patMargin: 12.7, ebitdaMargin: 21, roe: 9, roa: 6, roce: 12, debtEquity: 0.08, pe: 96, pb: 8.5, marketCap: 5100, eps: 10.5, divYield: 0, debtorDays: 102, inventoryDays: 146, fcf: 12, period: "N/A", verdict: "Watch", oneLine: "Specialized defence and space engineering company with optics and electronics capabilities." },
-  astra: { label: "Astra", focus: "RF, microwave and defence electronics", revenue: 1150, pat: 128, patMargin: 11.1, ebitdaMargin: 18, roe: 13, roa: 7, roce: 16, debtEquity: 0.18, pe: 61, pb: 7, marketCap: 8500, eps: 13.6, divYield: 0.25, debtorDays: 112, inventoryDays: 138, fcf: 28, period: "2025-12-31", verdict: "Steady", oneLine: "RF and microwave electronics supplier for defence, space and meteorology applications." }
+  zentec: { label: "Zen", focus: "Training simulators, anti-drone systems", revenue: 687.69, pat: 193.45, patMargin: 28.1, ebitdaMargin: 48.37, roe: 28, roa: 18, roce: 32, debtEquity: 0, pe: 72, pb: 18, marketCap: 14500, eps: 21.5, divYield: 0.05, debtorDays: 92, inventoryDays: 104, fcf: 65, period: "FY26", source: "Company Q4 FY26 release / BSE filing", verdict: "Positive", oneLine: "High-growth defence electronics and simulation play with order visibility tied to domestic procurement." },
+  ideaforge: { label: "ideaForge", focus: "UAVs and drone platforms", revenue: 226.1, pat: -17.0, grossMargin: 58.0, patMargin: -7.5, ebitdaMargin: 12.0, roe: -5, roa: -3, roce: 8, debtEquity: 0.02, pe: null, pb: 6.5, marketCap: 2900, eps: -4.0, divYield: 0, debtorDays: 118, inventoryDays: 152, fcf: -22, period: "FY26", source: "Company FY26 investor presentation / NSE filing", verdict: "Watch", oneLine: "Drone specialist with strategic relevance across surveillance, mapping and tactical use cases." },
+  mtar: { label: "MTAR", focus: "Precision Engineering", revenue: 876.2, pat: 94.0, patMargin: 10.7, ebitdaMargin: 22.2, roe: 14, roa: 8, roce: 18, debtEquity: 0.46, pe: 88, pb: 8.2, marketCap: 7800, eps: 31.1, divYield: 0, debtorDays: 76, inventoryDays: 178, fcf: 41, period: "FY26", source: "Company Q4 FY26 earnings call / results release", verdict: "Constructive", oneLine: "High-precision components for defence, space and nuclear programmes." },
+  datapatterns: { label: "Data", focus: "Defence electronics and radar systems", revenue: 924.8, pat: 271.4, grossMargin: 63.2, patMargin: 29.3, ebitdaMargin: 40.1, roe: 15.8, roa: 17, roce: 21.8, debtEquity: 0, debt: 0, cash: 422.7, pe: 79.2, pb: 12, marketCap: 21498, eps: 48.5, divYield: 0.2, debtorDays: 86, inventoryDays: 126, fcf: 78, period: "FY26", source: "Company FY26 results / ICICI Direct", verdict: "Positive", oneLine: "Electronics-led platform supplier with exposure to radar, EW and avionics programmes." },
+  azad: { label: "Azad", focus: "Precision aerospace and turbine components", revenue: 590.4, pat: 132.2, patMargin: 22.4, ebitdaMargin: 36.9, roe: 16, roa: 8, roce: 19, debtEquity: 0.32, pe: 117, pb: 14, marketCap: 14496, eps: 21.0, divYield: 0, debtorDays: 72, inventoryDays: 210, fcf: 35, period: "FY26", source: "Company FY26 results / exchange filing", verdict: "Growth", oneLine: "Aerospace and turbine component platform with export-led precision manufacturing exposure." },
+  aequs: { label: "Aequs", focus: "Aerospace precision components", revenue: 863.3, pat: -59.3, patMargin: -6.9, ebitdaMargin: 14.2, roe: -8, roa: -4, roce: 5, debtEquity: 0.8, pe: null, pb: 5.4, marketCap: 8200, eps: -1.8, divYield: 0, debtorDays: 69, inventoryDays: 184, fcf: -95, period: "9M FY26", source: "Company Q3/9M FY26 investor meet presentation", verdict: "Scale-up", oneLine: "Aerospace manufacturing platform tied to precision machining and supply-chain localization." },
+  paras: { label: "Paras", focus: "Optics, defence electronics and space engineering", revenue: 478.0, pat: 88.0, patMargin: 18.4, ebitdaMargin: 26.0, roe: 9, roa: 6, roce: 12, debtEquity: 0.08, pe: 96, pb: 8.5, marketCap: 5100, eps: 10.5, divYield: 0, debtorDays: 102, inventoryDays: 146, fcf: 12, period: "FY26", source: "Company FY26 investor presentation / Q4 result filing", verdict: "Watch", oneLine: "Specialized defence and space engineering company with optics and electronics capabilities." },
+  astra: { label: "Astra", focus: "RF, microwave and defence electronics", revenue: 1162.8, pat: 193.0, patMargin: 16.6, ebitdaMargin: 24.6, roe: 13, roa: 7, roce: 16, debtEquity: 0.18, pe: 61, pb: 7, marketCap: 8500, eps: 20.4, divYield: 0.25, debtorDays: 112, inventoryDays: 138, fcf: 28, period: "FY26", source: "Company audited FY26 results announced 26 May 2026", verdict: "Steady", oneLine: "RF and microwave electronics supplier for defence, space and meteorology applications." }
 };
 
 const years = ["FY21", "FY22", "FY23", "FY24", "FY25", "FY26"];
@@ -650,8 +650,8 @@ function renderSectorCharts() {
     b: activeSectorMetric === "revenue" ? row.extra.pat || 0 : row.extra.patMargin || 0
   }));
   els.sectorCharts.innerHTML = `
-    <article class="chart-card">${chartTitle("Revenue & PAT")}<div class="chart-toolbar"><button class="${activeSectorMetric === "revenue" ? "is-active" : ""}" data-sector-metric="revenue">Revenue/PAT</button><button class="${activeSectorMetric === "ebitdaMargin" ? "is-active" : ""}" data-sector-metric="ebitdaMargin">EBITDA/PAT margin</button><button class="${activeSectorMetric === "roce" ? "is-active" : ""}" data-sector-metric="roce">ROCE/PAT margin</button></div>${barChart(metricRows, activeSectorMetric === "revenue" ? "Revenue" : activeSectorMetric === "roce" ? "ROCE" : "EBITDA margin", activeSectorMetric === "revenue" ? "PAT" : "PAT margin")}</article>
-    <article class="chart-card">${chartTitle("Valuation vs Profitability")}${scatterChart(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, x: row.extra.pe, y: row.extra.patMargin })), "P/E", "PAT margin")}</article>
+    <article class="chart-card">${chartTitle("Revenue & PAT (FY26 / 9M FY26)")}<div class="chart-toolbar"><button class="${activeSectorMetric === "revenue" ? "is-active" : ""}" data-sector-metric="revenue">Revenue/PAT</button><button class="${activeSectorMetric === "ebitdaMargin" ? "is-active" : ""}" data-sector-metric="ebitdaMargin">EBITDA/PAT margin</button><button class="${activeSectorMetric === "roce" ? "is-active" : ""}" data-sector-metric="roce">ROCE/PAT margin</button></div>${barChart(metricRows, activeSectorMetric === "revenue" ? "Revenue" : activeSectorMetric === "roce" ? "ROCE" : "EBITDA margin", activeSectorMetric === "revenue" ? "PAT" : "PAT margin")}</article>
+    <article class="chart-card">${chartTitle("Valuation vs Profitability (FY26 / 9M FY26)")} ${scatterChart(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, x: row.extra.pe, y: row.extra.patMargin })), "P/E", "PAT margin")}</article>
     <article class="chart-card wide">${chartTitle("1Y Price Return Heatmap")}${heatmap(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, value: oneYearReturn(row.item) })))}</article>
     <article class="chart-card">${chartTitle("ROE vs ROA")}${scatterChart(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, x: row.extra.roa, y: row.extra.roe })), "ROA", "ROE")}</article>
     <article class="chart-card">${chartTitle("Market Cap Treemap")}${treemap(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, value: row.extra.marketCap || 0 })))}</article>`;
@@ -730,6 +730,8 @@ function renderDetail() {
   if (!item) return;
   const q = item.yahoo?.quote || {};
   const f = item.yahoo?.financials || {};
+  const extra = extraData[item.meta.id] || {};
+  const period = extra.period || "Yahoo latest";
   els.selectedName.textContent = item.meta.name;
   els.selectedCodes.innerHTML = `${escapeHtml(item.meta.nse || item.meta.symbol)} &middot; BSE ${escapeHtml(item.meta.bse || "custom")} &middot; ${escapeHtml(item.meta.isin || "")}`;
   els.selectedPrice.textContent = money(q.regularMarketPrice);
@@ -742,8 +744,8 @@ function renderDetail() {
     ["Volume", compact(q.volume)],
     ["52W high", money(q.fiftyTwoWeekHigh)],
     ["52W low", money(q.fiftyTwoWeekLow)],
-    ["Revenue", compact(f.revenue)],
-    ["P/E", compact(q.trailingPE)],
+    [`Revenue (${period})`, Number.isFinite(extra.revenue) ? `Rs ${compact(extra.revenue)}crs` : compact(f.revenue)],
+    [`P/E (${period})`, Number.isFinite(extra.pe) ? `${formatNum.format(extra.pe)}x` : compact(q.trailingPE)],
     ["Source", item.yahoo?.source || "Live feed"]
   ];
   els.fundamentals.innerHTML = metrics.map(([label, value]) => `<div><small>${label}</small><strong>${value}</strong></div>`).join("");
@@ -963,18 +965,19 @@ function renderBusiness() {
   const q = selected.yahoo?.quote || {};
   const f = selected.yahoo?.financials || {};
   const valuation = valuationMetrics(extra);
+  const period = extra.period || "latest period";
   const financialRows = [
-    ["Revenue", Number.isFinite(extra.revenue) ? `Rs ${compact(extra.revenue)}crs` : compact(selected.yahoo?.financials?.revenue)],
-    ["Gross margin", Number.isFinite(extra.grossMargin) ? pct(extra.grossMargin) : pct(Number(f.grossMargins) * 100)],
-    ["EBITDA margin", Number.isFinite(extra.ebitdaMargin) ? pct(extra.ebitdaMargin) : pct(Number(f.operatingMargins) * 100)],
-    ["PAT margin", Number.isFinite(extra.patMargin) ? pct(extra.patMargin) : pct((selected.yahoo?.financials?.profitMargins || NaN) * 100)],
-    ["ROCE", Number.isFinite(extra.roce) ? pct(extra.roce) : "--"],
-    ["Debt", Number.isFinite(extra.debt) ? `Rs ${compact(extra.debt)}crs` : (Number.isFinite(f.totalDebt) ? `Rs ${compact(f.totalDebt)}` : "--")],
-    ["Cash", Number.isFinite(extra.cash) ? `Rs ${compact(extra.cash)}crs` : (Number.isFinite(f.totalCash) ? `Rs ${compact(f.totalCash)}` : "--")],
-    ["D/E", Number.isFinite(extra.debtEquity) ? `${formatNum.format(extra.debtEquity)}x` : "--"],
-    ["EV/Revenue", valuation.evRevenue],
-    ["EV/EBITDA", valuation.evEbitda],
-    ["P/E", valuation.pe !== "--" ? valuation.pe : (Number.isFinite(q.trailingPE) ? `${formatNum.format(q.trailingPE)}x` : "--")],
+    [`Revenue (${period})`, Number.isFinite(extra.revenue) ? `Rs ${compact(extra.revenue)}crs` : compact(selected.yahoo?.financials?.revenue)],
+    [`Gross margin (${period})`, Number.isFinite(extra.grossMargin) ? pct(extra.grossMargin) : pct(Number(f.grossMargins) * 100)],
+    [`EBITDA margin (${period})`, Number.isFinite(extra.ebitdaMargin) ? pct(extra.ebitdaMargin) : pct(Number(f.operatingMargins) * 100)],
+    [`PAT margin (${period})`, Number.isFinite(extra.patMargin) ? pct(extra.patMargin) : pct((selected.yahoo?.financials?.profitMargins || NaN) * 100)],
+    [`ROCE (${period})`, Number.isFinite(extra.roce) ? pct(extra.roce) : "--"],
+    [`Debt (${period})`, Number.isFinite(extra.debt) ? `Rs ${compact(extra.debt)}crs` : (Number.isFinite(f.totalDebt) ? `Rs ${compact(f.totalDebt)}` : "--")],
+    [`Cash (${period})`, Number.isFinite(extra.cash) ? `Rs ${compact(extra.cash)}crs` : (Number.isFinite(f.totalCash) ? `Rs ${compact(f.totalCash)}` : "--")],
+    [`D/E (${period})`, Number.isFinite(extra.debtEquity) ? `${formatNum.format(extra.debtEquity)}x` : "--"],
+    [`EV/Revenue (${period})`, valuation.evRevenue],
+    [`EV/EBITDA (${period})`, valuation.evEbitda],
+    [`P/E (${period})`, valuation.pe !== "--" ? valuation.pe : (Number.isFinite(q.trailingPE) ? `${formatNum.format(q.trailingPE)}x` : "--")],
     ["1Y return", pct(oneYearReturn(selected))]
   ];
   els.businessPanel.innerHTML = `<div class="business-layout">
@@ -1021,8 +1024,9 @@ function renderBusiness() {
 
     <article class="brief-card">
       <small>Key financials</small>
-      <strong>Operating snapshot</strong>
+      <strong>Operating snapshot (${escapeHtml(period)})</strong>
       ${table(["Metric", "Value"], financialRows.map(([label, value]) => [escapeHtml(label), escapeHtml(value)]))}
+      <p class="fine-print">Source: ${escapeHtml(extra.source || "Yahoo/BSE live feed and company filings")}.</p>
     </article>
 
     <article class="brief-card">
@@ -1172,7 +1176,7 @@ function renderHistorical() {
     const valuation = valuationMetrics(extra);
     const wc = workingCapitalMetrics(extra);
     return [
-      `<strong>${escapeHtml(item.meta.name)}</strong><br><small>${escapeHtml(extra.focus || item.meta.segment)}</small>`,
+      `<strong>${escapeHtml(item.meta.name)}</strong><br><small>${escapeHtml(extra.period || "latest")} &middot; ${escapeHtml(extra.focus || item.meta.segment)}</small>`,
       money(item.yahoo?.quote?.regularMarketPrice),
       `<span class="${moveClass(oneYearReturn(item))}">${pct(oneYearReturn(item))}</span>`,
       Number.isFinite(extra.roce) ? pct(extra.roce) : "--",
@@ -1200,7 +1204,7 @@ function renderHistorical() {
       return { id: item.meta.id, label: extra.label || item.meta.nse, values: [wc.receivable, wc.inventory, wc.debtor, wc.netCycle] };
     }), ["Receivable days", "Inventory days", "Debtor days", "Net WC cycle"], "Days")}</article>
   </div>` + table([
-    "Company", "Live price", "1Y return", "ROCE", "EBITDA margin", "EV/Revenue", "EV/EBITDA", "P/E", "FCF", "Receivable / Inventory / Debtor / Net WC days"
+    "Company / period", "Live price", "1Y return", "ROCE", "EBITDA margin", "EV/Revenue", "EV/EBITDA", "P/E", "FCF", "Receivable / Inventory / Debtor / Net WC days"
   ], rows);
 }
 
@@ -1215,8 +1219,8 @@ function renderEarnings() {
         <summary>${escapeHtml(item.meta.name)} &middot; ${escapeHtml(extra.period || "Live")}</summary>
         <div class="body">
           <div class="fundamentals">
-            <div><small>Revenue</small><strong>${Number.isFinite(extra.revenue) ? `\u20b9${compact(extra.revenue)} Cr` : "--"}</strong></div>
-            <div><small>PAT margin</small><strong>${Number.isFinite(extra.patMargin) ? pct(extra.patMargin) : "--"}</strong></div>
+            <div><small>Revenue (${escapeHtml(extra.period || "latest")})</small><strong>${Number.isFinite(extra.revenue) ? `\u20b9${compact(extra.revenue)} Cr` : "--"}</strong></div>
+            <div><small>PAT margin (${escapeHtml(extra.period || "latest")})</small><strong>${Number.isFinite(extra.patMargin) ? pct(extra.patMargin) : "--"}</strong></div>
             <div><small>1Y return</small><strong>${pct(oneYearReturn(item))}</strong></div>
             <div><small>IC verdict</small><strong>${escapeHtml(extra.verdict || "Watch")}</strong></div>
           </div>
@@ -1268,13 +1272,13 @@ function renderComparison() {
     }), ["EV/Revenue", "EV/EBITDA", "P/E"], "Multiple (x)")}</article>
     <article class="chart-card">${chartTitle("Profitability vs Leverage")}${scatterChart(dashboard.map((item) => ({ id: item.meta.id, label: extraData[item.meta.id]?.label || item.meta.nse, x: extraData[item.meta.id]?.debtEquity, y: extraData[item.meta.id]?.patMargin })), "D/E", "PAT margin")}</article>
   </div>` + table([
-    "Company", "Focus", "Revenue", "EV/Revenue", "EV/EBITDA", "P/E", "PAT margin", "ROE", "D/E", "Commentary"
+    "Company / period", "Focus", "Revenue", "EV/Revenue", "EV/EBITDA", "P/E", "PAT margin", "ROE", "D/E", "Commentary"
   ], dashboard.map((item) => {
     const extra = extraData[item.meta.id] || {};
     const valuation = valuationMetrics(extra);
     const f = item.yahoo?.financials || {};
     return [
-      `<strong>${escapeHtml(item.meta.name)}</strong>`,
+      `<strong>${escapeHtml(item.meta.name)}</strong><br><small>${escapeHtml(extra.period || "latest")}</small>`,
       escapeHtml(extra.focus || item.meta.segment || ""),
       Number.isFinite(extra.revenue) ? `\u20b9${compact(extra.revenue)} Cr` : compact(f.revenue),
       valuation.evRevenue,
