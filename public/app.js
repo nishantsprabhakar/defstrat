@@ -568,6 +568,7 @@ function sourceMetric(item, key, options = {}) {
     if (Number.isFinite(f.revenue)) return { value: rupeesToCrores(f.revenue), period: "Yahoo latest", source: "Yahoo Finance" };
   }
   if (key === "pat" && Number.isFinite(mc.pat)) return { value: mc.pat, period: mc.period || "latest consolidated year", source: "Moneycontrol consolidated P&L" };
+  if (key === "ebitdaMargin" && Number.isFinite(f.operatingMargins)) return { value: f.operatingMargins * 100, period: "Yahoo latest", source: "Yahoo Finance" };
   if (key === "grossMargin" && Number.isFinite(f.grossMargins)) return { value: f.grossMargins * 100, period: "Yahoo latest", source: "Yahoo Finance" };
   if (key === "patMargin" && Number.isFinite(f.profitMargins)) return { value: f.profitMargins * 100, period: "Yahoo latest", source: "Yahoo Finance" };
   if ((key === "debt" || key === "cash") && Number.isFinite(f[options.yahooKey])) {
@@ -578,6 +579,21 @@ function sourceMetric(item, key, options = {}) {
 
 function moneyCr(value) {
   return Number.isFinite(value) ? `Rs ${compact(value)}crs` : "--";
+}
+
+function historicalMetricSeries(item, key) {
+  const rowKey = key === "pat" ? "pat" : key === "revenue" ? "revenue" : null;
+  const mc = item?.moneycontrol;
+  if (rowKey && mc?.available && Array.isArray(mc.years) && Array.isArray(mc.rows?.[rowKey])) {
+    const byYear = new Map();
+    mc.years.forEach((year, index) => {
+      const match = String(year).match(/(\d{2})$/);
+      if (match && Number.isFinite(mc.rows[rowKey][index])) byYear.set(`FY${match[1]}`, mc.rows[rowKey][index]);
+    });
+    const series = years.map((year) => byYear.has(year) ? byYear.get(year) : NaN);
+    if (series.some(Number.isFinite)) return series;
+  }
+  return null;
 }
 
 function moveClass(value) {
@@ -665,8 +681,11 @@ function render() {
 
 function seededSeries(item, key) {
   if (!item?.meta) return years.map(() => NaN);
+  const historical = historicalMetricSeries(item, key);
+  if (historical) return historical;
   const extra = extraData[item.meta.id] || {};
-  const latest = Number.isFinite(extra[key]) ? extra[key] : NaN;
+  const resolved = sourceMetric(item, key);
+  const latest = Number.isFinite(resolved.value) ? resolved.value : (Number.isFinite(extra[key]) ? extra[key] : NaN);
   if (!Number.isFinite(latest)) return years.map(() => NaN);
   const lastIndex = Math.max(years.length - 1, 1);
   if (key === "revenue") return years.map((_, i) => Math.max(0, latest * (0.38 + (i / lastIndex) * 0.62)));
@@ -694,14 +713,16 @@ function renderSectorCharts() {
   const metricRows = rows.map((row) => ({
     id: row.item.meta.id,
     label: row.extra.label || row.item.meta.nse,
-    a: Number.isFinite(row.extra[activeSectorMetric]) ? row.extra[activeSectorMetric] : NaN,
+    a: activeSectorMetric === "roce"
+      ? (Number.isFinite(row.extra.roce) ? row.extra.roce : NaN)
+      : sourceMetric(row.item, activeSectorMetric).value,
     b: activeSectorMetric === "revenue"
-      ? (Number.isFinite(row.extra.pat) ? row.extra.pat : NaN)
-      : (Number.isFinite(row.extra.patMargin) ? row.extra.patMargin : NaN)
+      ? sourceMetric(row.item, "pat").value
+      : sourceMetric(row.item, "patMargin").value
   }));
   els.sectorCharts.innerHTML = `
-    <article class="chart-card">${chartTitle("Revenue & PAT (latest verified filing)")}<div class="chart-toolbar"><button class="${activeSectorMetric === "revenue" ? "is-active" : ""}" data-sector-metric="revenue">Revenue/PAT</button><button class="${activeSectorMetric === "ebitdaMargin" ? "is-active" : ""}" data-sector-metric="ebitdaMargin">EBITDA/PAT margin</button><button class="${activeSectorMetric === "roce" ? "is-active" : ""}" data-sector-metric="roce">ROCE/PAT margin</button></div>${barChart(metricRows, activeSectorMetric === "revenue" ? "Revenue" : activeSectorMetric === "roce" ? "ROCE" : "EBITDA margin", activeSectorMetric === "revenue" ? "PAT" : "PAT margin")}</article>
-    <article class="chart-card">${chartTitle("Valuation vs Profitability (live / verified only)")} ${scatterChart(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, x: row.extra.pe, y: row.extra.patMargin })), "P/E", "PAT margin")}</article>
+    <article class="chart-card">${chartTitle("Revenue & PAT (latest consolidated source)")}<div class="chart-toolbar"><button class="${activeSectorMetric === "revenue" ? "is-active" : ""}" data-sector-metric="revenue">Revenue/PAT</button><button class="${activeSectorMetric === "ebitdaMargin" ? "is-active" : ""}" data-sector-metric="ebitdaMargin">EBITDA/PAT margin</button><button class="${activeSectorMetric === "roce" ? "is-active" : ""}" data-sector-metric="roce">ROCE/PAT margin</button></div>${barChart(metricRows, activeSectorMetric === "revenue" ? "Revenue" : activeSectorMetric === "roce" ? "ROCE" : "EBITDA margin", activeSectorMetric === "revenue" ? "PAT" : "PAT margin")}</article>
+    <article class="chart-card">${chartTitle("Valuation vs Profitability (live / verified only)")} ${scatterChart(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, x: row.extra.pe, y: sourceMetric(row.item, "patMargin").value })), "P/E", "PAT margin")}</article>
     <article class="chart-card wide">${chartTitle("1Y Price Return Heatmap")}${heatmap(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, value: oneYearReturn(row.item) })))}</article>
     <article class="chart-card">${chartTitle("ROE vs ROA")}${scatterChart(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, x: row.extra.roa, y: row.extra.roe })), "ROA", "ROE")}</article>
     <article class="chart-card">${chartTitle("Market Cap Treemap")}${treemap(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, value: row.extra.marketCap || 0 })))}</article>`;
@@ -1075,15 +1096,16 @@ function renderBusiness() {
   const valuation = valuationMetrics(extra);
   const revenueMetric = sourceMetric(selected, "revenue");
   const grossMetric = sourceMetric(selected, "grossMargin");
+  const ebitdaMetric = sourceMetric(selected, "ebitdaMargin");
   const patMetric = sourceMetric(selected, "patMargin");
   const debtMetric = sourceMetric(selected, "debt", { yahooKey: "totalDebt" });
   const cashMetric = sourceMetric(selected, "cash", { yahooKey: "totalCash" });
   const period = extra.period || revenueMetric.period || "latest period";
-  const sourceList = Array.from(new Set([revenueMetric.source, grossMetric.source, patMetric.source, debtMetric.source, cashMetric.source].filter((source) => source && source !== "Unavailable")));
+  const sourceList = Array.from(new Set([revenueMetric.source, grossMetric.source, ebitdaMetric.source, patMetric.source, debtMetric.source, cashMetric.source].filter((source) => source && source !== "Unavailable")));
   const financialRows = [
     [`Revenue (${revenueMetric.period})`, moneyCr(revenueMetric.value)],
     [`Gross margin (${grossMetric.period})`, Number.isFinite(grossMetric.value) ? pct(grossMetric.value) : "--"],
-    [`EBITDA margin (${period})`, Number.isFinite(extra.ebitdaMargin) ? pct(extra.ebitdaMargin) : ratioPct(f.operatingMargins)],
+    [`EBITDA margin (${ebitdaMetric.period})`, Number.isFinite(ebitdaMetric.value) ? pct(ebitdaMetric.value) : "--"],
     [`PAT margin (${patMetric.period})`, Number.isFinite(patMetric.value) ? pct(patMetric.value) : "--"],
     [`ROCE (${period})`, Number.isFinite(extra.roce) ? pct(extra.roce) : "--"],
     [`Debt (${debtMetric.period})`, moneyCr(debtMetric.value)],
@@ -1289,12 +1311,14 @@ function renderHistorical() {
     const extra = extraData[item.meta.id] || {};
     const valuation = valuationMetrics(extra);
     const wc = workingCapitalMetrics(extra);
+    const revenue = sourceMetric(item, "revenue");
+    const ebitdaMargin = sourceMetric(item, "ebitdaMargin");
     return [
-      `<strong>${escapeHtml(item.meta.name)}</strong><br><small>${escapeHtml(extra.period || "latest")} &middot; ${escapeHtml(extra.focus || item.meta.segment)}</small>`,
+      `<strong>${escapeHtml(item.meta.name)}</strong><br><small>${escapeHtml(revenue.period || extra.period || "latest")} &middot; ${escapeHtml(revenue.source || extra.focus || item.meta.segment)}</small>`,
       money(item.yahoo?.quote?.regularMarketPrice),
       `<span class="${moveClass(oneYearReturn(item))}">${pct(oneYearReturn(item))}</span>`,
       Number.isFinite(extra.roce) ? pct(extra.roce) : "--",
-      Number.isFinite(extra.ebitdaMargin) ? pct(extra.ebitdaMargin) : "--",
+      Number.isFinite(ebitdaMargin.value) ? pct(ebitdaMargin.value) : "--",
       valuation.evRevenue,
       valuation.evEbitda,
       valuation.pe,
@@ -1305,7 +1329,7 @@ function renderHistorical() {
   els.historicalPanel.innerHTML = `<div class="chart-grid">
     <article class="chart-card">${chartTitle("Revenue Growth Trajectory")}${lineChart(years, seededSeries(selected, "revenue"), "Revenue")}</article>
     <article class="chart-card">${chartTitle("Return on Capital Employed (ROCE)")}${lineChart(years, seededSeries(selected, "roce"), "ROCE")}</article>
-    <article class="chart-card">${chartTitle("EBITDA vs PAT Margins")}${barChart([{ id: selected?.meta.id, label: selectedExtra.label || selected?.meta.nse, a: selectedExtra.ebitdaMargin || 0, b: selectedExtra.patMargin || 0 }], "EBITDA", "PAT")}</article>
+    <article class="chart-card">${chartTitle("EBITDA vs PAT Margins")}${barChart([{ id: selected?.meta.id, label: selectedExtra.label || selected?.meta.nse, a: sourceMetric(selected, "ebitdaMargin").value, b: sourceMetric(selected, "patMargin").value }], "EBITDA", "PAT")}</article>
     <article class="chart-card">${chartTitle("Free Cash Flow Generation")}${lineChart(years, seededSeries(selected, "fcf"), "FCF")}</article>
     <article class="chart-card wide">${chartTitle("Peer Valuation Multiples")}${groupedBarChart(dashboard.map((item) => {
       const extra = extraData[item.meta.id] || {};
@@ -1329,16 +1353,19 @@ function renderEarnings() {
       const extra = extraData[item.meta.id] || {};
       const q = item.yahoo?.quote || {};
       const filing = item.bse?.[0];
+      const revenue = sourceMetric(item, "revenue");
+      const patMargin = sourceMetric(item, "patMargin");
       return `<details class="earnings-card">
-        <summary>${escapeHtml(item.meta.name)} &middot; ${escapeHtml(extra.period || "Live")}</summary>
+        <summary>${escapeHtml(item.meta.name)} &middot; ${escapeHtml(revenue.period || extra.period || "Live")}</summary>
         <div class="body">
           <div class="fundamentals">
-            <div><small>Revenue (${escapeHtml(extra.period || "latest")})</small><strong>${Number.isFinite(extra.revenue) ? `\u20b9${compact(extra.revenue)} Cr` : "--"}</strong></div>
-            <div><small>PAT margin (${escapeHtml(extra.period || "latest")})</small><strong>${Number.isFinite(extra.patMargin) ? pct(extra.patMargin) : "--"}</strong></div>
+            <div><small>Revenue (${escapeHtml(revenue.period || "latest")})</small><strong>${Number.isFinite(revenue.value) ? `\u20b9${compact(revenue.value)} Cr` : "--"}</strong></div>
+            <div><small>PAT margin (${escapeHtml(patMargin.period || "latest")})</small><strong>${Number.isFinite(patMargin.value) ? pct(patMargin.value) : "--"}</strong></div>
             <div><small>1Y return</small><strong>${pct(oneYearReturn(item))}</strong></div>
             <div><small>IC verdict</small><strong>${escapeHtml(extra.verdict || "Watch")}</strong></div>
           </div>
           <p>${escapeHtml(extra.oneLine || item.meta.segment)}</p>
+          <p>Financial source: ${escapeHtml(revenue.source || "Unavailable")} for revenue; ${escapeHtml(patMargin.source || "Unavailable")} for PAT margin.</p>
           <p>Latest quote: ${money(q.regularMarketPrice)} (${pct(q.regularMarketChangePercent)}). Consensus data is shown as unavailable when Yahoo's protected statement modules do not return it.</p>
           <p>${filing ? `<a href="${filing.attachment || `https://www.bseindia.com/corporates/ann.html`}" target="_blank" rel="noreferrer">${escapeHtml(filing.title || "Latest BSE filing")}</a>` : `<a href="https://www.bseindia.com/corporates/ann.html" target="_blank" rel="noreferrer">BSE filings (${escapeHtml(item.meta.bse || "code")})</a>`} &middot; <a href="https://finance.yahoo.com/quote/${item.meta.symbol}" target="_blank" rel="noreferrer">Yahoo Finance</a></p>
         </div>
@@ -1398,16 +1425,17 @@ function renderComparison() {
   ], dashboard.map((item) => {
     const extra = extraData[item.meta.id] || {};
     const valuation = valuationMetrics(extra);
-    const f = item.yahoo?.financials || {};
+    const revenue = sourceMetric(item, "revenue");
+    const patMargin = sourceMetric(item, "patMargin");
     return [
-      `<strong>${escapeHtml(item.meta.name)}</strong><br><small>${escapeHtml(extra.period || "latest")}</small>`,
+      `<strong>${escapeHtml(item.meta.name)}</strong><br><small>${escapeHtml(revenue.period || extra.period || "latest")} &middot; ${escapeHtml(revenue.source || "Unavailable")}</small>`,
       escapeHtml(extra.focus || item.meta.segment || ""),
-      Number.isFinite(extra.revenue) ? `\u20b9${compact(extra.revenue)} Cr` : compact(f.revenue),
+      Number.isFinite(revenue.value) ? `\u20b9${compact(revenue.value)} Cr` : "--",
       valuation.evRevenue,
       valuation.evEbitda,
       valuation.pe,
-      Number.isFinite(extra.patMargin) ? pct(extra.patMargin) : pct((f.profitMargins || NaN) * 100),
-      Number.isFinite(extra.roe) ? pct(extra.roe) : pct((f.returnOnEquity || NaN) * 100),
+      Number.isFinite(patMargin.value) ? pct(patMargin.value) : "--",
+      Number.isFinite(extra.roe) ? pct(extra.roe) : pct((item.yahoo?.financials?.returnOnEquity || NaN) * 100),
       Number.isFinite(extra.debtEquity) ? `${formatNum.format(extra.debtEquity)}x` : "--",
       escapeHtml(extra.oneLine || item.meta.segment || "")
     ];
@@ -1778,14 +1806,16 @@ function getAnalystRows() {
   return dashboard.map((item) => {
     const extra = extraData[item.meta.id] || {};
     const quote = item.yahoo?.quote || {};
+    const revenue = sourceMetric(item, "revenue");
+    const patMargin = sourceMetric(item, "patMargin");
     return {
       id: item.meta.id,
       name: item.meta.name,
       price: quote.regularMarketPrice,
       dayMove: quote.regularMarketChangePercent,
       return1y: oneYearReturn(item),
-      revenue: extra.revenue,
-      patMargin: extra.patMargin,
+      revenue: revenue.value,
+      patMargin: patMargin.value,
       roce: extra.roce,
       pe: extra.pe,
       debtEquity: extra.debtEquity,
