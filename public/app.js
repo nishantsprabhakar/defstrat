@@ -568,6 +568,7 @@ function sourceMetric(item, key, options = {}) {
     if (Number.isFinite(f.revenue)) return { value: rupeesToCrores(f.revenue), period: "Yahoo latest", source: "Yahoo Finance" };
   }
   if (key === "pat" && Number.isFinite(mc.pat)) return { value: mc.pat, period: mc.period || "latest consolidated year", source: "Moneycontrol consolidated P&L" };
+  if (key === "ebitda" && Number.isFinite(f.ebitda)) return { value: rupeesToCrores(f.ebitda), period: "Yahoo latest", source: "Yahoo Finance" };
   if (key === "ebitdaMargin" && Number.isFinite(f.operatingMargins)) return { value: f.operatingMargins * 100, period: "Yahoo latest", source: "Yahoo Finance" };
   if (key === "grossMargin" && Number.isFinite(f.grossMargins)) return { value: f.grossMargins * 100, period: "Yahoo latest", source: "Yahoo Finance" };
   if (key === "patMargin" && Number.isFinite(f.profitMargins)) return { value: f.profitMargins * 100, period: "Yahoo latest", source: "Yahoo Finance" };
@@ -590,7 +591,16 @@ function chartCard(title, body, className = "") {
 }
 
 function historicalMetricSeries(item, key) {
-  const rowKey = key === "pat" ? "pat" : key === "revenue" ? "revenue" : null;
+  const rowKeyMap = {
+    pat: "pat",
+    revenue: "revenue",
+    roce: "roce",
+    fcf: "fcf",
+    receivableDays: "receivableDays",
+    inventoryDays: "inventoryDays",
+    payableDays: "payableDays"
+  };
+  const rowKey = rowKeyMap[key] || null;
   const mc = item?.moneycontrol;
   if (rowKey && mc?.available && Array.isArray(mc.years) && Array.isArray(mc.rows?.[rowKey])) {
     const byYear = new Map();
@@ -602,6 +612,16 @@ function historicalMetricSeries(item, key) {
     if (series.some(Number.isFinite)) return series;
   }
   return null;
+}
+
+function latestHistoricalValue(item, key) {
+  const series = historicalMetricSeries(item, key);
+  if (series) {
+    const latest = [...series].reverse().find(Number.isFinite);
+    if (Number.isFinite(latest)) return latest;
+  }
+  const latest = item?.moneycontrol?.latest?.[key];
+  return Number.isFinite(latest) ? latest : NaN;
 }
 
 function moveClass(value) {
@@ -1101,7 +1121,7 @@ function renderBusiness() {
   };
   const q = selected.yahoo?.quote || {};
   const f = selected.yahoo?.financials || {};
-  const valuation = valuationMetrics(extra);
+  const valuation = valuationMetrics(extra, selected);
   const revenueMetric = sourceMetric(selected, "revenue");
   const grossMetric = sourceMetric(selected, "grossMargin");
   const ebitdaMetric = sourceMetric(selected, "ebitdaMargin");
@@ -1210,13 +1230,27 @@ function detailList(items = []) {
   return `<ul class="detail-list">${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
 }
 
-function valuationMetrics(extra = {}) {
-  const revenue = Number(extra.revenue);
-  const ebitda = revenue * (Number(extra.ebitdaMargin) / 100);
-  const enterpriseValue = Number.isFinite(extra.enterpriseValue) ? Number(extra.enterpriseValue) : Number(extra.marketCap);
+function valuationMetrics(extra = {}, item = null) {
+  const revenueMetric = item ? sourceMetric(item, "revenue") : { value: Number(extra.revenue) };
+  const ebitdaMetric = item ? sourceMetric(item, "ebitda") : { value: Number(extra.ebitda) };
+  const revenue = Number.isFinite(revenueMetric.value) ? revenueMetric.value : Number(extra.revenue);
+  const ebitda = Number.isFinite(ebitdaMetric.value) ? ebitdaMetric.value : revenue * (Number(extra.ebitdaMargin) / 100);
+  const liveMarketCap = rupeesToCrores(item?.yahoo?.quote?.marketCap);
+  const enterpriseValue = Number.isFinite(extra.enterpriseValue)
+    ? Number(extra.enterpriseValue)
+    : Number.isFinite(extra.marketCap)
+      ? Number(extra.marketCap)
+      : liveMarketCap;
   const rawEvRevenue = Number.isFinite(enterpriseValue) && revenue > 0 ? enterpriseValue / revenue : NaN;
   const rawEvEbitda = Number.isFinite(enterpriseValue) && ebitda > 0 ? enterpriseValue / ebitda : NaN;
-  const rawPe = Number(extra.pe);
+  const patMetric = item ? sourceMetric(item, "pat") : { value: Number(extra.pat) };
+  const rawPe = Number.isFinite(extra.pe)
+    ? Number(extra.pe)
+    : Number.isFinite(item?.yahoo?.quote?.trailingPE)
+      ? Number(item.yahoo.quote.trailingPE)
+      : Number.isFinite(enterpriseValue) && patMetric.value > 0
+        ? enterpriseValue / patMetric.value
+        : NaN;
   return {
     rawEvRevenue,
     rawEvEbitda,
@@ -1227,10 +1261,14 @@ function valuationMetrics(extra = {}) {
   };
 }
 
-function workingCapitalMetrics(extra = {}) {
-  const receivable = Number.isFinite(extra.receivableDays) ? extra.receivableDays : (Number.isFinite(extra.debtorDays) ? extra.debtorDays : NaN);
-  const inventory = extra.inventoryDays;
-  const payable = extra.payableDays;
+function workingCapitalMetrics(extra = {}, item = null) {
+  const receivable = Number.isFinite(extra.receivableDays)
+    ? extra.receivableDays
+    : Number.isFinite(extra.debtorDays)
+      ? extra.debtorDays
+      : latestHistoricalValue(item, "receivableDays");
+  const inventory = Number.isFinite(extra.inventoryDays) ? extra.inventoryDays : latestHistoricalValue(item, "inventoryDays");
+  const payable = Number.isFinite(extra.payableDays) ? extra.payableDays : latestHistoricalValue(item, "payableDays");
   const netCycle = [receivable, inventory, payable].every(Number.isFinite) ? receivable + inventory - payable : NaN;
   return { receivable, inventory, payable, netCycle };
 }
@@ -1322,12 +1360,12 @@ function renderHistorical() {
   const marginValues = [sourceMetric(selected, "ebitdaMargin").value, sourceMetric(selected, "patMargin").value];
   const valuationRows = dashboard.map((item) => {
     const extra = extraData[item.meta.id] || {};
-    const valuation = valuationMetrics(extra);
+    const valuation = valuationMetrics(extra, item);
     return { id: item.meta.id, label: extra.label || item.meta.nse, values: [valuation.rawEvRevenue, valuation.rawEvEbitda, valuation.rawPe] };
   });
   const wcRows = dashboard.map((item) => {
     const extra = extraData[item.meta.id] || {};
-    const wc = workingCapitalMetrics(extra);
+    const wc = workingCapitalMetrics(extra, item);
     return { id: item.meta.id, label: extra.label || item.meta.nse, values: [wc.receivable, wc.inventory, wc.payable, wc.netCycle] };
   });
   const chartCards = [
@@ -1341,8 +1379,8 @@ function renderHistorical() {
   ].filter(Boolean).join("");
   const rows = dashboard.map((item) => {
     const extra = extraData[item.meta.id] || {};
-    const valuation = valuationMetrics(extra);
-    const wc = workingCapitalMetrics(extra);
+    const valuation = valuationMetrics(extra, item);
+    const wc = workingCapitalMetrics(extra, item);
     const revenue = sourceMetric(item, "revenue");
     const ebitdaMargin = sourceMetric(item, "ebitdaMargin");
     return [
@@ -1451,7 +1489,7 @@ function renderComparison() {
   els.comparisonPanel.innerHTML = `<div class="chart-grid">
     <article class="chart-card wide">${chartTitle("Peer Valuation Multiples")}${groupedBarChart(dashboard.map((item) => {
       const extra = extraData[item.meta.id] || {};
-      const valuation = valuationMetrics(extra);
+      const valuation = valuationMetrics(extra, item);
       return { id: item.meta.id, label: extra.label || item.meta.nse, values: [valuation.rawEvRevenue, valuation.rawEvEbitda, valuation.rawPe] };
     }), ["EV/Revenue", "EV/EBITDA", "P/E"], "Multiple (x)")}</article>
     <article class="chart-card">${chartTitle("Profitability vs Leverage")}${scatterChart(dashboard.map((item) => ({ id: item.meta.id, label: extraData[item.meta.id]?.label || item.meta.nse, x: extraData[item.meta.id]?.debtEquity, y: extraData[item.meta.id]?.patMargin })), "D/E", "PAT margin")}</article>
@@ -1459,7 +1497,7 @@ function renderComparison() {
     "Company / period", "Focus", "Revenue", "EV/Revenue", "EV/EBITDA", "P/E", "PAT margin", "ROE", "D/E", "Commentary"
   ], dashboard.map((item) => {
     const extra = extraData[item.meta.id] || {};
-    const valuation = valuationMetrics(extra);
+    const valuation = valuationMetrics(extra, item);
     const revenue = sourceMetric(item, "revenue");
     const patMargin = sourceMetric(item, "patMargin");
     return [

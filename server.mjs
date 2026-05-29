@@ -70,6 +70,19 @@ function latestStatements(list = []) {
   ));
 }
 
+function moneycontrolUrl(meta, section) {
+  if (!meta.moneycontrol) return "";
+  return meta.moneycontrol
+    .replace(/consolidated-profit-lossVI/i, section)
+    .replace(/profit-lossVI/i, section);
+}
+
+function moneycontrolQuoteUrl(meta) {
+  const match = String(meta.moneycontrol || "").match(/\/financials\/([^/]+)\/[^/]+\/([^/?#]+)/i);
+  if (!match) return "";
+  return `https://www.moneycontrol.com/india/stockpricequote/any/${match[1]}/${match[2].toUpperCase()}`;
+}
+
 async function fetchJson(url, options = {}) {
   const key = url;
   const cached = cache.get(key);
@@ -156,7 +169,14 @@ function parseMoneycontrolHeaders(html) {
 
 async function moneycontrolFinancials(meta) {
   if (!meta.moneycontrol) return null;
-  const html = await fetchText(meta.moneycontrol, { headers: { referer: "https://www.moneycontrol.com/" } });
+  const [plResult, bsResult, cfResult] = await Promise.allSettled([
+    fetchText(meta.moneycontrol, { headers: { referer: "https://www.moneycontrol.com/" } }),
+    fetchText(moneycontrolUrl(meta, "consolidated-balance-sheetVI"), { headers: { referer: "https://www.moneycontrol.com/" } }),
+    fetchText(moneycontrolUrl(meta, "consolidated-cash-flowVI"), { headers: { referer: "https://www.moneycontrol.com/" } })
+  ]);
+  const html = plResult.status === "fulfilled" ? plResult.value : "";
+  const balanceHtml = bsResult.status === "fulfilled" ? bsResult.value : "";
+  const cashHtml = cfResult.status === "fulfilled" ? cfResult.value : "";
   if (/Data Not Available for Profit\s*&amp;\s*Loss/i.test(html)) {
     return { source: "Moneycontrol consolidated P&L", url: meta.moneycontrol, available: false, reason: "Data not available" };
   }
@@ -164,19 +184,142 @@ async function moneycontrolFinancials(meta) {
   const revenue = parseMoneycontrolRow(html, "Revenue From Operations [Gross]");
   const operatingRevenue = parseMoneycontrolRow(html, "Total Operating Revenues");
   const pat = parseMoneycontrolRow(html, "Consolidated Profit/Loss After MI And Associates");
+  const pbt = parseMoneycontrolRow(html, "Profit/Loss Before Tax");
+  const financeCosts = parseMoneycontrolRow(html, "Finance Costs");
+  const totalAssets = parseMoneycontrolRow(balanceHtml, "Total Assets");
+  const currentLiabilities = parseMoneycontrolRow(balanceHtml, "Total Current Liabilities");
+  const inventories = parseMoneycontrolRow(balanceHtml, "Inventories");
+  const receivables = parseMoneycontrolRow(balanceHtml, "Trade Receivables");
+  const payables = parseMoneycontrolRow(balanceHtml, "Trade Payables");
+  const cfo = parseMoneycontrolRow(cashHtml, "Net CashFlow From Operating Activities");
+  const investing = parseMoneycontrolRow(cashHtml, "Net Cash Used In Investing Activities");
+  const byIndex = (fn) => years.map((_, index) => {
+    const value = fn(index);
+    return Number.isFinite(value) ? Number(value.toFixed(2)) : null;
+  });
+  const baseRevenue = revenue.length ? revenue : operatingRevenue;
+  const roce = byIndex((index) => {
+    const capitalEmployed = totalAssets[index] - currentLiabilities[index];
+    const ebit = pbt[index] + financeCosts[index];
+    return capitalEmployed > 0 ? (ebit / capitalEmployed) * 100 : NaN;
+  });
+  const fcf = byIndex((index) => Number.isFinite(cfo[index]) && Number.isFinite(investing[index]) ? cfo[index] + investing[index] : NaN);
+  const receivableDays = byIndex((index) => baseRevenue[index] > 0 ? (receivables[index] / baseRevenue[index]) * 365 : NaN);
+  const inventoryDays = byIndex((index) => baseRevenue[index] > 0 ? (inventories[index] / baseRevenue[index]) * 365 : NaN);
+  const payableDays = byIndex((index) => baseRevenue[index] > 0 ? (payables[index] / baseRevenue[index]) * 365 : NaN);
   const latest = {
     period: years[0] ? `FY${years[0].slice(-2)}` : "latest consolidated year",
     revenue: revenue[0] ?? operatingRevenue[0] ?? null,
     operatingRevenue: operatingRevenue[0] ?? null,
-    pat: pat[0] ?? null
+    pat: pat[0] ?? null,
+    roce: roce[0],
+    fcf: fcf[0],
+    receivableDays: receivableDays[0],
+    inventoryDays: inventoryDays[0],
+    payableDays: payableDays[0]
   };
   return {
-    source: "Moneycontrol consolidated P&L",
+    source: "Moneycontrol consolidated financial statements",
     url: meta.moneycontrol,
     available: Number.isFinite(latest.revenue) || Number.isFinite(latest.pat),
     latest,
     years,
-    rows: { revenue, operatingRevenue, pat }
+    rows: {
+      revenue,
+      operatingRevenue,
+      pat,
+      pbt,
+      financeCosts,
+      totalAssets,
+      currentLiabilities,
+      inventories,
+      receivables,
+      payables,
+      cfo,
+      investing,
+      roce,
+      fcf,
+      receivableDays,
+      inventoryDays,
+      payableDays
+    }
+  };
+}
+
+async function yahooSimpleQuote(symbol) {
+  const url = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(symbol)}`;
+  const json = await fetchJson(url, { headers: { origin: "https://finance.yahoo.com", referer: "https://finance.yahoo.com/" } });
+  const row = json?.quoteResponse?.result?.[0] || {};
+  return {
+    source: "Yahoo Finance quote",
+    quote: {
+      symbol,
+      name: row.longName || row.shortName || symbol,
+      currency: row.currency || "INR",
+      exchange: row.fullExchangeName || row.exchange || "NSE",
+      regularMarketPrice: row.regularMarketPrice ?? null,
+      regularMarketChange: row.regularMarketChange ?? null,
+      regularMarketChangePercent: row.regularMarketChangePercent ?? null,
+      regularMarketTime: row.regularMarketTime ?? null,
+      marketCap: row.marketCap ?? null,
+      volume: row.regularMarketVolume ?? row.averageDailyVolume3Month ?? null,
+      fiftyTwoWeekHigh: row.fiftyTwoWeekHigh ?? null,
+      fiftyTwoWeekLow: row.fiftyTwoWeekLow ?? null,
+      trailingPE: row.trailingPE ?? row.forwardPE ?? null,
+      forwardPE: row.forwardPE ?? null,
+      dividendYield: row.trailingAnnualDividendYield ?? null,
+      beta: null
+    }
+  };
+}
+
+function parseMetricAfterLabel(text, labelPattern) {
+  const match = text.match(new RegExp(`${labelPattern}\\s+(-?[\\d,.]+)`, "i"));
+  return match ? parseMoneyNumber(match[1]) : null;
+}
+
+function parseMoneycontrolOverviewSeries(html, heading) {
+  const escaped = heading.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = html.match(new RegExp(`"heading"\\s*:\\s*"${escaped}"\\s*,\\s*"data"\\s*:\\s*(\\[[\\s\\S]*?\\])`, "i"));
+  if (!match) return [];
+  try {
+    return JSON.parse(match[1]).map((row) => ({
+      year: row.year ? `Mar ${String(row.year).slice(-2)}` : "",
+      value: Number(row.value)
+    })).filter((row) => row.year && Number.isFinite(row.value));
+  } catch {
+    return [];
+  }
+}
+
+async function moneycontrolQuote(meta) {
+  const url = moneycontrolQuoteUrl(meta);
+  if (!url) return null;
+  const html = await fetchText(url, { headers: { referer: "https://www.moneycontrol.com/" } });
+  const text = stripHtml(html).replace(/\s+/g, " ");
+  const marketCap = parseMetricAfterLabel(text, "Mkt Cap \\(Rs\\. Cr\\.\\)");
+  const dividendYield = parseMetricAfterLabel(text, "Dividend Yield");
+  const bookValue = parseMetricAfterLabel(text, "Book Value Per Share");
+  const beta = parseMetricAfterLabel(text, "Beta");
+  const high = parseMetricAfterLabel(text, "High");
+  const low = parseMetricAfterLabel(text, "Low");
+  return {
+    source: "Moneycontrol live quote",
+    url,
+    quote: {
+      marketCap: Number.isFinite(marketCap) ? marketCap * 1e7 : null,
+      dividendYield,
+      beta,
+      fiftyTwoWeekHigh: high,
+      fiftyTwoWeekLow: low,
+      bookValue
+    },
+    overview: {
+      revenue: parseMoneycontrolOverviewSeries(html, "Revenue"),
+      pat: parseMoneycontrolOverviewSeries(html, "Net Profit"),
+      roe: parseMoneycontrolOverviewSeries(html, "ROE"),
+      debtEquity: parseMoneycontrolOverviewSeries(html, "Debt to Equity")
+    }
   };
 }
 
@@ -501,19 +644,67 @@ async function transcriptSummary(meta) {
 }
 
 async function companyPayload(meta) {
-  const [chart, richYahoo, bse, news, moneycontrol] = await Promise.allSettled([
+  const [chart, richYahoo, simpleQuote, mcQuote, bse, news, moneycontrol] = await Promise.allSettled([
     yahooChart(meta.symbol),
     yahooCompany(meta.symbol),
+    yahooSimpleQuote(meta.symbol),
+    moneycontrolQuote(meta),
     bseAnnouncements(meta.bse),
     companyNews(meta),
     moneycontrolFinancials(meta)
   ]);
   const chartValue = chart.status === "fulfilled" ? chart.value : { meta: {}, points: [] };
   const yahooValue = richYahoo.status === "fulfilled" ? richYahoo.value : yahooFromChart(meta.symbol, chartValue);
+  const simpleQuoteValue = simpleQuote.status === "fulfilled" ? simpleQuote.value : null;
+  const moneycontrolQuoteValue = mcQuote.status === "fulfilled" ? mcQuote.value : null;
+  if (simpleQuoteValue?.quote) {
+    yahooValue.quote = {
+      ...simpleQuoteValue.quote,
+      ...Object.fromEntries(Object.entries(yahooValue.quote || {}).filter(([, value]) => value !== null && value !== undefined))
+    };
+    for (const [key, value] of Object.entries(simpleQuoteValue.quote)) {
+      if ((yahooValue.quote[key] === null || yahooValue.quote[key] === undefined) && value !== null && value !== undefined) {
+        yahooValue.quote[key] = value;
+      }
+    }
+    yahooValue.source = yahooValue.source === "Yahoo Finance chart" ? "Yahoo Finance quote/chart" : yahooValue.source;
+  }
+  if (moneycontrolQuoteValue?.quote) {
+    for (const [key, value] of Object.entries(moneycontrolQuoteValue.quote)) {
+      if ((yahooValue.quote[key] === null || yahooValue.quote[key] === undefined) && value !== null && value !== undefined) {
+        yahooValue.quote[key] = value;
+      }
+    }
+    yahooValue.source = yahooValue.source === "Yahoo Finance chart" ? "Yahoo Finance chart + Moneycontrol quote" : yahooValue.source;
+  }
+  const moneycontrolValue = moneycontrol.status === "fulfilled" ? moneycontrol.value : { source: "Moneycontrol consolidated P&L", available: false, reason: moneycontrol.reason?.message || "Unavailable" };
+  if (!moneycontrolValue?.available && moneycontrolQuoteValue?.overview?.revenue?.length) {
+    const overviewYears = moneycontrolQuoteValue.overview.revenue.map((row) => row.year);
+    const alignOverview = (key) => {
+      const map = new Map((moneycontrolQuoteValue.overview[key] || []).map((row) => [row.year, row.value]));
+      return overviewYears.map((year) => map.get(year) ?? null);
+    };
+    moneycontrolValue.source = "Moneycontrol stock quote financial overview";
+    moneycontrolValue.url = moneycontrolQuoteValue.url;
+    moneycontrolValue.available = true;
+    moneycontrolValue.years = overviewYears;
+    moneycontrolValue.latest = {
+      period: overviewYears.at(-1) ? `FY${overviewYears.at(-1).slice(-2)}` : "latest consolidated year",
+      revenue: moneycontrolQuoteValue.overview.revenue.at(-1)?.value ?? null,
+      pat: moneycontrolQuoteValue.overview.pat.at(-1)?.value ?? null
+    };
+    moneycontrolValue.rows = {
+      ...(moneycontrolValue.rows || {}),
+      revenue: alignOverview("revenue"),
+      pat: alignOverview("pat"),
+      roe: alignOverview("roe"),
+      debtEquity: alignOverview("debtEquity")
+    };
+  }
   return {
     meta,
     yahoo: yahooValue,
-    moneycontrol: moneycontrol.status === "fulfilled" ? moneycontrol.value : { source: "Moneycontrol consolidated P&L", available: false, reason: moneycontrol.reason?.message || "Unavailable" },
+    moneycontrol: moneycontrolValue,
     chart: chartValue.points,
     bse: bse.status === "fulfilled" ? bse.value : [],
     news: news.status === "fulfilled" ? news.value : [],
