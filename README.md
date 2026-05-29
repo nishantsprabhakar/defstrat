@@ -49,7 +49,7 @@ This app needs a Node-capable web service because it includes a live-data proxy.
    - Start command: `node server.mjs`
    - Environment: Node
 
-`render.yaml` is included for blueprint deploys.
+`render.yaml` is included for blueprint deploys and enables auto-deploy from the connected branch. If an existing Render service was created with auto-deploy disabled, open the Render dashboard and trigger **Manual Deploy -> Deploy latest commit** once.
 
 ### Docker
 
