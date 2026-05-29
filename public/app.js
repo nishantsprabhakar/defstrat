@@ -566,6 +566,17 @@ async function getJson(url) {
   return response.json();
 }
 
+async function postJson(url, body) {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body || {}),
+    cache: "no-store"
+  });
+  if (!response.ok) throw new Error(await response.text());
+  return response.json();
+}
+
 async function boot() {
   const { companies } = await getJson("/api/companies");
   catalog = companies;
@@ -1311,10 +1322,32 @@ function renderCallSummary() {
     ${note}
     <small>${escapeHtml(summary.period)} &middot; Call date/period: ${escapeHtml(summary.callDate)} &middot; Refreshed every minute; replaced when a newer transcript is available for the followed company.</small>
     <strong>${escapeHtml(summary.title)}</strong>
+    <div id="autoCallSummary" class="empty">Checking for newer transcript uploads...</div>
     ${summary.sections.map((section) => `<div class="call-section"><h3>${escapeHtml(section.heading)}</h3><p>${escapeHtml(section.text)}</p></div>`).join("")}
     <div class="call-section"><h3>${escapeHtml(summary.quarterTitle || "Q4 FY26 Metrics")}</h3>${table(summary.quarterHeaders || ["Metric", "Q4 FY26", "Q4 FY25", "Change"], summary.q4)}</div>
     <div class="call-section"><h3>${escapeHtml(summary.fullYearTitle || "FY26 Metrics")}</h3>${table(summary.fullYearHeaders || ["Metric", "FY26", "FY25", "Change"], summary.fy)}</div>
   </article>`;
+  refreshCallSummary(selected.meta.id);
+}
+
+async function refreshCallSummary(id) {
+  const target = document.querySelector("#autoCallSummary");
+  if (!target) return;
+  try {
+    const { summary, candidates } = await getJson(`/api/transcript-summary?id=${encodeURIComponent(id)}`);
+    const latest = summary?.latestSource;
+    const sections = (summary?.sections || []).map((section) => `<div class="ai-response-item">
+      <strong>${escapeHtml(section.heading)}</strong>
+      <p>${escapeHtml(section.text)}</p>
+    </div>`).join("");
+    target.className = "ai-response-list";
+    target.innerHTML = `<div class="ai-response-item">
+      <strong>Automatic transcript monitor</strong>
+      <p>${latest ? `Latest detected source: ${escapeHtml(latest.date || "date unavailable")} - ${escapeHtml(latest.title)}.` : "No newer transcript-like filing detected yet."} ${candidates?.length ? `${candidates.length} candidate source(s) checked.` : "The backend will keep checking BSE/news feeds."}</p>
+    </div>${sections}`;
+  } catch (error) {
+    target.innerHTML = `Automatic transcript monitor is active, but the latest check failed: ${escapeHtml(error.message)}`;
+  }
 }
 
 function renderComparison() {
@@ -1376,7 +1409,7 @@ function renderAiBrief() {
 function renderManage() {
   if (!els.managePanel) return;
   els.managePanel.innerHTML = `<div class="brief-grid">
-    <article class="brief-card"><small>AI analyst settings</small><strong>Local deterministic mode</strong><p>Groq/Llama-style prompt chips are mirrored from DefStrat. Add a key later if you want cloud LLM responses.</p></article>
+    <article class="brief-card"><small>AI analyst settings</small><strong>Backend AI enabled</strong><p>DefStrat AI now calls the server for fresh Yahoo Finance, BSE, news and transcript context. Add OPENAI_API_KEY on the host for full AI responses; otherwise it uses a live-data fallback.</p></article>
     <article class="brief-card"><small>Tracked companies</small><strong>${watchIds.length}</strong><p>${watchIds.map((id) => escapeHtml(metaFor(id)?.name || id)).join(", ")}</p></article>
     <article class="brief-card"><small>Data sources</small><strong>Yahoo Finance + BSE + live news</strong><p>Quote history comes from Yahoo Finance. Filings, presentations and exchange notes link back to BSE where available. Article summaries use current news feeds.</p></article>
   </div>
@@ -1403,6 +1436,17 @@ async function answerAi(prompt) {
     return;
   }
   answer.innerHTML = `<small>Searching live sources</small><p>Refreshing Yahoo Finance quote/chart data, live internet news and BSE filing context before answering...</p>`;
+  try {
+    const result = await postJson("/api/ai", {
+      prompt,
+      selectedId,
+      ids: watchIds
+    });
+    renderAiText(`DefStrat AI (${result.mode === "openai" ? "AI backend" : "live-data fallback"}) - ${formatDate(result.refreshedAt)}`, result.answer);
+    return;
+  } catch {
+    answer.innerHTML = `<small>Backend unavailable</small><p>Using local fallback while the AI backend is unavailable.</p>`;
+  }
   await refreshYahooContext(normalized);
   const rows = getAnalystRows();
   const metric = inferMetric(normalized);
@@ -1469,6 +1513,16 @@ async function answerAi(prompt) {
   const refreshed = dashboard.find((item) => item.meta.id === (mentioned[0]?.id || selectedId))?.refreshedAt;
   const stamp = refreshed ? `Latest refresh: ${formatDate(refreshed)}` : `Latest refresh: ${new Date().toLocaleString()}`;
   renderAiResponse(`${title} - ${stamp}`, lines);
+}
+
+function renderAiText(title, text) {
+  const answer = document.querySelector("#aiAnswer");
+  if (!answer) return;
+  const lines = String(text || "").split(/\n+/).map((line) => line.replace(/^[-*\d.\s]+/, "").trim()).filter(Boolean);
+  const cards = lines.length ? lines.map((line) => `<div class="ai-response-item">
+    <p>${escapeHtml(line)}</p>
+  </div>`).join("") : `<div class="empty">No response generated.</div>`;
+  answer.innerHTML = `<small>${escapeHtml(title)}</small><div class="ai-response-list">${cards}</div>`;
 }
 
 async function refreshYahooContext(text) {

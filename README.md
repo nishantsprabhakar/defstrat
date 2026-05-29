@@ -36,6 +36,12 @@ Stop DefStrat Dashboard.cmd
 
 The backend proxies Yahoo Finance chart/quote data and BSE filings so the browser can keep refreshing without CORS failures. The dashboard refreshes automatically every 60 seconds and stores added/deleted companies in local browser storage.
 
+## AI and transcript refresh
+
+DefStrat AI calls the backend endpoint `/api/ai`, which refreshes Yahoo Finance, BSE announcements and news context before answering. Set `OPENAI_API_KEY` on your host for full AI-generated responses. Without it, the server returns a deterministic live-data fallback instead of inventing unavailable numbers.
+
+The earnings-call tab calls `/api/transcript-summary` for the selected company. The backend scans BSE/company/news sources for transcript-like uploads and surfaces the latest detected filing or presentation signal automatically.
+
 ## Publish
 
 This app needs a Node-capable web service because it includes a live-data proxy.

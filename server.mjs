@@ -5,7 +5,10 @@ import { extname, join, normalize } from "node:path";
 const PORT = Number(process.env.PORT || 4173);
 const ROOT = join(process.cwd(), "public");
 const TTL = 60_000;
+const TRANSCRIPT_TTL = 15 * 60_000;
+const AI_MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
 const cache = new Map();
+const transcriptCache = new Map();
 
 const companies = [
   { id: "zentec", name: "Zen Technologies", symbol: "ZENTEC.NS", nse: "ZENTEC", bse: "533339", isin: "INE251B01027", segment: "Simulation, anti-drone and training systems" },
@@ -17,6 +20,17 @@ const companies = [
   { id: "paras", name: "Paras Defence", symbol: "PARAS.NS", nse: "PARAS", bse: "543367", isin: "INE045601023", segment: "Optics, defence electronics and space engineering" },
   { id: "astra", name: "Astra Microwave", symbol: "ASTRAMICRO.NS", nse: "ASTRAMICRO", bse: "532493", isin: "INE386C01029", segment: "RF, microwave and defence electronics" }
 ];
+
+const auditedMetrics = {
+  zentec: { period: "FY26", revenue: 687.69, pat: 193.45, ebitdaMargin: 48.37, grossMargin: 69.3, source: "NSE/BSE Q4 FY26 investor presentation filed 3 May 2026" },
+  ideaforge: { period: "FY26", revenue: 226.1, pat: -17.0, ebitda: 27.1, ebitdaMargin: 12.0, grossMargin: 58.0, source: "NSE Q4 FY26 press release filed 30 Apr 2026" },
+  mtar: { period: "FY26", revenue: 876.2, pat: 94.0, ebitda: 171.2, ebitdaMargin: 19.5, source: "Company Q4 FY26 results release / BSE filing dated 12 May 2026" },
+  datapatterns: { period: "FY26", revenue: 924.8, pat: 271.4, ebitda: 371.0, ebitdaMargin: 40.1, patMargin: 29.3, receivableDays: 287, inventoryDays: 108, payableDays: 30, source: "Data Patterns Q4 FY26 earnings transcript / presentation filed 15 May 2026" },
+  azad: { period: "FY26", revenue: 602.98, pat: 133.56, ebitdaMargin: 36.9, patMargin: 22.1, source: "Audited FY26 consolidated results filed 15 May 2026" },
+  aequs: { period: "FY26", revenue: 1230.4, pat: -113.3, ebitda: 154.5, ebitdaMargin: 12.6, patMargin: -9.2, source: "Company FY26 press release dated 26 May 2026" },
+  paras: { period: "FY26", revenue: 476.57, pat: 89.46, ebitda: 120.46, ebitdaMargin: 25.3, patMargin: 18.8, source: "Company Q4 FY26 results release / BSE filing dated 13 May 2026" },
+  astra: { period: "FY26", revenue: 1162.8, pat: 192.97, ebitdaMargin: 28.7, patMargin: 16.6, source: "Company audited FY26 results dated 26 May 2026" }
+};
 
 const mime = {
   ".html": "text/html; charset=utf-8",
@@ -33,6 +47,14 @@ function send(res, status, body, type = "application/json; charset=utf-8") {
     "access-control-allow-origin": "*"
   });
   res.end(typeof body === "string" ? body : JSON.stringify(body));
+}
+
+async function readJsonBody(req) {
+  const chunks = [];
+  for await (const chunk of req) chunks.push(chunk);
+  if (!chunks.length) return {};
+  const text = Buffer.concat(chunks).toString("utf8");
+  return text ? JSON.parse(text) : {};
 }
 
 function compactYahoo(value) {
@@ -332,6 +354,95 @@ async function bseAnnouncements(scrip) {
   }));
 }
 
+function isTranscriptLike(row = {}) {
+  const text = `${row.title || ""} ${row.category || ""} ${row.notes || ""} ${row.attachment || ""}`.toLowerCase();
+  return [
+    "transcript",
+    "earnings call",
+    "conference call",
+    "investor call",
+    "analyst",
+    "investor presentation",
+    "audio recording",
+    "financial result",
+    "press release"
+  ].some((term) => text.includes(term));
+}
+
+function parseDate(value) {
+  if (!value) return 0;
+  const parsed = Date.parse(value);
+  if (Number.isFinite(parsed)) return parsed;
+  const match = String(value).match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+  if (!match) return 0;
+  return Date.UTC(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
+}
+
+async function transcriptCandidates(meta) {
+  const key = `transcripts:${meta.id}`;
+  const cached = transcriptCache.get(key);
+  if (cached && Date.now() - cached.time < TRANSCRIPT_TTL) return cached.data;
+  const [bse, news] = await Promise.allSettled([bseAnnouncements(meta.bse), companyNews(meta)]);
+  const filings = (bse.status === "fulfilled" ? bse.value : []).filter(isTranscriptLike).map((row) => ({
+    title: row.title,
+    date: row.date,
+    source: row.category || "BSE filing",
+    link: row.attachment || "https://www.bseindia.com/corporates/ann.html",
+    summary: row.notes || row.title || "",
+    kind: "filing"
+  }));
+  const articles = (news.status === "fulfilled" ? news.value : []).filter(isTranscriptLike).map((row) => ({
+    title: row.title,
+    date: row.date,
+    source: row.publisher || row.source || "News",
+    link: row.link,
+    summary: row.summary || row.title || "",
+    kind: "news"
+  }));
+  const data = [...filings, ...articles]
+    .filter((row) => row.title)
+    .sort((a, b) => parseDate(b.date) - parseDate(a.date))
+    .slice(0, 8);
+  transcriptCache.set(key, { time: Date.now(), data });
+  return data;
+}
+
+function deterministicTranscriptSummary(meta, latest, metrics) {
+  const period = metrics?.period || "latest reported period";
+  const metricBits = [];
+  if (Number.isFinite(metrics?.revenue)) metricBits.push(`revenue Rs ${metrics.revenue}cr`);
+  if (Number.isFinite(metrics?.ebitda)) metricBits.push(`EBITDA Rs ${metrics.ebitda}cr`);
+  if (Number.isFinite(metrics?.ebitdaMargin)) metricBits.push(`EBITDA margin ${metrics.ebitdaMargin}%`);
+  if (Number.isFinite(metrics?.pat)) metricBits.push(`PAT Rs ${metrics.pat}cr`);
+  if (Number.isFinite(metrics?.patMargin)) metricBits.push(`PAT margin ${metrics.patMargin}%`);
+  const metricText = metricBits.length ? `${period} verified metrics: ${metricBits.join(", ")}.` : `No verified FY metric row is available for ${meta.name} in the backend yet.`;
+  return {
+    title: `${meta.name} automatic earnings update`,
+    callDate: latest?.date ? new Date(latest.date).toLocaleDateString("en-IN") : "Latest detected filing/news",
+    period,
+    refreshedAt: new Date().toISOString(),
+    status: latest ? "updated-from-latest-source" : "no-new-transcript-detected",
+    latestSource: latest || null,
+    sections: [
+      { heading: "Financial Performance", text: metricText },
+      { heading: "Latest Filing / Transcript Signal", text: latest ? `${latest.source}: ${latest.title}. ${latest.summary || "Review the linked source for full management commentary."}` : "No fresh transcript-like filing was detected in the latest BSE/news scan. The app will keep checking automatically." },
+      { heading: "Investor Watch Points", text: "Track order inflow, execution cadence, margin sustainability, receivable collection, inventory movement and management guidance changes versus the latest verified fiscal-year base." }
+    ]
+  };
+}
+
+async function transcriptSummary(meta) {
+  const candidates = await transcriptCandidates(meta);
+  const latest = candidates[0] || null;
+  const metrics = auditedMetrics[meta.id] || {};
+  return {
+    meta,
+    summary: deterministicTranscriptSummary(meta, latest, metrics),
+    candidates,
+    source: "BSE announcements, company/news feeds and audited metric cache"
+  };
+}
+
 async function companyPayload(meta) {
   const [chart, richYahoo, bse, news] = await Promise.allSettled([
     yahooChart(meta.symbol),
@@ -348,6 +459,158 @@ async function companyPayload(meta) {
     bse: bse.status === "fulfilled" ? bse.value : [],
     news: news.status === "fulfilled" ? news.value : [],
     refreshedAt: new Date().toISOString()
+  };
+}
+
+function compactNumber(value) {
+  return Number.isFinite(value) ? Number(value.toFixed(2)) : null;
+}
+
+function payloadForAi(payload) {
+  const q = payload.yahoo?.quote || {};
+  const chart = payload.chart || [];
+  const first = chart.find((point) => Number.isFinite(point.close));
+  const last = [...chart].reverse().find((point) => Number.isFinite(point.close));
+  const return1y = first?.close && last?.close ? ((last.close - first.close) / first.close) * 100 : null;
+  return {
+    id: payload.meta.id,
+    name: payload.meta.name,
+    symbol: payload.meta.symbol,
+    segment: payload.meta.segment,
+    audited: auditedMetrics[payload.meta.id] || null,
+    quote: {
+      price: q.regularMarketPrice ?? null,
+      dayMovePct: q.regularMarketChangePercent ?? null,
+      marketCap: q.marketCap ?? null,
+      trailingPE: q.trailingPE ?? null,
+      volume: q.volume ?? null,
+      return1y: compactNumber(return1y),
+      refreshedAt: payload.refreshedAt
+    },
+    latestNews: (payload.news || []).slice(0, 4).map((row) => ({
+      date: row.date,
+      title: row.title,
+      publisher: row.publisher || row.source,
+      link: row.link,
+      summary: row.summary
+    })),
+    latestBse: (payload.bse || []).slice(0, 4).map((row) => ({
+      date: row.date,
+      title: row.title,
+      category: row.category,
+      attachment: row.attachment,
+      notes: row.notes
+    }))
+  };
+}
+
+function resolveAiCompanies(prompt, selectedId, ids = []) {
+  const text = String(prompt || "").toLowerCase();
+  const all = text.includes("all companies") || text.includes("watchlist") || text.includes("peer") || text.includes("compare");
+  if (all) return companies.filter((c) => !ids.length || ids.includes(c.id)).slice(0, 10);
+  const mentioned = companies.filter((c) => [c.id, c.nse, c.symbol, c.name].some((value) => String(value || "").toLowerCase().replace(".ns", "").split(/\s+/).some((part) => part && text.includes(part))));
+  if (mentioned.length) return mentioned.slice(0, 4);
+  return companies.filter((c) => c.id === selectedId).slice(0, 1);
+}
+
+function extractResponseText(json) {
+  if (json?.output_text) return json.output_text;
+  const parts = [];
+  for (const item of json?.output || []) {
+    for (const content of item.content || []) {
+      if (content.text) parts.push(content.text);
+    }
+  }
+  return parts.join("\n").trim();
+}
+
+async function callOpenAi(prompt, context) {
+  if (!process.env.OPENAI_API_KEY) return null;
+  const response = await fetch("https://api.openai.com/v1/responses", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+    },
+    body: JSON.stringify({
+      model: AI_MODEL,
+      instructions: [
+        "You are DefStrat AI, an expert Indian defence-equities financial reviewer.",
+        "Use only the supplied Yahoo Finance, BSE, news and audited metric context.",
+        "Mention fiscal years for every financial figure. Do not invent missing values.",
+        "Answer in 3-6 concise analyst bullets with source/date cues where available.",
+        "This is informational analysis, not investment advice."
+      ].join(" "),
+      input: `User question: ${prompt}\n\nContext JSON:\n${JSON.stringify(context, null, 2)}`,
+      max_output_tokens: 900
+    })
+  });
+  if (!response.ok) throw new Error(`OpenAI ${response.status}: ${await response.text()}`);
+  return extractResponseText(await response.json());
+}
+
+function deterministicAiAnswer(prompt, context) {
+  const question = String(prompt || "").toLowerCase();
+  const rows = context.companies || [];
+  const wantsNews = question.includes("news") || question.includes("latest");
+  const wantsCall = question.includes("earnings call") || question.includes("transcript");
+  const wantsCompare = question.includes("compare") || question.includes("peer") || rows.length > 1;
+  if (wantsCall) {
+    return rows.map((row) => {
+      const source = context.transcripts?.[row.id]?.summary?.latestSource;
+      const audited = row.audited;
+      return `- ${row.name}: ${audited?.period || "Latest period"} revenue ${audited?.revenue ?? "not verified"}cr and PAT ${audited?.pat ?? "not verified"}cr. Latest transcript/filing signal: ${source ? `${source.date || "date unavailable"} - ${source.title}` : "no new transcript-like filing detected"}.`;
+    }).join("\n");
+  }
+  if (wantsNews) {
+    return rows.map((row) => {
+      const news = row.latestNews?.[0];
+      const filing = row.latestBse?.[0];
+      return `- ${row.name}: latest Yahoo/news item: ${news ? `${news.date || "date unavailable"} - ${news.title}` : "none returned"}. Latest BSE item: ${filing ? `${filing.date || "date unavailable"} - ${filing.title}` : "none returned"}.`;
+    }).join("\n");
+  }
+  if (wantsCompare) {
+    return rows.map((row) => {
+      const audited = row.audited || {};
+      return `- ${row.name}: ${audited.period || "Latest period"} revenue Rs ${audited.revenue ?? "--"}cr, PAT Rs ${audited.pat ?? "--"}cr, EBITDA margin ${audited.ebitdaMargin ?? "--"}%, live price Rs ${row.quote.price ?? "--"}, 1Y return ${row.quote.return1y ?? "--"}%.`;
+    }).join("\n");
+  }
+  const row = rows[0];
+  if (!row) return "No matching company context was available. Try a company name or select one from the watchlist.";
+  const audited = row.audited || {};
+  return `- ${row.name}: live price Rs ${row.quote.price ?? "--"} with day move ${row.quote.dayMovePct ?? "--"}%.\n- ${audited.period || "Latest period"} verified metrics: revenue Rs ${audited.revenue ?? "--"}cr, PAT Rs ${audited.pat ?? "--"}cr, EBITDA margin ${audited.ebitdaMargin ?? "--"}%.\n- Latest news/BSE context is refreshed from Yahoo Finance, Google News RSS and BSE before this answer. Missing values are left blank rather than inferred.`;
+}
+
+async function aiAnswer(body = {}) {
+  const prompt = String(body.prompt || "").slice(0, 1200);
+  const ids = Array.isArray(body.ids) ? body.ids : [];
+  const selected = body.selectedId || ids[0] || companies[0].id;
+  const selectedCompanies = resolveAiCompanies(prompt, selected, ids);
+  const payloads = await Promise.all(selectedCompanies.map(companyPayload));
+  const transcriptPairs = await Promise.all(selectedCompanies.map(async (meta) => [meta.id, await transcriptSummary(meta)]));
+  const context = {
+    generatedAt: new Date().toISOString(),
+    dataSources: ["Yahoo Finance quote/chart/search", "BSE announcements", "Google News RSS", "audited FY26 metric cache"],
+    companies: payloads.map(payloadForAi),
+    transcripts: Object.fromEntries(transcriptPairs)
+  };
+  let text = null;
+  let mode = "deterministic";
+  try {
+    text = await callOpenAi(prompt, context);
+    if (text) mode = "openai";
+  } catch (error) {
+    text = `${deterministicAiAnswer(prompt, context)}\n\nAI backend note: OpenAI response failed, so this answer used the deterministic live-data fallback. ${error.message}`;
+  }
+  if (!text) text = deterministicAiAnswer(prompt, context);
+  return {
+    answer: text,
+    mode,
+    refreshedAt: context.generatedAt,
+    sources: context.companies.flatMap((row) => [
+      ...(row.latestNews || []).slice(0, 2).map((item) => ({ company: row.name, type: "news", title: item.title, date: item.date, link: item.link })),
+      ...(row.latestBse || []).slice(0, 2).map((item) => ({ company: row.name, type: "bse", title: item.title, date: item.date, link: item.attachment }))
+    ])
   };
 }
 
@@ -385,6 +648,21 @@ async function routeApi(req, res, url) {
       bse: bse.status === "fulfilled" ? bse.value : [],
       refreshedAt: new Date().toISOString()
     });
+  }
+  if (url.pathname === "/api/transcript-summary") {
+    const id = url.searchParams.get("id") || "";
+    const meta = companies.find((c) => c.id === id || c.symbol === id || c.nse === id.toUpperCase());
+    if (!meta) return send(res, 404, { error: "Unknown company" });
+    return send(res, 200, await transcriptSummary(meta));
+  }
+  if (url.pathname === "/api/transcripts") {
+    const ids = (url.searchParams.get("ids") || companies.map((c) => c.id).join(",")).split(",").filter(Boolean);
+    const selected = ids.map((id) => companies.find((c) => c.id === id || c.nse === id.toUpperCase())).filter(Boolean);
+    const summaries = await Promise.all(selected.map(transcriptSummary));
+    return send(res, 200, { summaries, refreshedAt: new Date().toISOString() });
+  }
+  if (url.pathname === "/api/ai" && req.method === "POST") {
+    return send(res, 200, await aiAnswer(await readJsonBody(req)));
   }
   return send(res, 404, { error: "Unknown API endpoint" });
 }
