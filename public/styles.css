@@ -144,6 +144,17 @@ h1 {
   padding: 16px;
 }
 
+.status-panel > div {
+  min-width: 0;
+}
+
+.status-panel strong,
+.status-panel span:not(.pulse) {
+  display: block;
+  min-width: 0;
+  line-height: 1.35;
+}
+
 .status-panel span:not(.pulse), .section-title span, small {
   color: var(--muted);
 }
@@ -157,13 +168,16 @@ h1 {
 }
 
 .icon-button {
+  width: 40px;
   min-width: 40px;
+  height: 40px;
   padding: 0;
   display: inline-grid;
   place-items: center;
+  flex: 0 0 40px;
 }
 
-.icon-button svg {
+.icon-button .refresh-icon {
   width: 20px;
   height: 20px;
   min-height: 0;
@@ -714,6 +728,21 @@ svg {
   background: #0c100d;
   border: 1px solid var(--line);
   border-radius: 8px;
+}
+
+.icon-button .refresh-icon {
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  display: block;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
 }
 
 .fundamentals {

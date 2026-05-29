@@ -3,8 +3,10 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
     <title>Defence Finance Command</title>
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/styles.css?v=20260529-2">
   </head>
   <body>
     <main class="shell">
@@ -25,7 +27,7 @@
             <span id="refreshStamp">Waiting for first refresh</span>
           </div>
           <button id="refreshBtn" class="icon-button" title="Refresh live data" aria-label="Refresh live data">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6v5h-5"/><path d="M4 18v-5h5"/><path d="M18.6 9A7 7 0 0 0 6.8 5.8L4 8.5"/><path d="M5.4 15A7 7 0 0 0 17.2 18.2L20 15.5"/></svg>
+            <svg class="refresh-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M21 12a9 9 0 0 1-15.1 6.6"/><path d="M3 12A9 9 0 0 1 18.1 5.4"/><path d="M6 19H3v-3"/><path d="M18 5h3v3"/></svg>
           </button>
         </div>
       </section>
@@ -196,6 +198,6 @@
       </footer>
     </main>
     <div id="chartTooltip" class="chart-tooltip" role="status" aria-live="polite"></div>
-    <script src="/app.js" type="module"></script>
+    <script src="/app.js?v=20260529-2" type="module"></script>
   </body>
 </html>

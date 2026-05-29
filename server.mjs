@@ -395,7 +395,12 @@ async function routeStatic(req, res, url) {
   if (!file.startsWith(ROOT)) return send(res, 403, "Forbidden", "text/plain; charset=utf-8");
   try {
     const body = await readFile(file);
-    res.writeHead(200, { "content-type": mime[extname(file)] || "application/octet-stream" });
+    res.writeHead(200, {
+      "content-type": mime[extname(file)] || "application/octet-stream",
+      "cache-control": "no-store, no-cache, must-revalidate, max-age=0",
+      "pragma": "no-cache",
+      "expires": "0"
+    });
     res.end(body);
   } catch {
     send(res, 404, "Not found", "text/plain; charset=utf-8");
