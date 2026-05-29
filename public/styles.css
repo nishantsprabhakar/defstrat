@@ -15,6 +15,10 @@
 
 * { box-sizing: border-box; }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -23,6 +27,15 @@ body {
     linear-gradient(135deg, rgba(22, 35, 24, .9), rgba(7, 9, 7, .96) 45%, rgba(18, 16, 10, .92)),
     radial-gradient(circle at 70% 20%, rgba(119, 199, 213, .16), transparent 32%);
   color: var(--text);
+  overflow-x: hidden;
+}
+
+p, span, small, strong, h1, h2, h3, button, input, td, th, a {
+  overflow-wrap: anywhere;
+}
+
+svg {
+  max-width: 100%;
 }
 
 button, input {
@@ -146,7 +159,21 @@ h1 {
 .icon-button {
   min-width: 40px;
   padding: 0;
-  font-size: 22px;
+  display: inline-grid;
+  place-items: center;
+}
+
+.icon-button svg {
+  width: 20px;
+  height: 20px;
+  min-height: 0;
+  border: 0;
+  background: transparent;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
 }
 
 .toolbar {
@@ -1118,6 +1145,35 @@ svg {
   padding: 18px;
   border: 1px dashed var(--line);
   border-radius: 8px;
+}
+
+.app-footer {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(16, 20, 17, .82);
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.app-footer strong {
+  display: block;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.app-footer p {
+  margin: 0 0 8px;
+  max-width: 1100px;
+}
+
+.app-footer span {
+  display: block;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
 }
 
 @media (max-width: 1120px) {

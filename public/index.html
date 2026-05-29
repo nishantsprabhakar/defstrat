@@ -24,7 +24,9 @@
             <strong id="marketStatus">Connecting to live feeds</strong>
             <span id="refreshStamp">Waiting for first refresh</span>
           </div>
-          <button id="refreshBtn" class="icon-button" title="Refresh live data" aria-label="Refresh live data">&#8635;</button>
+          <button id="refreshBtn" class="icon-button" title="Refresh live data" aria-label="Refresh live data">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6v5h-5"/><path d="M4 18v-5h5"/><path d="M18.6 9A7 7 0 0 0 6.8 5.8L4 8.5"/><path d="M5.4 15A7 7 0 0 0 17.2 18.2L20 15.5"/></svg>
+          </button>
         </div>
       </section>
 
@@ -150,7 +152,7 @@
       <section class="tab-panel data-panel" data-panel="callSummary">
         <div class="section-title">
           <h2>Earnings Call Summary</h2>
-          <span>Latest call notes in the attached format</span>
+          <span>Auto-refreshed when followed-company transcripts update</span>
         </div>
         <div id="callSummaryPanel"></div>
       </section>
@@ -186,6 +188,12 @@
         </div>
         <div id="managePanel"></div>
       </section>
+
+      <footer class="app-footer">
+        <strong>Disclaimer</strong>
+        <p>DefStrat is an informational dashboard for financial review and monitoring. It is not investment advice, a recommendation, or a solicitation to buy or sell securities. Live market data, company filings, news and transcript summaries may contain delays, omissions or third-party errors; verify all figures with official exchange/company sources before making decisions.</p>
+        <span>Copyright &copy; 2026 Nishant Prabhakar. All rights reserved.</span>
+      </footer>
     </main>
     <div id="chartTooltip" class="chart-tooltip" role="status" aria-live="polite"></div>
     <script src="/app.js" type="module"></script>

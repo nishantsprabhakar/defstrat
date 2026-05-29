@@ -1300,24 +1300,10 @@ function renderCallSummary() {
   const selected = dashboard.find((item) => item.meta.id === selectedId) || dashboard[0];
   if (!selected) return;
   const summary = callSummaries[selected.meta.id] || callSummaries.mtar;
-  const note = callSummaries[selected.meta.id] ? "" : `<div class="empty">No earnings call summary has been added for ${escapeHtml(selected.meta.name)} yet. Showing the latest attached MTAR earnings call format below. Current ${escapeHtml(selected.meta.name)} period tracked: ${escapeHtml(extraData[selected.meta.id]?.period || "N/A")}.</div>`;
-  const transcriptRows = dashboard.map((item) => {
-    const source = transcriptSources[item.meta.id] || {};
-    return [
-      `<strong>${escapeHtml(item.meta.name)}</strong><br><small>${escapeHtml(item.meta.nse || item.meta.symbol)}</small>`,
-      escapeHtml(source.status || "Checking"),
-      escapeHtml(source.date || extraData[item.meta.id]?.period || "N/A"),
-      source.url ? `<a href="${source.url}" target="_blank" rel="noreferrer">Open source</a><br><small>${escapeHtml(source.note || "")}</small>` : escapeHtml(source.note || "No transcript source added yet.")
-    ];
-  });
-  els.callSummaryPanel.innerHTML = `<article class="brief-card">
-    <small>Transcript availability rechecked</small>
-    <strong>Latest earnings-call transcript sources</strong>
-    ${table(["Company", "Availability", "Date / period", "Source"], transcriptRows)}
-  </article>
-  <article class="brief-card call-summary-card">
+  const note = callSummaries[selected.meta.id] ? "" : `<div class="empty">No dedicated earnings-call summary has been added for ${escapeHtml(selected.meta.name)} yet. Showing the MTAR-format summary template. Current ${escapeHtml(selected.meta.name)} period tracked: ${escapeHtml(extraData[selected.meta.id]?.period || "N/A")}.</div>`;
+  els.callSummaryPanel.innerHTML = `<article class="brief-card call-summary-card">
     ${note}
-    <small>${escapeHtml(summary.period)} &middot; Call date/period: ${escapeHtml(summary.callDate)} &middot; Source: ${escapeHtml(summary.source)}</small>
+    <small>${escapeHtml(summary.period)} &middot; Call date/period: ${escapeHtml(summary.callDate)} &middot; Refreshed every minute; replaced when a newer transcript is available for the followed company.</small>
     <strong>${escapeHtml(summary.title)}</strong>
     ${summary.sections.map((section) => `<div class="call-section"><h3>${escapeHtml(section.heading)}</h3><p>${escapeHtml(section.text)}</p></div>`).join("")}
     <div class="call-section"><h3>${escapeHtml(summary.quarterTitle || "Q4 FY26 Metrics")}</h3>${table(summary.quarterHeaders || ["Metric", "Q4 FY26", "Q4 FY25", "Change"], summary.q4)}</div>
