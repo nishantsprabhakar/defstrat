@@ -59,14 +59,14 @@ let activeSectorMetric = "revenue";
 let activePriceRange = "1Y";
 
 const extraData = {
-  zentec: { label: "Zen", focus: "Training simulators, anti-drone systems", revenue: 687.69, pat: 193.45, patMargin: 28.1, ebitdaMargin: 48.37, roe: 28, roa: 18, roce: 32, debtEquity: 0, pe: 72, pb: 18, marketCap: 14500, eps: 21.5, divYield: 0.05, debtorDays: 92, inventoryDays: 104, fcf: 65, period: "FY26", source: "Company Q4 FY26 release / BSE filing", verdict: "Positive", oneLine: "High-growth defence electronics and simulation play with order visibility tied to domestic procurement." },
-  ideaforge: { label: "ideaForge", focus: "UAVs and drone platforms", revenue: 226.1, pat: -17.0, grossMargin: 58.0, patMargin: -7.5, ebitdaMargin: 12.0, roe: -5, roa: -3, roce: 8, debtEquity: 0.02, pe: null, pb: 6.5, marketCap: 2900, eps: -4.0, divYield: 0, debtorDays: 118, inventoryDays: 152, fcf: -22, period: "FY26", source: "Company FY26 investor presentation / NSE filing", verdict: "Watch", oneLine: "Drone specialist with strategic relevance across surveillance, mapping and tactical use cases." },
-  mtar: { label: "MTAR", focus: "Precision Engineering", revenue: 876.2, pat: 94.0, patMargin: 10.7, ebitdaMargin: 22.2, roe: 14, roa: 8, roce: 18, debtEquity: 0.46, pe: 88, pb: 8.2, marketCap: 7800, eps: 31.1, divYield: 0, debtorDays: 76, inventoryDays: 178, fcf: 41, period: "FY26", source: "Company Q4 FY26 earnings call / results release", verdict: "Constructive", oneLine: "High-precision components for defence, space and nuclear programmes." },
-  datapatterns: { label: "Data", focus: "Defence electronics and radar systems", revenue: 924.8, pat: 271.4, grossMargin: 63.2, patMargin: 29.3, ebitdaMargin: 40.1, roe: 15.8, roa: 17, roce: 21.8, debtEquity: 0, debt: 0, cash: 422.7, pe: 79.2, pb: 12, marketCap: 21498, eps: 48.5, divYield: 0.2, debtorDays: 86, inventoryDays: 126, fcf: 78, period: "FY26", source: "Company FY26 results / ICICI Direct", verdict: "Positive", oneLine: "Electronics-led platform supplier with exposure to radar, EW and avionics programmes." },
-  azad: { label: "Azad", focus: "Precision aerospace and turbine components", revenue: 590.4, pat: 132.2, patMargin: 22.4, ebitdaMargin: 36.9, roe: 16, roa: 8, roce: 19, debtEquity: 0.32, pe: 117, pb: 14, marketCap: 14496, eps: 21.0, divYield: 0, debtorDays: 72, inventoryDays: 210, fcf: 35, period: "FY26", source: "Company FY26 results / exchange filing", verdict: "Growth", oneLine: "Aerospace and turbine component platform with export-led precision manufacturing exposure." },
-  aequs: { label: "Aequs", focus: "Aerospace precision components", revenue: 863.3, pat: -59.3, patMargin: -6.9, ebitdaMargin: 14.2, roe: -8, roa: -4, roce: 5, debtEquity: 0.8, pe: null, pb: 5.4, marketCap: 8200, eps: -1.8, divYield: 0, debtorDays: 69, inventoryDays: 184, fcf: -95, period: "9M FY26", source: "Company Q3/9M FY26 investor meet presentation", verdict: "Scale-up", oneLine: "Aerospace manufacturing platform tied to precision machining and supply-chain localization." },
-  paras: { label: "Paras", focus: "Optics, defence electronics and space engineering", revenue: 478.0, pat: 88.0, patMargin: 18.4, ebitdaMargin: 26.0, roe: 9, roa: 6, roce: 12, debtEquity: 0.08, pe: 96, pb: 8.5, marketCap: 5100, eps: 10.5, divYield: 0, debtorDays: 102, inventoryDays: 146, fcf: 12, period: "FY26", source: "Company FY26 investor presentation / Q4 result filing", verdict: "Watch", oneLine: "Specialized defence and space engineering company with optics and electronics capabilities." },
-  astra: { label: "Astra", focus: "RF, microwave and defence electronics", revenue: 1162.8, pat: 193.0, patMargin: 16.6, ebitdaMargin: 24.6, roe: 13, roa: 7, roce: 16, debtEquity: 0.18, pe: 61, pb: 7, marketCap: 8500, eps: 20.4, divYield: 0.25, debtorDays: 112, inventoryDays: 138, fcf: 28, period: "FY26", source: "Company audited FY26 results announced 26 May 2026", verdict: "Steady", oneLine: "RF and microwave electronics supplier for defence, space and meteorology applications." }
+  zentec: { label: "Zen", focus: "Training simulators, anti-drone systems", revenue: 687.69, pat: 193.45, grossMargin: 69.3, patMargin: 28.1, ebitdaMargin: 48.37, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "NSE/BSE Q4 FY26 investor presentation filed 3 May 2026", verdict: "Positive", oneLine: "High-growth defence electronics and simulation play with order visibility tied to domestic procurement." },
+  ideaforge: { label: "ideaForge", focus: "UAVs and drone platforms", revenue: 226.1, pat: -17.0, grossMargin: 58.0, patMargin: -7.5, ebitdaMargin: 12.0, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "NSE Q4 FY26 press release filed 30 Apr 2026", verdict: "Watch", oneLine: "Drone specialist with strategic relevance across surveillance, mapping and tactical use cases." },
+  mtar: { label: "MTAR", focus: "Precision Engineering", revenue: 876.2, pat: 94.0, patMargin: 10.7, ebitdaMargin: 19.5, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "Company Q4 FY26 results release / BSE filing dated 12 May 2026", verdict: "Constructive", oneLine: "High-precision components for defence, space and nuclear programmes." },
+  datapatterns: { label: "Data", focus: "Defence electronics and radar systems", revenue: 924.8, pat: 271.4, grossMargin: 63.2, patMargin: 29.3, ebitdaMargin: 40.1, roe: 16.7, roa: null, roce: 20.8, debtEquity: 0, debt: 0, cash: 422.7, pe: null, pb: null, marketCap: null, eps: 48.47, divYield: null, receivableDays: 287, inventoryDays: 108, payableDays: 30, fcf: null, period: "FY26", source: "Data Patterns Q4 FY26 earnings transcript / presentation filed 15 May 2026", verdict: "Positive", oneLine: "Electronics-led platform supplier with exposure to radar, EW and avionics programmes." },
+  azad: { label: "Azad", focus: "Precision aerospace and turbine components", revenue: 602.98, pat: 133.56, patMargin: 22.1, ebitdaMargin: 36.9, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "Audited FY26 consolidated results filed 15 May 2026", verdict: "Growth", oneLine: "Aerospace and turbine component platform with export-led precision manufacturing exposure." },
+  aequs: { label: "Aequs", focus: "Aerospace precision components", revenue: 1230.4, pat: -113.3, patMargin: -9.2, ebitdaMargin: 12.6, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "Company FY26 press release dated 26 May 2026", verdict: "Scale-up", oneLine: "Aerospace manufacturing platform tied to precision machining and supply-chain localization." },
+  paras: { label: "Paras", focus: "Optics, defence electronics and space engineering", revenue: 476.57, pat: 89.46, patMargin: 18.8, ebitdaMargin: 25.3, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "Company Q4 FY26 results release / BSE filing dated 13 May 2026", verdict: "Watch", oneLine: "Specialized defence and space engineering company with optics and electronics capabilities." },
+  astra: { label: "Astra", focus: "RF, microwave and defence electronics", revenue: 1163.0, pat: 193.0, patMargin: 16.6, ebitdaMargin: 28.7, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: 216, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "Company audited FY26 results presentation dated 26 May 2026", verdict: "Steady", oneLine: "RF and microwave electronics supplier for defence, space and meteorology applications." }
 };
 
 const years = ["FY21", "FY22", "FY23", "FY24", "FY25", "FY26"];
@@ -264,6 +264,7 @@ const callSummaries = {
     fy: [
       ["Revenue", "Rs 687.69crs", "Not disclosed in current source", "FY26"],
       ["EBITDA margin", "48.37%", "Not disclosed in current source", "FY26"],
+      ["PAT", "Rs 193.45crs", "Rs 280.24crs", "FY26"],
       ["Order book", "Rs 1,336.04crs", "N/A", "As of 31 Mar 2026"]
     ]
   },
@@ -273,7 +274,7 @@ const callSummaries = {
     period: "Q4 FY26 and FY26",
     source: "Q4 FY26 transcript filing / investor materials",
     sections: [
-      { heading: "Financial Performance", text: "ideaForge delivered a sharp Q4 FY26 recovery, with revenue of approximately Rs 141crs versus Rs 20.3crs in Q4 FY25. PAT was approximately Rs 60crs, implying a very high quarterly PAT margin of about 42.5%, helped by strong order conversion and operating leverage. FY26 EBITDA was approximately Rs 27crs, marking a return to positive operating profitability after a difficult demand cycle." },
+      { heading: "Financial Performance", text: "ideaForge delivered a sharp Q4 FY26 recovery, with revenue of approximately Rs 141crs versus Rs 20.3crs in Q4 FY25. PAT was approximately Rs 60crs, implying a very high quarterly PAT margin of about 42.5%, helped by strong order conversion and operating leverage. For FY26, revenue from operations was Rs 226.10crs, EBITDA was Rs 27.10crs and PAT was negative Rs 17.0crs. The full-year point is important: Q4 was profitable, but FY26 PAT remained negative because earlier quarters were weak." },
       { heading: "Order Book and Pipeline", text: "The company entered FY27 with an opening order book of approximately Rs 310crs, expected to execute over roughly three quarters. Q4 was important because it demonstrated that order-book conversion can quickly change the P&L profile. The key pipeline question is whether fresh government and enterprise drone orders replenish the book fast enough after the current execution cycle." },
       { heading: "Segment Performance and Strategic Direction", text: "The business remains centred on UAV platforms, drone systems and related solutions. Management commentary highlighted order conversion and the US opportunity. Strategically, ideaForge needs to prove that drone procurement can become more repeatable across defence, homeland security, mapping, surveillance and enterprise applications rather than remaining a lumpy tender-led business." },
       { heading: "FY27 Guidance", text: "Specific FY27 revenue guidance was not disclosed in the source snippets. The visible base is the Rs 310crs opening order book, which should support near-term revenue if execution remains on schedule. Investors should compare quarterly revenue against order inflow to judge whether FY27 is a sustained recovery or a one-quarter catch-up." },
@@ -286,9 +287,10 @@ const callSummaries = {
       ["Order book", "Rs 310crs opening FY27", "N/A", "Execution expected within ~3 quarters"]
     ],
     fy: [
+      ["Revenue", "Rs 226.10crs", "Rs 161.20crs", "+40.3% YoY"],
       ["EBITDA", "Rs 27crs", "Not disclosed in current source", "FY26"],
+      ["PAT", "Rs -17crs", "Not disclosed in current source", "FY26"],
       ["Borrowing", "Nil", "N/A", "Debt-free as of 31 Mar 2026"],
-      ["Revenue", "Not disclosed in current source", "Not disclosed in current source", "FY26"]
     ]
   },
   mtar: {
@@ -352,9 +354,9 @@ const callSummaries = {
       ["PAT", "Rs 139crs", "Not disclosed in current source", "40% PAT margin"]
     ],
     fy: [
-      ["Revenue", "Rs 925crs", "Not disclosed in current source", "+31% YoY"],
-      ["EBITDA", "Rs 371crs", "Not disclosed in current source", "FY26"],
-      ["PAT", "Rs 271crs", "Not disclosed in current source", "FY26"]
+      ["Revenue", "Rs 924.8crs", "Rs 708.4crs", "+30.5% YoY"],
+      ["Operational EBITDA", "Rs 371.0crs", "Rs 275.0crs", "FY26"],
+      ["PAT", "Rs 271.4crs", "Rs 221.8crs", "FY26"]
     ]
   },
   azad: {
@@ -363,7 +365,7 @@ const callSummaries = {
     period: "Q4 FY26 and FY26",
     source: "Azad IR transcript page / Q4 FY26 call transcript",
     sections: [
-      { heading: "Financial Performance", text: "Azad delivered a strong Q4 FY26, with revenue of approximately Rs 157crs, up 26.4% YoY. EBITDA margin was approximately 36.7% and PAT margin was approximately 22.3%. FY26 revenue reached approximately Rs 590crs versus Rs 453crs in FY25, with EBITDA margin at 36.9% and PAT margin at 22.4%, reflecting strong operating discipline during an investment phase." },
+      { heading: "Financial Performance", text: "Azad delivered a strong Q4 FY26, with revenue of approximately Rs 157crs, up 26.4% YoY. EBITDA margin was approximately 36.7% and PAT margin was approximately 22.3%. For FY26, audited consolidated revenue was Rs 602.98crs and PAT was Rs 133.56crs, implying a PAT margin of about 22.1%. The audited full-year figures are now used in the dashboard rather than the earlier rounded estimate." },
       { heading: "Order Book and Pipeline", text: "Management indicated a rolling order book of approximately Rs 6,500crs, with delivery schedules over roughly five to six years. This is the central investment argument: Azad has multi-year visibility from global OEM programmes, while execution capacity is still ramping. The company delivered around Rs 600crs in FY26 while keeping the rolling book at roughly the same level, implying continued replenishment." },
       { heading: "Segment Performance and Strategic Direction", text: "FY26 was described as a year of consolidation and infrastructure investment, with around 70% to 80% of build-out complete and four dedicated facilities operational. The Mitsubishi Heavy Industries eight-year single-source contract is strategically important because it validates capability in complex hot-section components and supports long-cycle customer stickiness." },
       { heading: "FY27 Guidance", text: "Management reiterated approximately 25% plus top-line growth, with potential upside as new plants stabilise. The second-half skew is important: investors should expect quarterly ramp-up to depend on capacity qualification, customer approvals and utilisation of the newly commissioned facilities." },
@@ -376,48 +378,48 @@ const callSummaries = {
       ["PAT margin", "22.3%", "Not disclosed in current source", "Q4 FY26"]
     ],
     fy: [
-      ["Revenue", "Rs 590crs", "Rs 453crs", "FY26 vs FY25"],
+      ["Revenue", "Rs 602.98crs", "Not disclosed in current source", "FY26 audited consolidated"],
       ["EBITDA margin", "36.9%", "Not disclosed in current source", "FY26"],
-      ["PAT margin", "22.4%", "Not disclosed in current source", "FY26"]
+      ["PAT", "Rs 133.56crs", "Not disclosed in current source", "FY26 audited consolidated"]
     ]
   },
   aequs: {
     title: "Aequs earnings call summary",
-    callDate: "29 January 2026",
-    period: "Q3 FY26 and 9M FY26",
-    quarterTitle: "Q3 FY26 Metrics",
-    fullYearTitle: "9M FY26 Metrics",
-    quarterHeaders: ["Metric", "Q3 FY26", "Q3 FY25", "Change"],
-    fullYearHeaders: ["Metric", "9M FY26", "9M FY25", "Change"],
-    source: "Company-hosted investor meet transcript dated 29 January 2026",
+    callDate: "26 May 2026",
+    period: "Q4 FY26 and FY26",
+    quarterTitle: "Q4 FY26 Metrics",
+    fullYearTitle: "FY26 Metrics",
+    quarterHeaders: ["Metric", "Q4 FY26", "Q4 FY25", "Change"],
+    fullYearHeaders: ["Metric", "FY26", "FY25", "Change"],
+    source: "Company FY26 press release dated 26 May 2026",
     sections: [
-      { heading: "Financial Performance", text: "Aequs reported Q3 FY26 revenue from operations of Rs 3,262mn, up 51% YoY and described as the highest quarterly revenue for the company. Q3 EBITDA was Rs 381mn, up 353% YoY, with EBITDA margin at 12%. PAT remained negative at Rs 426mn, but adjusted PAT loss was lower at Rs 259mn after excluding labour-code and IPO-related one-offs." },
+      { heading: "Financial Performance", text: "Aequs reported FY26 revenue from operations of Rs 12,304mn, up 33% YoY from Rs 9,246mn in FY25. FY26 EBITDA was Rs 1,545mn, up 43% YoY, with EBITDA margin at 13%. PAT remained negative at Rs 1,133mn versus a loss of Rs 1,024mn in FY25. Q4 FY26 revenue was Rs 3,671mn, up 47% YoY, while Q4 EBITDA was Rs 321mn and Q4 PAT loss was Rs 541mn." },
       { heading: "Order Book and Pipeline", text: "The transcript did not provide a conventional order-book figure. For Aequs, the relevant pipeline indicator is programme ramp-up across aerospace and consumer verticals, plus utilisation across the integrated manufacturing ecosystem. Revenue conversion depends on customer schedules, qualification cycles and capacity absorption rather than a disclosed fixed order book." },
-      { heading: "Segment Performance and Strategic Direction", text: "Aerospace contributed Rs 2,685mn in Q3, around 82% of consolidated revenue, with aerospace revenue up 38% YoY and segment EBITDA up 163% YoY. The consumer vertical grew rapidly from a small base, but losses widened as the segment remains in scale-up. Management's strategic message is that the integrated ecosystem from forging and special processing to machining and assembly supports differentiation." },
-      { heading: "FY27 Guidance", text: "Specific FY27 revenue guidance was not captured in the current source snippets. The key monitor is whether the 9M FY26 operating leverage continues into the next year: revenue including JVs grew 29%, EBITDA grew 75% and margin reached 15% on the 9M base." },
-      { heading: "Key Positives from the Call", text: "Highest quarterly revenue, strong 51% YoY Q3 revenue growth, 353% YoY Q3 EBITDA growth, aerospace segment strength and improving 9M EBITDA margin. The aerospace ecosystem continues to show operating leverage as scale rises." },
-      { heading: "Key Concerns and Watch Points", text: "PAT remains negative, even after adjusting for one-offs. Consumer vertical losses, utilisation, customer concentration, working capital and the pace of margin improvement are the main watch points." }
+      { heading: "Segment Performance and Strategic Direction", text: "Aequs remains an integrated manufacturing ecosystem spanning aerospace machining, forging, special processing and adjacent precision manufacturing. FY26 shows that scale is improving, but profitability is still constrained by depreciation, finance cost, ramp-up expense and segment mix." },
+      { heading: "FY27 Guidance", text: "Specific FY27 revenue guidance was not captured in the latest press release. The key monitor is whether FY26 revenue scale and EBITDA improvement convert into lower PAT losses or positive PAT as capacity utilisation improves." },
+      { heading: "Key Positives from the Call", text: "FY26 revenue grew 33%, EBITDA grew 43%, and the company remained at meaningful scale with Rs 1,230.4crs of revenue. The aerospace ecosystem continues to offer operating-leverage potential if utilisation rises." },
+      { heading: "Key Concerns and Watch Points", text: "PAT remains negative, Q4 PAT loss widened YoY, and Q4 EBITDA margin compressed to 9%. Investors should track utilisation, segment mix, debt/service cost, working capital and whether growth translates into bottom-line improvement." }
     ],
     q4: [
-      ["Revenue", "Rs 3,262mn", "Not disclosed in current source", "+51% YoY"],
-      ["EBITDA", "Rs 381mn", "Not disclosed in current source", "+353% YoY"],
-      ["PAT", "Rs -426mn", "Not disclosed in current source", "Adjusted PAT loss Rs -259mn"]
+      ["Revenue", "Rs 3,671mn", "Rs 2,493mn", "+47% YoY"],
+      ["EBITDA", "Rs 321mn", "Rs 416mn", "-23% YoY"],
+      ["PAT", "Rs -541mn", "Rs 90mn", "Loss in Q4 FY26"]
     ],
     fy: [
-      ["Revenue", "Rs 8,633mn", "Not disclosed in current source", "+28% YoY"],
-      ["EBITDA", "Rs 1,222mn", "Rs 662mn", "+85% YoY"],
-      ["PAT loss", "Rs -593mn", "Rs -1,115mn", "47% improvement YoY"]
+      ["Revenue", "Rs 12,304mn", "Rs 9,246mn", "+33% YoY"],
+      ["EBITDA", "Rs 1,545mn", "Rs 1,080mn", "+43% YoY"],
+      ["PAT loss", "Rs -1,133mn", "Rs -1,024mn", "-11% YoY"]
     ]
   },
   paras: {
     title: "Paras Defence earnings call summary",
-    callDate: "Q4 FY26 results period",
-    period: "Q4 FY26",
-    source: "Q4 FY26 results/news and investor presentation material",
+    callDate: "13 May 2026",
+    period: "Q4 FY26 and FY26",
+    source: "Q4 FY26 results release / FY26 investor presentation material",
     sections: [
-      { heading: "Financial Performance", text: "Paras Defence reported Q4 FY26 revenue from operations of approximately Rs 171.31crs, up 58.3% YoY from Rs 108.23crs. Consolidated EBITDA was approximately Rs 42.6crs and PAT was approximately Rs 38.88crs. FY26 revenue was approximately Rs 478crs, up around 31% YoY, and FY26 net profit was approximately Rs 88crs, up around 40% YoY." },
+      { heading: "Financial Performance", text: "Paras Defence reported Q4 FY26 revenue from operations of Rs 171.31crs, up 58.3% YoY from Rs 108.23crs. Consolidated EBITDA was Rs 42.6crs and PAT was Rs 38.88crs. For FY26, revenue from operations was Rs 476.57crs, EBITDA was Rs 120.46crs and PAT was Rs 89.46crs, implying FY26 EBITDA margin of about 25.3% and PAT margin of about 18.8%." },
       { heading: "Order Book and Pipeline", text: "Investor presentation/news sources indicate a consolidated order book close to Rs 986crs entering FY27. This is about two times FY26 revenue and gives visible execution cover, subject to delivery schedules. The key question is how quickly the company converts optics, defence engineering and space-related orders into revenue without diluting margins." },
-      { heading: "Segment Performance and Strategic Direction", text: "The results reflect stronger execution in optics, defence electronics and space engineering. The strategic direction is aligned with defence indigenisation, anti-drone/optics opportunities and space-sector demand. Presentation material points to improving profitability, with FY26 EBITDA margin around 26% and PAT margin around 19%." },
+      { heading: "Segment Performance and Strategic Direction", text: "The results reflect stronger execution in optics, defence electronics and space engineering. The strategic direction is aligned with defence indigenisation, anti-drone/optics opportunities and space-sector demand. FY26 profitability was healthy, but the dashboard now uses exact full-year figures rather than rounded approximations." },
       { heading: "FY27 Guidance", text: "Specific FY27 guidance was not captured in the source snippets. The investor framework should focus on order inflow, Rs 986crs order book conversion, margin sustainability and whether Q4's strong execution pace can continue." },
       { heading: "Key Positives from the Call", text: "Strong Q4 revenue growth, strong PAT growth, Rs 42.6crs Q4 EBITDA, FY26 revenue growth, order book visibility and exposure to optics/space/defence electronics. The Q4 print shows improved execution and operating leverage." },
       { heading: "Key Concerns and Watch Points", text: "Latest transcript link still needs direct confirmation, so the summary is based on results and presentation material. Quarterly revenue may remain lumpy, and investors should monitor order mix, receivables, execution timelines and whether FY26 margin levels sustain." }
@@ -425,40 +427,41 @@ const callSummaries = {
     q4: [
       ["Revenue", "Rs 171.31crs", "Rs 108.23crs", "+58.3% YoY"],
       ["PAT", "Rs 38.88crs", "Not disclosed in current source", "+75% YoY"],
-      ["EBITDA", "Not disclosed in current source", "Not disclosed in current source", "+51% YoY"]
+      ["EBITDA", "Rs 42.60crs", "Not disclosed in current source", "+51% YoY"]
     ],
     fy: [
-      ["Revenue", "Approx. Rs 478crs", "Approx. Rs 365crs", "+31% YoY"],
-      ["PAT", "Approx. Rs 88crs", "Approx. Rs 63crs", "+40% YoY"],
+      ["Revenue", "Rs 476.57crs", "Rs 364.66crs", "+30.7% YoY"],
+      ["EBITDA", "Rs 120.46crs", "Not disclosed in current source", "FY26"],
+      ["PAT", "Rs 89.46crs", "Rs 61.49crs", "+45.5% YoY"],
       ["Order book", "Approx. Rs 986crs", "N/A", "Entering FY27"]
     ]
   },
   astra: {
     title: "Astra Microwave earnings call summary",
-    callDate: "13 February 2026",
-    period: "Q3 FY26",
-    quarterTitle: "Q3 FY26 Metrics",
-    fullYearTitle: "FY26 / FY27 Outlook Metrics",
-    quarterHeaders: ["Metric", "Q3 FY26", "Prior period", "Change / note"],
-    fullYearHeaders: ["Metric", "Current outlook", "Prior period", "Change / note"],
-    source: "Astra Microwave transcript listing / Q3 FY26 transcript highlights",
+    callDate: "26 May 2026",
+    period: "Q4 FY26 and FY26",
+    quarterTitle: "Q4 FY26 Metrics",
+    fullYearTitle: "FY26 Metrics",
+    quarterHeaders: ["Metric", "Q4 FY26", "Q4 FY25", "Change / note"],
+    fullYearHeaders: ["Metric", "FY26", "FY25", "Change / note"],
+    source: "Audited FY26 results / company result update dated 26 May 2026",
     sections: [
-      { heading: "Financial Performance", text: "Astra Microwave's Q3 FY26 transcript highlights record performance with strong margins and a robust order book above Rs 2,200crs. Earlier FY26 commentary noted Q1 revenue of Rs 197crs, up 28.1% YoY, and H1 revenue up 7.2% YoY with H1 PAT up 13.5%. The result profile shows steady execution in a programme-led defence electronics business." },
-      { heading: "Order Book and Pipeline", text: "Order book exceeded Rs 2,200crs in Q3 FY26. Management highlighted major wins in defence and space and expected order additions of approximately Rs 1,500crs plus for FY27. This order visibility is the core support for the company's medium-term growth ambition." },
+      { heading: "Financial Performance", text: "Astra Microwave reported FY26 sales of Rs 1,162.80crs versus Rs 1,051.18crs in FY25. FY26 PAT was Rs 192.97crs versus Rs 153.51crs in FY25, and FY26 operating margin was 28.70%. Q4 FY26 sales were Rs 488.24crs and Q4 PAT was Rs 105.98crs, reflecting a strong year-end execution quarter." },
+      { heading: "Order Book and Pipeline", text: "The latest result update referenced a materially larger order book entering FY27. Order-book conversion remains the core support for the company's medium-term growth, but quarterly delivery can be milestone-led." },
       { heading: "Segment Performance and Strategic Direction", text: "The company remains focused on RF, microwave and defence electronics across defence, space and meteorology. Management expects to double turnover over three to four years, implying sustained order inflow and execution capacity. The long-term aspiration remains meaningfully larger than the current revenue base, but conversion will be milestone-led." },
-      { heading: "FY27 Guidance", text: "Transcript highlights indicate around 15% revenue growth expected for FY27 and order-book additions of around Rs 1,500crs plus. Management also continues to refer to a multi-year 2x turnover ambition, which makes order inflow, margin consistency and working-capital discipline the key FY27 checks." },
-      { heading: "Key Positives from the Call", text: "Record Q3 performance, strong margins, order book over Rs 2,200crs, major defence/space wins, Rs 1,500crs plus expected FY27 additions and a credible multi-year growth ambition." },
+      { heading: "FY27 Guidance", text: "Specific FY27 financial guidance was not changed in the verified result numbers used here. The monitor is order inflow, order conversion, margin consistency and working-capital discipline after a strong Q4 FY26." },
+      { heading: "Key Positives from the Call", text: "Strong Q4 PAT, FY26 revenue growth, FY26 PAT growth and a healthy operating-margin profile. The business remains strategically positioned in RF, microwave, radar and space electronics." },
       { heading: "Key Concerns and Watch Points", text: "Execution of the large order book, quarterly mix, defence order timing, receivables and conversion of the longer-term growth aspiration into near-term revenue are the key watch points. The business is attractive but milestone timing can make quarterly numbers uneven." }
     ],
     q4: [
-      ["Revenue", "Not applicable", "Not applicable", "Latest source is Q3 FY26"],
-      ["Order book", "Over Rs 2,200crs", "N/A", "Q3 FY26"],
-      ["Guidance", "15% FY27 revenue growth", "N/A", "Management outlook"]
+      ["Sales", "Rs 488.24crs", "Rs 407.85crs", "+20% YoY"],
+      ["PAT", "Rs 105.98crs", "Rs 73.49crs", "+44.2% YoY"],
+      ["Operating margin", "33.08%", "29.04%", "Q4 FY26"]
     ],
     fy: [
-      ["H1 revenue growth", "+7.2% YoY", "N/A", "Q2 FY26 commentary"],
-      ["H1 PAT growth", "+13.5% YoY", "N/A", "Q2 FY26 commentary"],
-      ["FY27 order additions", "Approx. Rs 1,500crs+", "N/A", "Management outlook"]
+      ["Sales", "Rs 1,162.80crs", "Rs 1,051.18crs", "+11% YoY"],
+      ["PAT", "Rs 192.97crs", "Rs 153.51crs", "+26% YoY"],
+      ["Operating margin", "28.70%", "25.59%", "FY26"]
     ]
   }
 };
@@ -496,21 +499,21 @@ const transcriptSources = {
   },
   aequs: {
     status: "Transcript available",
-    date: "29 January 2026 investor meet / Q3 FY26",
-    url: "https://www.aequs.com/wp-content/uploads/2026/02/Investor-Meet-transcript-29-January-2026.pdf",
-    note: "Company-hosted transcript for Q3 and nine months ended 31 December 2025."
+    date: "FY26 press release dated 26 May 2026",
+    url: "https://www.aequs.com/wp-content/uploads/2026/05/Press-Release-for-May-26-2026.pdf",
+    note: "Company-hosted FY26 result press release. Latest transcript should be summarised when the next call transcript is uploaded."
   },
   paras: {
     status: "Investor presentation available",
-    date: "Q1 FY26 presentation",
-    url: "https://parasdefence.com/uploads/presentation/1754971084_paras-defence-investor-presentation-2025.pdf",
-    note: "I found investor presentation material; latest call transcript link still needs confirmation from company/BSE announcements."
+    date: "Q4 FY26 / FY26 presentation",
+    url: "https://parasdefence.com/uploads/presentation/1779278288_paras-defence-investor-presentation-2026.pdf",
+    note: "FY26 presentation material is used for the latest summary; a call transcript should replace it when uploaded by the company."
   },
   astra: {
-    status: "Transcript available",
-    date: "Q3 FY26 call on 13 February 2026",
-    url: "https://stockanalysis.com/quote/bom/532493/transcripts/",
-    note: "Transcript listing shows Q3 FY26, Q2 FY26, Q1 FY26 and Q4 FY25 call transcripts."
+    status: "FY26 results available",
+    date: "Audited FY26 results dated 26 May 2026",
+    url: "https://www.business-standard.com/markets/capital-market-news/astra-microwave-products-consolidated-net-profit-rises-44-21-in-the-march-2026-quarter-126052600667_1.html",
+    note: "FY26 audited result figures are used for the latest summary; call transcript should replace the commentary when uploaded."
   }
 };
 
@@ -622,9 +625,10 @@ function render() {
 }
 
 function seededSeries(item, key) {
-  if (!item?.meta) return years.map(() => 0);
+  if (!item?.meta) return years.map(() => NaN);
   const extra = extraData[item.meta.id] || {};
-  const latest = Number.isFinite(extra[key]) ? extra[key] : 0;
+  const latest = Number.isFinite(extra[key]) ? extra[key] : NaN;
+  if (!Number.isFinite(latest)) return years.map(() => NaN);
   const lastIndex = Math.max(years.length - 1, 1);
   if (key === "revenue") return years.map((_, i) => Math.max(0, latest * (0.38 + (i / lastIndex) * 0.62)));
   if (key === "pat") return years.map((_, i) => latest * (0.28 + (i / lastIndex) * 0.72));
@@ -651,12 +655,14 @@ function renderSectorCharts() {
   const metricRows = rows.map((row) => ({
     id: row.item.meta.id,
     label: row.extra.label || row.item.meta.nse,
-    a: row.extra[activeSectorMetric] || 0,
-    b: activeSectorMetric === "revenue" ? row.extra.pat || 0 : row.extra.patMargin || 0
+    a: Number.isFinite(row.extra[activeSectorMetric]) ? row.extra[activeSectorMetric] : NaN,
+    b: activeSectorMetric === "revenue"
+      ? (Number.isFinite(row.extra.pat) ? row.extra.pat : NaN)
+      : (Number.isFinite(row.extra.patMargin) ? row.extra.patMargin : NaN)
   }));
   els.sectorCharts.innerHTML = `
-    <article class="chart-card">${chartTitle("Revenue & PAT (FY26 / 9M FY26)")}<div class="chart-toolbar"><button class="${activeSectorMetric === "revenue" ? "is-active" : ""}" data-sector-metric="revenue">Revenue/PAT</button><button class="${activeSectorMetric === "ebitdaMargin" ? "is-active" : ""}" data-sector-metric="ebitdaMargin">EBITDA/PAT margin</button><button class="${activeSectorMetric === "roce" ? "is-active" : ""}" data-sector-metric="roce">ROCE/PAT margin</button></div>${barChart(metricRows, activeSectorMetric === "revenue" ? "Revenue" : activeSectorMetric === "roce" ? "ROCE" : "EBITDA margin", activeSectorMetric === "revenue" ? "PAT" : "PAT margin")}</article>
-    <article class="chart-card">${chartTitle("Valuation vs Profitability (FY26 / 9M FY26)")} ${scatterChart(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, x: row.extra.pe, y: row.extra.patMargin })), "P/E", "PAT margin")}</article>
+    <article class="chart-card">${chartTitle("Revenue & PAT (latest verified filing)")}<div class="chart-toolbar"><button class="${activeSectorMetric === "revenue" ? "is-active" : ""}" data-sector-metric="revenue">Revenue/PAT</button><button class="${activeSectorMetric === "ebitdaMargin" ? "is-active" : ""}" data-sector-metric="ebitdaMargin">EBITDA/PAT margin</button><button class="${activeSectorMetric === "roce" ? "is-active" : ""}" data-sector-metric="roce">ROCE/PAT margin</button></div>${barChart(metricRows, activeSectorMetric === "revenue" ? "Revenue" : activeSectorMetric === "roce" ? "ROCE" : "EBITDA margin", activeSectorMetric === "revenue" ? "PAT" : "PAT margin")}</article>
+    <article class="chart-card">${chartTitle("Valuation vs Profitability (live / verified only)")} ${scatterChart(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, x: row.extra.pe, y: row.extra.patMargin })), "P/E", "PAT margin")}</article>
     <article class="chart-card wide">${chartTitle("1Y Price Return Heatmap")}${heatmap(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, value: oneYearReturn(row.item) })))}</article>
     <article class="chart-card">${chartTitle("ROE vs ROA")}${scatterChart(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, x: row.extra.roa, y: row.extra.roe })), "ROA", "ROE")}</article>
     <article class="chart-card">${chartTitle("Market Cap Treemap")}${treemap(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, value: row.extra.marketCap || 0 })))}</article>`;
@@ -1147,11 +1153,11 @@ function valuationMetrics(extra = {}) {
 }
 
 function workingCapitalMetrics(extra = {}) {
-  const receivable = Number.isFinite(extra.receivableDays) ? extra.receivableDays : extra.debtorDays;
+  const receivable = Number.isFinite(extra.receivableDays) ? extra.receivableDays : (Number.isFinite(extra.debtorDays) ? extra.debtorDays : NaN);
   const inventory = extra.inventoryDays;
-  const debtor = extra.debtorDays;
-  const netCycle = [receivable, inventory, debtor].every(Number.isFinite) ? receivable + inventory - debtor : NaN;
-  return { receivable, inventory, debtor, netCycle };
+  const payable = extra.payableDays;
+  const netCycle = [receivable, inventory, payable].every(Number.isFinite) ? receivable + inventory - payable : NaN;
+  return { receivable, inventory, payable, netCycle };
 }
 
 function shareholdingChart(rows = []) {
@@ -1248,7 +1254,7 @@ function renderHistorical() {
       valuation.evEbitda,
       valuation.pe,
       Number.isFinite(extra.fcf) ? `\u20b9${compact(extra.fcf)} Cr` : "--",
-      `${wc.receivable || "--"} / ${wc.inventory || "--"} / ${wc.debtor || "--"} / ${wc.netCycle || "--"}`
+      `${Number.isFinite(wc.receivable) ? wc.receivable : "--"} / ${Number.isFinite(wc.inventory) ? wc.inventory : "--"} / ${Number.isFinite(wc.payable) ? wc.payable : "--"} / ${Number.isFinite(wc.netCycle) ? wc.netCycle : "--"}`
     ];
   });
   els.historicalPanel.innerHTML = `<div class="chart-grid">
@@ -1261,13 +1267,13 @@ function renderHistorical() {
       const valuation = valuationMetrics(extra);
       return { id: item.meta.id, label: extra.label || item.meta.nse, values: [valuation.rawEvRevenue, valuation.rawEvEbitda, valuation.rawPe] };
     }), ["EV/Revenue", "EV/EBITDA", "P/E"], "Multiple (x)")}</article>
-    <article class="chart-card wide">${chartTitle("Working Capital - Receivable, Inventory, Debtor & Net WC Cycle")}${groupedBarChart(dashboard.map((item) => {
+    <article class="chart-card wide">${chartTitle("Working Capital - Receivable, Inventory, Payable & Net WC Cycle")}${groupedBarChart(dashboard.map((item) => {
       const extra = extraData[item.meta.id] || {};
       const wc = workingCapitalMetrics(extra);
-      return { id: item.meta.id, label: extra.label || item.meta.nse, values: [wc.receivable, wc.inventory, wc.debtor, wc.netCycle] };
-    }), ["Receivable days", "Inventory days", "Debtor days", "Net WC cycle"], "Days")}</article>
+      return { id: item.meta.id, label: extra.label || item.meta.nse, values: [wc.receivable, wc.inventory, wc.payable, wc.netCycle] };
+    }), ["Receivable days", "Inventory days", "Payable days", "Net WC cycle"], "Days")}</article>
   </div>` + table([
-    "Company / period", "Live price", "1Y return", "ROCE", "EBITDA margin", "EV/Revenue", "EV/EBITDA", "P/E", "FCF", "Receivable / Inventory / Debtor / Net WC days"
+    "Company / period", "Live price", "1Y return", "ROCE", "EBITDA margin", "EV/Revenue", "EV/EBITDA", "P/E", "FCF", "Receivable / Inventory / Payable / Net WC days"
   ], rows);
 }
 
@@ -1530,10 +1536,14 @@ function barChart(rows, labelA, labelB) {
   const yFor = (value) => 190 - (Math.max(value, 0) / max) * 150;
   const bars = rows.map((row, i) => {
     const x = 45 + i * group;
-    const hA = 190 - yFor(row.a);
-    const hB = 190 - yFor(row.b);
     const tip = `${row.label}: ${labelA} ${compact(row.a)}, ${labelB} ${compact(row.b)}`;
-    return `<rect class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(tip)}" x="${x}" y="${yFor(row.a)}" width="16" height="${hA}" rx="4" fill="#77c7d5"/><rect class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(tip)}" x="${x + 20}" y="${yFor(row.b)}" width="16" height="${hB}" rx="4" fill="#d9b45f"/><text x="${x + 18}" y="216" text-anchor="middle" fill="#9ea99c" font-size="10">${escapeHtml(chartLabel(row.label))}</text>`;
+    const first = Number.isFinite(row.a)
+      ? `<rect class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(tip)}" x="${x}" y="${yFor(row.a)}" width="16" height="${190 - yFor(row.a)}" rx="4" fill="#77c7d5"/>`
+      : "";
+    const second = Number.isFinite(row.b)
+      ? `<rect class="chart-hit" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(tip)}" x="${x + 20}" y="${yFor(row.b)}" width="16" height="${190 - yFor(row.b)}" rx="4" fill="#d9b45f"/>`
+      : "";
+    return `${first}${second}<text x="${x + 18}" y="216" text-anchor="middle" fill="#9ea99c" font-size="10">${escapeHtml(chartLabel(row.label))}</text>`;
   }).join("");
   const grid = yTicks.map((tick) => `<line class="grid-line" x1="45" x2="590" y1="${yFor(tick)}" y2="${yFor(tick)}"/><text x="38" y="${yFor(tick) + 4}" text-anchor="end" fill="#9ea99c" font-size="10">${compact(tick)}</text>`).join("");
   return `<svg viewBox="0 0 620 250"><text class="axis-label" x="45" y="20">Y: ${escapeHtml(labelA)} / ${escapeHtml(labelB)}</text><text class="axis-label" x="575" y="238" text-anchor="end">X: Company</text>${grid}<line class="axis-line" x1="45" x2="590" y1="190" y2="190"/><line class="axis-line" x1="45" x2="45" y1="36" y2="190"/><circle cx="452" cy="18" r="5" fill="#77c7d5"/><text x="462" y="22" fill="#cdd5ca" font-size="11">${escapeHtml(labelA)}</text><circle cx="530" cy="18" r="5" fill="#d9b45f"/><text x="540" y="22" fill="#cdd5ca" font-size="11">${escapeHtml(labelB)}</text>${bars}</svg>`;
@@ -1615,14 +1625,21 @@ function tripleBarChart(rows, labelA, labelB, labelC) {
 
 function lineChart(labels, values, label) {
   const nums = values.filter(Number.isFinite);
+  if (!nums.length) {
+    return `<div class="empty">No verified historical ${escapeHtml(label)} series available from company filings.</div>`;
+  }
   const min = Math.min(...nums, 0);
   const max = Math.max(...nums, 1);
   const gradientId = `lineArea-${String(label).replace(/[^a-z0-9]/gi, "-")}`;
   const yFor = (value) => 198 - ((value - min) / (max - min || 1)) * 150;
-  const points = values.map((value, i) => `${scale(i, 0, values.length - 1, 600, 55).toFixed(1)},${yFor(value).toFixed(1)}`);
-  const area = `M${points[0]} L${points.slice(1).join(" L")} L${scale(values.length - 1, 0, values.length - 1, 600, 55).toFixed(1)},198 L55,198 Z`;
+  const points = values.map((value, i) => Number.isFinite(value) ? `${scale(i, 0, values.length - 1, 600, 55).toFixed(1)},${yFor(value).toFixed(1)}` : "");
   const grid = [min, (min + max) / 2, max].map((tick) => `<line class="grid-line" x1="55" x2="590" y1="${yFor(tick)}" y2="${yFor(tick)}"/><text x="48" y="${yFor(tick) + 4}" text-anchor="end" fill="#9ea99c" font-size="10">${compact(tick)}</text>`).join("");
-  return `<svg viewBox="0 0 620 250"><defs><linearGradient id="${gradientId}" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#77c7d5" stop-opacity=".38"/><stop offset="1" stop-color="#77c7d5" stop-opacity="0"/></linearGradient></defs><text class="axis-label" x="55" y="20">Y: ${escapeHtml(label)}</text><text class="axis-label" x="575" y="238" text-anchor="end">X: Fiscal year</text>${grid}<line class="axis-line" x1="55" x2="590" y1="198" y2="198"/><line class="axis-line" x1="55" x2="55" y1="42" y2="198"/><path d="${area}" fill="url(#${gradientId})"/><polyline points="${points.join(" ")}" fill="none" stroke="#77c7d5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>${points.map((p, i) => `<circle class="chart-mark" data-tip="${escapeHtml(`${labels[i]}: ${label} ${compact(values[i])}`)}" cx="${p.split(",")[0]}" cy="${p.split(",")[1]}" r="5" fill="#d9b45f"/><text x="${p.split(",")[0]}" y="220" text-anchor="middle" fill="#9ea99c" font-size="11">${labels[i]}</text>`).join("")}</svg>`;
+  const plotted = points.map((point, index) => ({ point, index })).filter((row) => row.point);
+  const pathPoints = plotted.map((row) => row.point);
+  const firstX = pathPoints[0]?.split(",")[0] || "55";
+  const lastX = pathPoints.at(-1)?.split(",")[0] || "590";
+  const areaPath = `M${pathPoints.join(" L")} L${lastX},198 L${firstX},198 Z`;
+  return `<svg viewBox="0 0 620 250"><defs><linearGradient id="${gradientId}" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#77c7d5" stop-opacity=".38"/><stop offset="1" stop-color="#77c7d5" stop-opacity="0"/></linearGradient></defs><text class="axis-label" x="55" y="20">Y: ${escapeHtml(label)}</text><text class="axis-label" x="575" y="238" text-anchor="end">X: Fiscal year</text>${grid}<line class="axis-line" x1="55" x2="590" y1="198" y2="198"/><line class="axis-line" x1="55" x2="55" y1="42" y2="198"/><path d="${areaPath}" fill="url(#${gradientId})"/><polyline points="${pathPoints.join(" ")}" fill="none" stroke="#77c7d5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>${plotted.map(({ point, index }) => `<circle class="chart-mark" data-tip="${escapeHtml(`${labels[index]}: ${label} ${compact(values[index])}`)}" cx="${point.split(",")[0]}" cy="${point.split(",")[1]}" r="5" fill="#d9b45f"/><text x="${point.split(",")[0]}" y="220" text-anchor="middle" fill="#9ea99c" font-size="11">${labels[index]}</text>`).join("")}</svg>`;
 }
 
 function scatterChart(rows, labelX, labelY) {
