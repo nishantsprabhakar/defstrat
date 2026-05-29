@@ -59,14 +59,14 @@ let activeSectorMetric = "revenue";
 let activePriceRange = "1Y";
 
 const extraData = {
-  zentec: { label: "Zen", focus: "Training simulators, anti-drone systems", revenue: 687.69, pat: 193.45, grossMargin: 69.3, patMargin: 28.1, ebitdaMargin: 48.37, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "NSE/BSE Q4 FY26 investor presentation filed 3 May 2026", verdict: "Positive", oneLine: "High-growth defence electronics and simulation play with order visibility tied to domestic procurement." },
-  ideaforge: { label: "ideaForge", focus: "UAVs and drone platforms", revenue: 226.1, pat: -17.0, grossMargin: 58.0, patMargin: -7.5, ebitdaMargin: 12.0, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "NSE Q4 FY26 press release filed 30 Apr 2026", verdict: "Watch", oneLine: "Drone specialist with strategic relevance across surveillance, mapping and tactical use cases." },
-  mtar: { label: "MTAR", focus: "Precision Engineering", revenue: 876.2, pat: 94.0, patMargin: 10.7, ebitdaMargin: 19.5, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "Company Q4 FY26 results release / BSE filing dated 12 May 2026", verdict: "Constructive", oneLine: "High-precision components for defence, space and nuclear programmes." },
-  datapatterns: { label: "Data", focus: "Defence electronics and radar systems", revenue: 924.8, pat: 271.4, grossMargin: 63.2, patMargin: 29.3, ebitdaMargin: 40.1, roe: 16.7, roa: null, roce: 20.8, debtEquity: 0, debt: 0, cash: 422.7, pe: null, pb: null, marketCap: null, eps: 48.47, divYield: null, receivableDays: 287, inventoryDays: 108, payableDays: 30, fcf: null, period: "FY26", source: "Data Patterns Q4 FY26 earnings transcript / presentation filed 15 May 2026", verdict: "Positive", oneLine: "Electronics-led platform supplier with exposure to radar, EW and avionics programmes." },
-  azad: { label: "Azad", focus: "Precision aerospace and turbine components", revenue: 602.98, pat: 133.56, patMargin: 22.1, ebitdaMargin: 36.9, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "Audited FY26 consolidated results filed 15 May 2026", verdict: "Growth", oneLine: "Aerospace and turbine component platform with export-led precision manufacturing exposure." },
-  aequs: { label: "Aequs", focus: "Aerospace precision components", revenue: 1230.4, pat: -113.3, patMargin: -9.2, ebitdaMargin: 12.6, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "Company FY26 press release dated 26 May 2026", verdict: "Scale-up", oneLine: "Aerospace manufacturing platform tied to precision machining and supply-chain localization." },
-  paras: { label: "Paras", focus: "Optics, defence electronics and space engineering", revenue: 476.57, pat: 89.46, patMargin: 18.8, ebitdaMargin: 25.3, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "Company Q4 FY26 results release / BSE filing dated 13 May 2026", verdict: "Watch", oneLine: "Specialized defence and space engineering company with optics and electronics capabilities." },
-  astra: { label: "Astra", focus: "RF, microwave and defence electronics", revenue: 1163.0, pat: 193.0, patMargin: 16.6, ebitdaMargin: 28.7, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: 216, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "Company audited FY26 results presentation dated 26 May 2026", verdict: "Steady", oneLine: "RF and microwave electronics supplier for defence, space and meteorology applications." }
+  zentec: { label: "Zen", focus: "Training simulators, anti-drone systems", revenue: 687.69, ebitda: 332.7, pat: 193.45, grossMargin: 69.3, patMargin: 28.1, ebitdaMargin: 48.37, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "NSE/BSE Q4 FY26 investor presentation filed 3 May 2026", verdict: "Positive", oneLine: "High-growth defence electronics and simulation play with order visibility tied to domestic procurement." },
+  ideaforge: { label: "ideaForge", focus: "UAVs and drone platforms", revenue: 226.1, ebitda: 27.1, pat: -17.0, grossMargin: 58.0, patMargin: -7.5, ebitdaMargin: 12.0, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "NSE Q4 FY26 press release filed 30 Apr 2026", verdict: "Watch", oneLine: "Drone specialist with strategic relevance across surveillance, mapping and tactical use cases." },
+  mtar: { label: "MTAR", focus: "Precision Engineering", revenue: 876.2, ebitda: 171.2, pat: 94.0, patMargin: 10.7, ebitdaMargin: 19.5, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "Company Q4 FY26 results release / BSE filing dated 12 May 2026", verdict: "Constructive", oneLine: "High-precision components for defence, space and nuclear programmes." },
+  datapatterns: { label: "Data", focus: "Defence electronics and radar systems", revenue: 924.8, ebitda: 371.0, pat: 271.4, grossMargin: 63.2, patMargin: 29.3, ebitdaMargin: 40.1, roe: 16.7, roa: null, roce: 20.8, debtEquity: 0, debt: 0, cash: 422.7, pe: null, pb: null, marketCap: null, eps: 48.47, divYield: null, receivableDays: 287, inventoryDays: 108, payableDays: 30, fcf: null, period: "FY26", source: "Data Patterns Q4 FY26 earnings transcript / presentation filed 15 May 2026", verdict: "Positive", oneLine: "Electronics-led platform supplier with exposure to radar, EW and avionics programmes." },
+  azad: { label: "Azad", focus: "Precision aerospace and turbine components", revenue: 602.98, ebitda: 222.5, pat: 133.56, patMargin: 22.1, ebitdaMargin: 36.9, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "Audited FY26 consolidated results filed 15 May 2026", verdict: "Growth", oneLine: "Aerospace and turbine component platform with export-led precision manufacturing exposure." },
+  aequs: { label: "Aequs", focus: "Aerospace precision components", revenue: 1230.4, ebitda: 154.5, pat: -113.3, patMargin: -9.2, ebitdaMargin: 12.6, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "Company FY26 press release dated 26 May 2026", verdict: "Scale-up", oneLine: "Aerospace manufacturing platform tied to precision machining and supply-chain localization." },
+  paras: { label: "Paras", focus: "Optics, defence electronics and space engineering", revenue: 476.57, ebitda: 120.46, pat: 89.46, patMargin: 18.8, ebitdaMargin: 25.3, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "Company Q4 FY26 results release / BSE filing dated 13 May 2026", verdict: "Watch", oneLine: "Specialized defence and space engineering company with optics and electronics capabilities." },
+  astra: { label: "Astra", focus: "RF, microwave and defence electronics", revenue: 1162.8, ebitda: 334.0, pat: 192.97, patMargin: 16.6, ebitdaMargin: 28.7, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: 216, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "Company audited FY26 results presentation dated 26 May 2026", verdict: "Steady", oneLine: "RF and microwave electronics supplier for defence, space and meteorology applications." }
 };
 
 const years = ["FY21", "FY22", "FY23", "FY24", "FY25", "FY26"];
@@ -579,6 +579,14 @@ function sourceMetric(item, key, options = {}) {
 
 function moneyCr(value) {
   return Number.isFinite(value) ? `Rs ${compact(value)}crs` : "--";
+}
+
+function hasSeriesData(values = []) {
+  return values.some(Number.isFinite);
+}
+
+function chartCard(title, body, className = "") {
+  return `<article class="chart-card ${className}">${chartTitle(title)}${body}</article>`;
 }
 
 function historicalMetricSeries(item, key) {
@@ -1307,6 +1315,30 @@ function renderHistorical() {
     return;
   }
   const selectedExtra = extraData[selected?.meta.id] || {};
+  const revenueSeries = seededSeries(selected, "revenue");
+  const patSeries = seededSeries(selected, "pat");
+  const roceSeries = seededSeries(selected, "roce");
+  const fcfSeries = seededSeries(selected, "fcf");
+  const marginValues = [sourceMetric(selected, "ebitdaMargin").value, sourceMetric(selected, "patMargin").value];
+  const valuationRows = dashboard.map((item) => {
+    const extra = extraData[item.meta.id] || {};
+    const valuation = valuationMetrics(extra);
+    return { id: item.meta.id, label: extra.label || item.meta.nse, values: [valuation.rawEvRevenue, valuation.rawEvEbitda, valuation.rawPe] };
+  });
+  const wcRows = dashboard.map((item) => {
+    const extra = extraData[item.meta.id] || {};
+    const wc = workingCapitalMetrics(extra);
+    return { id: item.meta.id, label: extra.label || item.meta.nse, values: [wc.receivable, wc.inventory, wc.payable, wc.netCycle] };
+  });
+  const chartCards = [
+    hasSeriesData(revenueSeries) ? chartCard("Revenue Growth Trajectory", lineChart(years, revenueSeries, "Revenue")) : "",
+    hasSeriesData(patSeries) ? chartCard("PAT Growth Trajectory", lineChart(years, patSeries, "PAT")) : "",
+    marginValues.some(Number.isFinite) ? chartCard("EBITDA vs PAT Margins", barChart([{ id: selected?.meta.id, label: selectedExtra.label || selected?.meta.nse, a: marginValues[0], b: marginValues[1] }], "EBITDA", "PAT")) : "",
+    hasSeriesData(roceSeries) ? chartCard("Return on Capital Employed (ROCE)", lineChart(years, roceSeries, "ROCE")) : "",
+    hasSeriesData(fcfSeries) ? chartCard("Free Cash Flow Generation", lineChart(years, fcfSeries, "FCF")) : "",
+    valuationRows.some((row) => hasSeriesData(row.values)) ? chartCard("Peer Valuation Multiples", groupedBarChart(valuationRows, ["EV/Revenue", "EV/EBITDA", "P/E"], "Multiple (x)"), "wide") : "",
+    wcRows.some((row) => hasSeriesData(row.values)) ? chartCard("Working Capital - Receivable, Inventory, Payable & Net WC Cycle", groupedBarChart(wcRows, ["Receivable days", "Inventory days", "Payable days", "Net WC cycle"], "Days"), "wide") : ""
+  ].filter(Boolean).join("");
   const rows = dashboard.map((item) => {
     const extra = extraData[item.meta.id] || {};
     const valuation = valuationMetrics(extra);
@@ -1327,20 +1359,7 @@ function renderHistorical() {
     ];
   });
   els.historicalPanel.innerHTML = `<div class="chart-grid">
-    <article class="chart-card">${chartTitle("Revenue Growth Trajectory")}${lineChart(years, seededSeries(selected, "revenue"), "Revenue")}</article>
-    <article class="chart-card">${chartTitle("Return on Capital Employed (ROCE)")}${lineChart(years, seededSeries(selected, "roce"), "ROCE")}</article>
-    <article class="chart-card">${chartTitle("EBITDA vs PAT Margins")}${barChart([{ id: selected?.meta.id, label: selectedExtra.label || selected?.meta.nse, a: sourceMetric(selected, "ebitdaMargin").value, b: sourceMetric(selected, "patMargin").value }], "EBITDA", "PAT")}</article>
-    <article class="chart-card">${chartTitle("Free Cash Flow Generation")}${lineChart(years, seededSeries(selected, "fcf"), "FCF")}</article>
-    <article class="chart-card wide">${chartTitle("Peer Valuation Multiples")}${groupedBarChart(dashboard.map((item) => {
-      const extra = extraData[item.meta.id] || {};
-      const valuation = valuationMetrics(extra);
-      return { id: item.meta.id, label: extra.label || item.meta.nse, values: [valuation.rawEvRevenue, valuation.rawEvEbitda, valuation.rawPe] };
-    }), ["EV/Revenue", "EV/EBITDA", "P/E"], "Multiple (x)")}</article>
-    <article class="chart-card wide">${chartTitle("Working Capital - Receivable, Inventory, Payable & Net WC Cycle")}${groupedBarChart(dashboard.map((item) => {
-      const extra = extraData[item.meta.id] || {};
-      const wc = workingCapitalMetrics(extra);
-      return { id: item.meta.id, label: extra.label || item.meta.nse, values: [wc.receivable, wc.inventory, wc.payable, wc.netCycle] };
-    }), ["Receivable days", "Inventory days", "Payable days", "Net WC cycle"], "Days")}</article>
+    ${chartCards || `<article class="chart-card wide">${chartTitle("Historical Financial Series")}<div class="empty">No complete historical filing-backed series is available for ${escapeHtml(selected.meta.name)} yet.</div></article>`}
   </div>` + table([
     "Company / period", "Live price", "1Y return", "ROCE", "EBITDA margin", "EV/Revenue", "EV/EBITDA", "P/E", "FCF", "Receivable / Inventory / Payable / Net WC days"
   ], rows);
@@ -1373,20 +1392,36 @@ function renderEarnings() {
     }).join("")}</div>`;
 }
 
+function filingMetricRows(item) {
+  const extra = extraData[item.meta.id] || {};
+  const period = extra.period || "FY26";
+  const rows = [
+    ["Revenue", Number.isFinite(extra.revenue) ? moneyCr(extra.revenue) : "--", period],
+    ["EBITDA", Number.isFinite(extra.ebitda) ? moneyCr(extra.ebitda) : "--", period],
+    ["EBITDA margin", Number.isFinite(extra.ebitdaMargin) ? pct(extra.ebitdaMargin) : "--", period],
+    ["PAT", Number.isFinite(extra.pat) ? moneyCr(extra.pat) : "--", period],
+    ["PAT margin", Number.isFinite(extra.patMargin) ? pct(extra.patMargin) : "--", period],
+    ["Gross margin", Number.isFinite(extra.grossMargin) ? pct(extra.grossMargin) : "--", period],
+    ["Debt", Number.isFinite(extra.debt) ? moneyCr(extra.debt) : "--", period],
+    ["Cash", Number.isFinite(extra.cash) ? moneyCr(extra.cash) : "--", period]
+  ].filter((row) => row[1] !== "--");
+  return rows.length ? rows.map((row) => [...row, extra.source || "Company filing / investor release"]) : [["Filing metrics", "Awaiting filing-backed metric set", period, extra.source || "Company filing / investor release"]];
+}
+
 function renderCallSummary() {
   if (!els.callSummaryPanel) return;
   const selected = dashboard.find((item) => item.meta.id === selectedId) || dashboard[0];
   if (!selected) return;
   const summary = callSummaries[selected.meta.id] || callSummaries.mtar;
   const note = callSummaries[selected.meta.id] ? "" : `<div class="empty">No dedicated earnings-call summary has been added for ${escapeHtml(selected.meta.name)} yet. Showing the MTAR-format summary template. Current ${escapeHtml(selected.meta.name)} period tracked: ${escapeHtml(extraData[selected.meta.id]?.period || "N/A")}.</div>`;
+  const filingRows = filingMetricRows(selected);
   els.callSummaryPanel.innerHTML = `<article class="brief-card call-summary-card">
     ${note}
     <small>${escapeHtml(summary.period)} &middot; Call date/period: ${escapeHtml(summary.callDate)} &middot; Refreshed every minute; replaced when a newer transcript is available for the followed company.</small>
     <strong>${escapeHtml(summary.title)}</strong>
     <div id="autoCallSummary" class="empty">Checking for newer transcript uploads...</div>
     ${summary.sections.map((section) => `<div class="call-section"><h3>${escapeHtml(section.heading)}</h3><p>${escapeHtml(section.text)}</p></div>`).join("")}
-    <div class="call-section"><h3>${escapeHtml(summary.quarterTitle || "Q4 FY26 Metrics")}</h3>${table(summary.quarterHeaders || ["Metric", "Q4 FY26", "Q4 FY25", "Change"], summary.q4)}</div>
-    <div class="call-section"><h3>${escapeHtml(summary.fullYearTitle || "FY26 Metrics")}</h3>${table(summary.fullYearHeaders || ["Metric", "FY26", "FY25", "Change"], summary.fy)}</div>
+    <div class="call-section"><h3>Company filing financial metrics</h3>${table(["Metric", "Value", "Period", "Source"], filingRows)}</div>
   </article>`;
   refreshCallSummary(selected.meta.id);
 }
