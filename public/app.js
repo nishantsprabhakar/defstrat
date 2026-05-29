@@ -552,6 +552,34 @@ function ratioPct(value) {
   return Number.isFinite(value) && value > 0 ? pct(value * 100) : "--";
 }
 
+function rupeesToCrores(value) {
+  return Number.isFinite(value) ? value / 1e7 : NaN;
+}
+
+function sourceMetric(item, key, options = {}) {
+  const extra = extraData[item?.meta?.id] || {};
+  const mc = item?.moneycontrol?.latest || {};
+  const f = item?.yahoo?.financials || {};
+  if (Number.isFinite(extra[key])) {
+    return { value: extra[key], period: extra.period || "FY26", source: "Company filing / investor release" };
+  }
+  if (key === "revenue") {
+    if (Number.isFinite(mc.revenue)) return { value: mc.revenue, period: mc.period || "latest consolidated year", source: "Moneycontrol consolidated P&L" };
+    if (Number.isFinite(f.revenue)) return { value: rupeesToCrores(f.revenue), period: "Yahoo latest", source: "Yahoo Finance" };
+  }
+  if (key === "pat" && Number.isFinite(mc.pat)) return { value: mc.pat, period: mc.period || "latest consolidated year", source: "Moneycontrol consolidated P&L" };
+  if (key === "grossMargin" && Number.isFinite(f.grossMargins)) return { value: f.grossMargins * 100, period: "Yahoo latest", source: "Yahoo Finance" };
+  if (key === "patMargin" && Number.isFinite(f.profitMargins)) return { value: f.profitMargins * 100, period: "Yahoo latest", source: "Yahoo Finance" };
+  if ((key === "debt" || key === "cash") && Number.isFinite(f[options.yahooKey])) {
+    return { value: rupeesToCrores(f[options.yahooKey]), period: "Yahoo latest", source: "Yahoo Finance" };
+  }
+  return { value: NaN, period: extra.period || "latest", source: "Unavailable" };
+}
+
+function moneyCr(value) {
+  return Number.isFinite(value) ? `Rs ${compact(value)}crs` : "--";
+}
+
 function moveClass(value) {
   return Number(value) >= 0 ? "up" : "down";
 }
@@ -751,9 +779,8 @@ function renderDetail() {
   const item = dashboard.find((d) => d.meta.id === selectedId) || dashboard[0];
   if (!item) return;
   const q = item.yahoo?.quote || {};
-  const f = item.yahoo?.financials || {};
   const extra = extraData[item.meta.id] || {};
-  const period = extra.period || "Yahoo latest";
+  const revenue = sourceMetric(item, "revenue");
   els.selectedName.textContent = item.meta.name;
   els.selectedCodes.innerHTML = `${escapeHtml(item.meta.nse || item.meta.symbol)} &middot; BSE ${escapeHtml(item.meta.bse || "custom")} &middot; ${escapeHtml(item.meta.isin || "")}`;
   els.selectedPrice.textContent = money(q.regularMarketPrice);
@@ -766,9 +793,10 @@ function renderDetail() {
     ["Volume", compact(q.volume)],
     ["52W high", money(q.fiftyTwoWeekHigh)],
     ["52W low", money(q.fiftyTwoWeekLow)],
-    [`Revenue (${period})`, Number.isFinite(extra.revenue) ? `Rs ${compact(extra.revenue)}crs` : compact(f.revenue)],
-    [`P/E (${period})`, Number.isFinite(extra.pe) ? `${formatNum.format(extra.pe)}x` : compact(q.trailingPE)],
-    ["Source", item.yahoo?.source || "Live feed"]
+    [`Revenue (${revenue.period})`, moneyCr(revenue.value)],
+    [`P/E (${extra.period || "live"})`, Number.isFinite(extra.pe) ? `${formatNum.format(extra.pe)}x` : compact(q.trailingPE)],
+    ["Financial source", revenue.source],
+    ["Quote source", item.yahoo?.source || "Live feed"]
   ];
   els.fundamentals.innerHTML = metrics.map(([label, value]) => `<div><small>${label}</small><strong>${value}</strong></div>`).join("");
   renderInsights(item);
@@ -1045,15 +1073,21 @@ function renderBusiness() {
   const q = selected.yahoo?.quote || {};
   const f = selected.yahoo?.financials || {};
   const valuation = valuationMetrics(extra);
-  const period = extra.period || "latest period";
+  const revenueMetric = sourceMetric(selected, "revenue");
+  const grossMetric = sourceMetric(selected, "grossMargin");
+  const patMetric = sourceMetric(selected, "patMargin");
+  const debtMetric = sourceMetric(selected, "debt", { yahooKey: "totalDebt" });
+  const cashMetric = sourceMetric(selected, "cash", { yahooKey: "totalCash" });
+  const period = extra.period || revenueMetric.period || "latest period";
+  const sourceList = Array.from(new Set([revenueMetric.source, grossMetric.source, patMetric.source, debtMetric.source, cashMetric.source].filter((source) => source && source !== "Unavailable")));
   const financialRows = [
-    [`Revenue (${period})`, Number.isFinite(extra.revenue) ? `Rs ${compact(extra.revenue)}crs` : compact(selected.yahoo?.financials?.revenue)],
-    [`Gross margin (${period})`, Number.isFinite(extra.grossMargin) ? pct(extra.grossMargin) : ratioPct(f.grossMargins)],
+    [`Revenue (${revenueMetric.period})`, moneyCr(revenueMetric.value)],
+    [`Gross margin (${grossMetric.period})`, Number.isFinite(grossMetric.value) ? pct(grossMetric.value) : "--"],
     [`EBITDA margin (${period})`, Number.isFinite(extra.ebitdaMargin) ? pct(extra.ebitdaMargin) : ratioPct(f.operatingMargins)],
-    [`PAT margin (${period})`, Number.isFinite(extra.patMargin) ? pct(extra.patMargin) : pct((selected.yahoo?.financials?.profitMargins || NaN) * 100)],
+    [`PAT margin (${patMetric.period})`, Number.isFinite(patMetric.value) ? pct(patMetric.value) : "--"],
     [`ROCE (${period})`, Number.isFinite(extra.roce) ? pct(extra.roce) : "--"],
-    [`Debt (${period})`, Number.isFinite(extra.debt) ? `Rs ${compact(extra.debt)}crs` : (Number.isFinite(f.totalDebt) ? `Rs ${compact(f.totalDebt)}` : "--")],
-    [`Cash (${period})`, Number.isFinite(extra.cash) ? `Rs ${compact(extra.cash)}crs` : (Number.isFinite(f.totalCash) ? `Rs ${compact(f.totalCash)}` : "--")],
+    [`Debt (${debtMetric.period})`, moneyCr(debtMetric.value)],
+    [`Cash (${cashMetric.period})`, moneyCr(cashMetric.value)],
     [`D/E (${period})`, Number.isFinite(extra.debtEquity) ? `${formatNum.format(extra.debtEquity)}x` : "--"],
     [`EV/Revenue (${period})`, valuation.evRevenue],
     [`EV/EBITDA (${period})`, valuation.evEbitda],
@@ -1106,7 +1140,7 @@ function renderBusiness() {
       <small>Key financials</small>
       <strong>Operating snapshot (${escapeHtml(period)})</strong>
       ${table(["Metric", "Value"], financialRows.map(([label, value]) => [escapeHtml(label), escapeHtml(value)]))}
-      <p class="fine-print">Source: ${escapeHtml(extra.source || "Yahoo/BSE live feed and company filings")}.</p>
+      <p class="fine-print">Source priority: company filings first, then Moneycontrol consolidated P&L or Yahoo Finance where filing data is unavailable. Current sources: ${escapeHtml(sourceList.join(", ") || extra.source || "Unavailable")}.</p>
     </article>
 
     <article class="brief-card">
@@ -1401,7 +1435,7 @@ function renderAiBrief() {
     <article class="brief-card"><small>Selected company</small><strong>${escapeHtml(selected?.meta.name || "No company")}</strong><p>${escapeHtml(selectedExtra.oneLine || selected?.meta.segment || "Select a company to view the briefing.")}</p></article>
   </div>
   <div class="ai-box"><input id="aiPrompt" placeholder="Ask about latest prices, Yahoo news, BSE filings, valuations or comparisons"><button id="aiAskBtn">Ask DefStrat AI</button></div>
-  <article class="brief-card" id="aiAnswer"><small>Analyst response</small><p>Choose a prompt or ask a question. DefStrat refreshes live Yahoo Finance, BSE and current news context before answering.</p></article>`;
+  <article class="brief-card" id="aiAnswer"><small>Analyst response</small><p>Choose a prompt or ask a question. DefStrat refreshes company filing, Yahoo Finance, Moneycontrol consolidated P&L, BSE and current news context before answering.</p></article>`;
   document.querySelectorAll("[data-ai-prompt]").forEach((button) => button.addEventListener("click", () => answerAi(button.dataset.aiPrompt)));
   document.querySelector("#aiAskBtn")?.addEventListener("click", () => answerAi(document.querySelector("#aiPrompt")?.value || ""));
 }
@@ -1409,9 +1443,9 @@ function renderAiBrief() {
 function renderManage() {
   if (!els.managePanel) return;
   els.managePanel.innerHTML = `<div class="brief-grid">
-    <article class="brief-card"><small>AI analyst settings</small><strong>Backend AI enabled</strong><p>DefStrat AI now calls the server for fresh Yahoo Finance, BSE, news and transcript context. Add OPENAI_API_KEY on the host for full AI responses; otherwise it uses a live-data fallback.</p></article>
+    <article class="brief-card"><small>AI analyst settings</small><strong>Backend AI enabled</strong><p>DefStrat AI now calls the server for company filing, Yahoo Finance, Moneycontrol consolidated P&L, BSE, news and transcript context. Add OPENAI_API_KEY on the host for full AI responses; otherwise it uses a live-data fallback.</p></article>
     <article class="brief-card"><small>Tracked companies</small><strong>${watchIds.length}</strong><p>${watchIds.map((id) => escapeHtml(metaFor(id)?.name || id)).join(", ")}</p></article>
-    <article class="brief-card"><small>Data sources</small><strong>Yahoo Finance + BSE + live news</strong><p>Quote history comes from Yahoo Finance. Filings, presentations and exchange notes link back to BSE where available. Article summaries use current news feeds.</p></article>
+    <article class="brief-card"><small>Data sources</small><strong>Filings + Yahoo + Moneycontrol + BSE</strong><p>Quote history comes from Yahoo Finance. Financial fallback uses Moneycontrol consolidated P&L or Yahoo only when filing data is unavailable. Filings and presentations link back to BSE where available.</p></article>
   </div>
   <div class="brief-card">
     <small>Company universe</small><strong>Add company</strong>

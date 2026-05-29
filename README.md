@@ -38,9 +38,9 @@ The backend proxies Yahoo Finance chart/quote data and BSE filings so the browse
 
 ## AI and transcript refresh
 
-DefStrat AI calls the backend endpoint `/api/ai`, which refreshes Yahoo Finance, BSE announcements and news context before answering. Set `OPENAI_API_KEY` on your host for full AI-generated responses. Without it, the server returns a deterministic live-data fallback instead of inventing unavailable numbers.
+DefStrat AI calls the backend endpoint `/api/ai`, which refreshes company filing metrics, Yahoo Finance, Moneycontrol consolidated P&L, BSE announcements and news context before answering. Set `OPENAI_API_KEY` on your host for full AI-generated responses. Without it, the server returns a deterministic live-data fallback instead of inventing unavailable numbers.
 
-The earnings-call tab calls `/api/transcript-summary` for the selected company. The backend scans BSE/company/news sources for transcript-like uploads and surfaces the latest detected filing or presentation signal automatically.
+The earnings-call tab calls `/api/transcript-summary` for the selected company. The backend scans BSE/company/news sources for transcript-like uploads and surfaces the latest detected filing or presentation signal automatically. Financial metrics shown in the earnings-call summary are restricted to company filing / investor-release data; Yahoo and Moneycontrol are only fallback sources outside that filing-backed summary section.
 
 ## Publish
 
@@ -66,4 +66,4 @@ docker run -p 4173:4173 defstrat-dashboard
 
 ## Notes
 
-Yahoo's richer financial-statement endpoint can require protected web-session authorization. The app therefore uses Yahoo's live chart feed as the primary quote source and keeps direct BSE/Yahoo source links beside every company for filings, earnings notes, investor presentations, and financial disclosures.
+Yahoo's richer financial-statement endpoint can require protected web-session authorization. The app therefore uses Yahoo's live chart feed as the primary quote source, Moneycontrol consolidated P&L as a best-effort fallback for missing consolidated financials, and direct BSE/Yahoo source links beside every company for filings, earnings notes, investor presentations, and financial disclosures.

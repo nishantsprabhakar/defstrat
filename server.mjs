@@ -11,14 +11,14 @@ const cache = new Map();
 const transcriptCache = new Map();
 
 const companies = [
-  { id: "zentec", name: "Zen Technologies", symbol: "ZENTEC.NS", nse: "ZENTEC", bse: "533339", isin: "INE251B01027", segment: "Simulation, anti-drone and training systems" },
-  { id: "ideaforge", name: "ideaForge Technology", symbol: "IDEAFORGE.NS", nse: "IDEAFORGE", bse: "543932", isin: "INE349Y01013", segment: "UAVs and drone platforms" },
-  { id: "mtar", name: "MTAR Technologies", symbol: "MTARTECH.NS", nse: "MTARTECH", bse: "543270", isin: "INE864I01014", segment: "Precision engineering for aerospace, nuclear and clean energy" },
-  { id: "datapatterns", name: "Data Patterns", symbol: "DATAPATTNS.NS", nse: "DATAPATTNS", bse: "543428", isin: "INE0IX101010", segment: "Defence electronics and radar systems" },
-  { id: "azad", name: "Azad Engineering", symbol: "AZAD.NS", nse: "AZAD", bse: "544061", isin: "INE02IJ01035", segment: "Precision aerospace and turbine components" },
-  { id: "aequs", name: "Aequs", symbol: "AEQUS.NS", nse: "AEQUS", bse: "544634", isin: "INE947N01017", segment: "Aerospace precision components" },
-  { id: "paras", name: "Paras Defence", symbol: "PARAS.NS", nse: "PARAS", bse: "543367", isin: "INE045601023", segment: "Optics, defence electronics and space engineering" },
-  { id: "astra", name: "Astra Microwave", symbol: "ASTRAMICRO.NS", nse: "ASTRAMICRO", bse: "532493", isin: "INE386C01029", segment: "RF, microwave and defence electronics" }
+  { id: "zentec", name: "Zen Technologies", symbol: "ZENTEC.NS", nse: "ZENTEC", bse: "533339", isin: "INE251B01027", segment: "Simulation, anti-drone and training systems", moneycontrol: "https://www.moneycontrol.com/financials/zentechnologies/consolidated-profit-lossVI/zt01" },
+  { id: "ideaforge", name: "ideaForge Technology", symbol: "IDEAFORGE.NS", nse: "IDEAFORGE", bse: "543932", isin: "INE349Y01013", segment: "UAVs and drone platforms", moneycontrol: "https://www.moneycontrol.com/financials/ideaforgetechnology/consolidated-profit-lossVI/IT07" },
+  { id: "mtar", name: "MTAR Technologies", symbol: "MTARTECH.NS", nse: "MTARTECH", bse: "543270", isin: "INE864I01014", segment: "Precision engineering for aerospace, nuclear and clean energy", moneycontrol: "https://www.moneycontrol.com/financials/mtartechnologies/consolidated-profit-lossVI/MT15" },
+  { id: "datapatterns", name: "Data Patterns", symbol: "DATAPATTNS.NS", nse: "DATAPATTNS", bse: "543428", isin: "INE0IX101010", segment: "Defence electronics and radar systems", moneycontrol: "https://www.moneycontrol.com/financials/datapatternsindia/consolidated-profit-lossVI/DPI01" },
+  { id: "azad", name: "Azad Engineering", symbol: "AZAD.NS", nse: "AZAD", bse: "544061", isin: "INE02IJ01035", segment: "Precision aerospace and turbine components", moneycontrol: "https://www.moneycontrol.com/financials/azadengineering/consolidated-profit-lossVI/AEL02" },
+  { id: "aequs", name: "Aequs", symbol: "AEQUS.NS", nse: "AEQUS", bse: "544634", isin: "INE947N01017", segment: "Aerospace precision components", moneycontrol: "https://www.moneycontrol.com/financials/aequsltd/consolidated-profit-lossVI/AL16" },
+  { id: "paras", name: "Paras Defence", symbol: "PARAS.NS", nse: "PARAS", bse: "543367", isin: "INE045601023", segment: "Optics, defence electronics and space engineering", moneycontrol: "https://www.moneycontrol.com/financials/parasdefenceandspacetechnologies/consolidated-profit-lossVI/PDS01" },
+  { id: "astra", name: "Astra Microwave", symbol: "ASTRAMICRO.NS", nse: "ASTRAMICRO", bse: "532493", isin: "INE386C01029", segment: "RF, microwave and defence electronics", moneycontrol: "https://www.moneycontrol.com/financials/astramicrowaveproducts/consolidated-profit-lossVI/AMP01" }
 ];
 
 const auditedMetrics = {
@@ -121,6 +121,63 @@ function decodeXml(value = "") {
     .replace(/<[^>]*>/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function stripHtml(value = "") {
+  return decodeXml(String(value).replace(/<script[\s\S]*?<\/script>/gi, " ").replace(/<style[\s\S]*?<\/style>/gi, " "));
+}
+
+function parseMoneyNumber(value) {
+  const clean = stripHtml(value).replace(/,/g, "").replace(/[^\d.-]/g, "");
+  if (!clean || clean === "-" || clean === ".") return null;
+  const number = Number(clean);
+  return Number.isFinite(number) ? number : null;
+}
+
+function parseMoneycontrolRow(html, label) {
+  const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = html.match(new RegExp(`<tr[^>]*>[\\s\\S]*?<td[^>]*>\\s*${escaped}\\s*<\\/td>([\\s\\S]*?)<\\/tr>`, "i"));
+  if (!match) return [];
+  return [...match[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map((cell) => parseMoneyNumber(cell[1])).filter((value) => value !== null);
+}
+
+function parseMoneycontrolHeaders(html) {
+  const seen = new Set();
+  return [...html.matchAll(/<td[^>]*>\s*(Mar\s+\d{2})\s*<\/td>/gi)]
+    .map((match) => stripHtml(match[1]))
+    .filter((text) => {
+      const key = text.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 6);
+}
+
+async function moneycontrolFinancials(meta) {
+  if (!meta.moneycontrol) return null;
+  const html = await fetchText(meta.moneycontrol, { headers: { referer: "https://www.moneycontrol.com/" } });
+  if (/Data Not Available for Profit\s*&amp;\s*Loss/i.test(html)) {
+    return { source: "Moneycontrol consolidated P&L", url: meta.moneycontrol, available: false, reason: "Data not available" };
+  }
+  const years = parseMoneycontrolHeaders(html);
+  const revenue = parseMoneycontrolRow(html, "Revenue From Operations [Gross]");
+  const operatingRevenue = parseMoneycontrolRow(html, "Total Operating Revenues");
+  const pat = parseMoneycontrolRow(html, "Consolidated Profit/Loss After MI And Associates");
+  const latest = {
+    period: years[0] ? `FY${years[0].slice(-2)}` : "latest consolidated year",
+    revenue: revenue[0] ?? operatingRevenue[0] ?? null,
+    operatingRevenue: operatingRevenue[0] ?? null,
+    pat: pat[0] ?? null
+  };
+  return {
+    source: "Moneycontrol consolidated P&L",
+    url: meta.moneycontrol,
+    available: Number.isFinite(latest.revenue) || Number.isFinite(latest.pat),
+    latest,
+    years,
+    rows: { revenue, operatingRevenue, pat }
+  };
 }
 
 async function yahooCompany(symbol) {
@@ -444,17 +501,19 @@ async function transcriptSummary(meta) {
 }
 
 async function companyPayload(meta) {
-  const [chart, richYahoo, bse, news] = await Promise.allSettled([
+  const [chart, richYahoo, bse, news, moneycontrol] = await Promise.allSettled([
     yahooChart(meta.symbol),
     yahooCompany(meta.symbol),
     bseAnnouncements(meta.bse),
-    companyNews(meta)
+    companyNews(meta),
+    moneycontrolFinancials(meta)
   ]);
   const chartValue = chart.status === "fulfilled" ? chart.value : { meta: {}, points: [] };
   const yahooValue = richYahoo.status === "fulfilled" ? richYahoo.value : yahooFromChart(meta.symbol, chartValue);
   return {
     meta,
     yahoo: yahooValue,
+    moneycontrol: moneycontrol.status === "fulfilled" ? moneycontrol.value : { source: "Moneycontrol consolidated P&L", available: false, reason: moneycontrol.reason?.message || "Unavailable" },
     chart: chartValue.points,
     bse: bse.status === "fulfilled" ? bse.value : [],
     news: news.status === "fulfilled" ? news.value : [],
@@ -464,6 +523,42 @@ async function companyPayload(meta) {
 
 function compactNumber(value) {
   return Number.isFinite(value) ? Number(value.toFixed(2)) : null;
+}
+
+function rupeesToCrores(value) {
+  return Number.isFinite(value) ? value / 1e7 : null;
+}
+
+function resolvedFinancials(payload) {
+  const audited = auditedMetrics[payload.meta.id] || {};
+  const mc = payload.moneycontrol?.latest || {};
+  const yf = payload.yahoo?.financials || {};
+  const choose = (key, alternatives) => {
+    if (Number.isFinite(audited[key])) return { value: audited[key], source: "Company filing / investor release", period: audited.period || "FY26" };
+    for (const row of alternatives) {
+      if (Number.isFinite(row.value)) return row;
+    }
+    return { value: null, source: "Unavailable", period: audited.period || mc.period || "latest" };
+  };
+  return {
+    revenue: choose("revenue", [
+      { value: mc.revenue ?? mc.operatingRevenue, source: "Moneycontrol consolidated P&L", period: mc.period || "latest consolidated year" },
+      { value: rupeesToCrores(yf.revenue), source: "Yahoo Finance financialData", period: "Yahoo latest" }
+    ]),
+    pat: choose("pat", [
+      { value: mc.pat, source: "Moneycontrol consolidated P&L", period: mc.period || "latest consolidated year" }
+    ]),
+    ebitda: choose("ebitda", [
+      { value: rupeesToCrores(yf.ebitda), source: "Yahoo Finance financialData", period: "Yahoo latest" }
+    ]),
+    ebitdaMargin: choose("ebitdaMargin", []),
+    grossMargin: choose("grossMargin", [
+      { value: Number.isFinite(yf.grossMargins) ? yf.grossMargins * 100 : null, source: "Yahoo Finance financialData", period: "Yahoo latest" }
+    ]),
+    patMargin: choose("patMargin", [
+      { value: Number.isFinite(yf.profitMargins) ? yf.profitMargins * 100 : null, source: "Yahoo Finance financialData", period: "Yahoo latest" }
+    ])
+  };
 }
 
 function payloadForAi(payload) {
@@ -478,6 +573,12 @@ function payloadForAi(payload) {
     symbol: payload.meta.symbol,
     segment: payload.meta.segment,
     audited: auditedMetrics[payload.meta.id] || null,
+    financials: resolvedFinancials(payload),
+    moneycontrol: payload.moneycontrol?.available ? {
+      source: payload.moneycontrol.source,
+      url: payload.moneycontrol.url,
+      latest: payload.moneycontrol.latest
+    } : null,
     quote: {
       price: q.regularMarketPrice ?? null,
       dayMovePct: q.regularMarketChangePercent ?? null,
@@ -536,8 +637,9 @@ async function callOpenAi(prompt, context) {
       model: AI_MODEL,
       instructions: [
         "You are DefStrat AI, an expert Indian defence-equities financial reviewer.",
-        "Use only the supplied Yahoo Finance, BSE, news and audited metric context.",
-        "Mention fiscal years for every financial figure. Do not invent missing values.",
+        "Use only the supplied Yahoo Finance, Moneycontrol consolidated P&L, BSE, news and audited metric context.",
+        "Use company filing / investor release figures first. For metrics not available there, use Yahoo Finance or Moneycontrol consolidated data only.",
+        "Mention fiscal years for every financial figure and state the source. Do not use standalone figures. Do not invent missing values.",
         "Answer in 3-6 concise analyst bullets with source/date cues where available.",
         "This is informational analysis, not investment advice."
       ].join(" "),
@@ -559,7 +661,7 @@ function deterministicAiAnswer(prompt, context) {
     return rows.map((row) => {
       const source = context.transcripts?.[row.id]?.summary?.latestSource;
       const audited = row.audited;
-      return `- ${row.name}: ${audited?.period || "Latest period"} revenue ${audited?.revenue ?? "not verified"}cr and PAT ${audited?.pat ?? "not verified"}cr. Latest transcript/filing signal: ${source ? `${source.date || "date unavailable"} - ${source.title}` : "no new transcript-like filing detected"}.`;
+      return `- ${row.name}: ${audited?.period || "Latest period"} company-filing metrics: revenue ${audited?.revenue ?? "not verified"}cr and PAT ${audited?.pat ?? "not verified"}cr. Latest transcript/filing signal: ${source ? `${source.date || "date unavailable"} - ${source.title}` : "no new transcript-like filing detected"}.`;
     }).join("\n");
   }
   if (wantsNews) {
@@ -571,14 +673,14 @@ function deterministicAiAnswer(prompt, context) {
   }
   if (wantsCompare) {
     return rows.map((row) => {
-      const audited = row.audited || {};
-      return `- ${row.name}: ${audited.period || "Latest period"} revenue Rs ${audited.revenue ?? "--"}cr, PAT Rs ${audited.pat ?? "--"}cr, EBITDA margin ${audited.ebitdaMargin ?? "--"}%, live price Rs ${row.quote.price ?? "--"}, 1Y return ${row.quote.return1y ?? "--"}%.`;
+      const f = row.financials || {};
+      return `- ${row.name}: ${f.revenue?.period || "Latest period"} revenue Rs ${f.revenue?.value ?? "--"}cr (${f.revenue?.source || "unavailable"}), PAT Rs ${f.pat?.value ?? "--"}cr (${f.pat?.source || "unavailable"}), EBITDA margin ${f.ebitdaMargin?.value ?? "--"}% (${f.ebitdaMargin?.source || "unavailable"}), live price Rs ${row.quote.price ?? "--"}, 1Y return ${row.quote.return1y ?? "--"}%.`;
     }).join("\n");
   }
   const row = rows[0];
   if (!row) return "No matching company context was available. Try a company name or select one from the watchlist.";
-  const audited = row.audited || {};
-  return `- ${row.name}: live price Rs ${row.quote.price ?? "--"} with day move ${row.quote.dayMovePct ?? "--"}%.\n- ${audited.period || "Latest period"} verified metrics: revenue Rs ${audited.revenue ?? "--"}cr, PAT Rs ${audited.pat ?? "--"}cr, EBITDA margin ${audited.ebitdaMargin ?? "--"}%.\n- Latest news/BSE context is refreshed from Yahoo Finance, Google News RSS and BSE before this answer. Missing values are left blank rather than inferred.`;
+  const f = row.financials || {};
+  return `- ${row.name}: live price Rs ${row.quote.price ?? "--"} with day move ${row.quote.dayMovePct ?? "--"}%.\n- ${f.revenue?.period || "Latest period"} consolidated metrics: revenue Rs ${f.revenue?.value ?? "--"}cr (${f.revenue?.source || "unavailable"}), PAT Rs ${f.pat?.value ?? "--"}cr (${f.pat?.source || "unavailable"}), EBITDA margin ${f.ebitdaMargin?.value ?? "--"}% (${f.ebitdaMargin?.source || "unavailable"}).\n- Latest news/BSE context is refreshed from Yahoo Finance, Google News RSS and BSE; financial fallback uses Moneycontrol consolidated P&L or Yahoo Finance only when company filing data is missing.`;
 }
 
 async function aiAnswer(body = {}) {
@@ -590,7 +692,7 @@ async function aiAnswer(body = {}) {
   const transcriptPairs = await Promise.all(selectedCompanies.map(async (meta) => [meta.id, await transcriptSummary(meta)]));
   const context = {
     generatedAt: new Date().toISOString(),
-    dataSources: ["Yahoo Finance quote/chart/search", "BSE announcements", "Google News RSS", "audited FY26 metric cache"],
+    dataSources: ["Company filings / investor releases", "Yahoo Finance quote/chart/search", "Moneycontrol consolidated P&L", "BSE announcements", "Google News RSS"],
     companies: payloads.map(payloadForAi),
     transcripts: Object.fromEntries(transcriptPairs)
   };
