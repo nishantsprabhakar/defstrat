@@ -960,11 +960,14 @@ async function routeApi(req, res, url) {
     return send(res, 200, { data, refreshedAt: new Date().toISOString() });
   }
   if (url.pathname === "/api/company") {
+    const id = url.searchParams.get("id");
     const symbol = url.searchParams.get("symbol");
     const bse = url.searchParams.get("bse") || "";
     const name = url.searchParams.get("name") || symbol;
+    const segment = url.searchParams.get("segment") || "Custom watchlist company";
+    const nse = url.searchParams.get("nse") || symbol?.replace(".NS", "");
     if (!symbol) return send(res, 400, { error: "symbol is required" });
-    return send(res, 200, await companyPayload({ id: symbol.toLowerCase(), name, symbol, nse: symbol.replace(".NS", ""), bse, segment: "Custom watchlist company" }));
+    return send(res, 200, await companyPayload({ id: id || symbol.toLowerCase(), name, symbol, nse, bse, segment }));
   }
   if (url.pathname === "/api/search") {
     const q = url.searchParams.get("q") || "";

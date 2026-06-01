@@ -718,7 +718,7 @@ async function refresh() {
     const { data } = await getJson(`/api/dashboard?ids=${encodeURIComponent(known.join(","))}`);
     const customData = await Promise.all(customIds.map((id) => {
       const item = custom.find((x) => x.id === id);
-      return getJson(`/api/company?symbol=${encodeURIComponent(item.symbol)}&bse=${encodeURIComponent(item.bse || "")}&name=${encodeURIComponent(item.name)}`);
+      return getJson(`/api/company?id=${encodeURIComponent(item.id)}&symbol=${encodeURIComponent(item.symbol)}&bse=${encodeURIComponent(item.bse || "")}&name=${encodeURIComponent(item.name)}&nse=${encodeURIComponent(item.nse || item.symbol.replace(".NS", ""))}&segment=${encodeURIComponent(item.segment || "Custom watchlist company")}`);
     }));
     dashboard = [...data, ...customData].filter(Boolean);
     if (!dashboard.some((item) => item.meta.id === selectedId)) selectedId = dashboard[0]?.meta.id;
@@ -1174,10 +1174,10 @@ function renderBusiness() {
     [`Gross margin (${grossMetric.period})`, Number.isFinite(grossMetric.value) ? pct(grossMetric.value) : "--"],
     [`EBITDA margin (${ebitdaMetric.period})`, Number.isFinite(ebitdaMetric.value) ? pct(ebitdaMetric.value) : "--"],
     [`PAT margin (${patMetric.period})`, Number.isFinite(patMetric.value) ? pct(patMetric.value) : "--"],
-    [`ROCE (${period})`, Number.isFinite(extra.roce) ? pct(extra.roce) : "--"],
+    [`ROCE (${period})`, Number.isFinite(liveMetric(selected, "roce")) ? pct(liveMetric(selected, "roce")) : "--"],
     [`Debt (${debtMetric.period})`, moneyCr(debtMetric.value)],
     [`Cash (${cashMetric.period})`, moneyCr(cashMetric.value)],
-    [`D/E (${period})`, Number.isFinite(extra.debtEquity) ? `${formatNum.format(extra.debtEquity)}x` : "--"],
+    [`D/E (${period})`, Number.isFinite(liveMetric(selected, "debtEquity")) ? `${formatNum.format(liveMetric(selected, "debtEquity"))}x` : "--"],
     [`EV/Revenue (${period})`, valuation.evRevenue],
     [`EV/EBITDA (${period})`, valuation.evEbitda],
     [`P/E (${period})`, valuation.pe !== "--" ? valuation.pe : (Number.isFinite(q.trailingPE) ? `${formatNum.format(q.trailingPE)}x` : "--")],
@@ -1203,7 +1203,7 @@ function renderBusiness() {
       <div class="business-kpis">
         <div><small>Live price</small><strong>${money(q.regularMarketPrice)}</strong></div>
         <div><small>Day move</small><strong class="${moveClass(q.regularMarketChangePercent)}">${pct(q.regularMarketChangePercent)}</strong></div>
-        <div><small>Market cap</small><strong>${Number.isFinite(extra.marketCap) ? `Rs ${compact(extra.marketCap)}crs` : compact(q.marketCap)}</strong></div>
+        <div><small>Market cap</small><strong>${Number.isFinite(liveMetric(selected, "marketCapCr")) ? `Rs ${compact(liveMetric(selected, "marketCapCr"))}crs` : "--"}</strong></div>
       </div>
     </article>
 
@@ -1492,12 +1492,47 @@ function filingMetricRows(item) {
   return rows.length ? rows.map((row) => [...row, extra.source || "Company filing / investor release"]) : [["Filing metrics", "Awaiting filing-backed metric set", period, extra.source || "Company filing / investor release"]];
 }
 
+function liveCallSummary(item) {
+  const revenue = sourceMetric(item, "revenue");
+  const ebitdaMargin = sourceMetric(item, "ebitdaMargin");
+  const pat = sourceMetric(item, "pat");
+  const patMargin = sourceMetric(item, "patMargin");
+  const latest = liveNewsRows(item, 1)[0];
+  const metricBits = [
+    Number.isFinite(revenue.value) ? `revenue ${moneyCr(revenue.value)}` : "",
+    Number.isFinite(pat.value) ? `PAT ${moneyCr(pat.value)}` : "",
+    Number.isFinite(ebitdaMargin.value) ? `EBITDA margin ${pct(ebitdaMargin.value)}` : "",
+    Number.isFinite(patMargin.value) ? `PAT margin ${pct(patMargin.value)}` : ""
+  ].filter(Boolean);
+  return {
+    title: `${item.meta.name} live earnings summary`,
+    period: revenue.period || "Latest available period",
+    callDate: latest?.date || "Latest live update",
+    sections: [
+      {
+        heading: "Financial Performance",
+        text: metricBits.length
+          ? `${revenue.period || "Latest available period"} metrics from live fallback sources: ${metricBits.join(", ")}.`
+          : "No full financial metric set has been returned yet; the dashboard will continue refreshing Yahoo Finance and available public sources."
+      },
+      {
+        heading: "Latest Filing / News Signal",
+        text: latest ? `${latest.source}: ${latest.title}. ${latest.detail}` : "No relevant live news or filing item has been returned yet."
+      },
+      {
+        heading: "Investor Watch Points",
+        text: "Track revenue trend, margin direction, leverage, cash generation, working-capital movement, share-price reaction and any new exchange filings."
+      }
+    ]
+  };
+}
+
 function renderCallSummary() {
   if (!els.callSummaryPanel) return;
   const selected = dashboard.find((item) => item.meta.id === selectedId) || dashboard[0];
   if (!selected) return;
-  const summary = callSummaries[selected.meta.id] || callSummaries.mtar;
-  const note = callSummaries[selected.meta.id] ? "" : `<div class="empty">No dedicated earnings-call summary has been added for ${escapeHtml(selected.meta.name)} yet. Showing the MTAR-format summary template. Current ${escapeHtml(selected.meta.name)} period tracked: ${escapeHtml(extraData[selected.meta.id]?.period || "N/A")}.</div>`;
+  const summary = callSummaries[selected.meta.id] || liveCallSummary(selected);
+  const note = callSummaries[selected.meta.id] ? "" : `<div class="empty">No dedicated earnings-call transcript template is stored for ${escapeHtml(selected.meta.name)} yet. Showing a live-source summary that refreshes with Yahoo/news data.</div>`;
   const filingRows = filingMetricRows(selected);
   els.callSummaryPanel.innerHTML = `<article class="brief-card call-summary-card">
     ${note}
@@ -1510,7 +1545,12 @@ function renderCallSummary() {
       <div id="autoCallSummary" class="empty">Checking for newer transcript uploads...</div>
     </details>
   </article>`;
-  refreshCallSummary(selected.meta.id);
+  if (catalog.some((item) => item.id === selected.meta.id)) {
+    refreshCallSummary(selected.meta.id);
+  } else {
+    const target = document.querySelector("#autoCallSummary");
+    if (target) target.innerHTML = "Automatic transcript monitoring is available for the default tracked universe. For custom companies, this tab refreshes live Yahoo/news data and any BSE code you add in Manage.";
+  }
 }
 
 async function refreshCallSummary(id) {
@@ -1620,7 +1660,9 @@ async function answerAi(prompt) {
     return;
   }
   answer.innerHTML = `<small>Searching live sources</small><p>Refreshing Yahoo Finance quote/chart data, live internet news and BSE filing context before answering...</p>`;
+  const hasCustomTarget = custom.some((item) => item.id === selectedId) || (wantsAllCompanies(normalized) && custom.length);
   try {
+    if (hasCustomTarget) throw new Error("Use local custom-company context");
     const result = await postJson("/api/ai", {
       prompt,
       selectedId,
@@ -1629,7 +1671,7 @@ async function answerAi(prompt) {
     renderAiText(`DefStrat AI (${result.mode === "openai" ? "AI backend" : "live-data fallback"}) - ${formatDate(result.refreshedAt)}`, result.answer);
     return;
   } catch {
-    answer.innerHTML = `<small>Backend unavailable</small><p>Using local fallback while the AI backend is unavailable.</p>`;
+    answer.innerHTML = `<small>Live local context</small><p>Using the current dashboard data for custom-company coverage.</p>`;
   }
   await refreshYahooContext(normalized);
   const rows = getAnalystRows();
@@ -1718,7 +1760,7 @@ async function refreshYahooContext(text) {
   const targets = wantsAll ? dashboard : matches.length ? matches : (selected ? [selected] : []);
   await Promise.all(targets.map(async (item) => {
     try {
-      const fresh = await getJson(`/api/company?symbol=${encodeURIComponent(item.meta.symbol)}&bse=${encodeURIComponent(item.meta.bse || "")}&name=${encodeURIComponent(item.meta.name)}`);
+      const fresh = await getJson(`/api/company?id=${encodeURIComponent(item.meta.id)}&symbol=${encodeURIComponent(item.meta.symbol)}&bse=${encodeURIComponent(item.meta.bse || "")}&name=${encodeURIComponent(item.meta.name)}&nse=${encodeURIComponent(item.meta.nse || item.meta.symbol?.replace(".NS", ""))}&segment=${encodeURIComponent(item.meta.segment || "Custom watchlist company")}`);
       const index = dashboard.findIndex((row) => row.meta.id === item.meta.id);
       if (index >= 0 && fresh?.yahoo) dashboard[index] = { ...dashboard[index], ...fresh, meta: dashboard[index].meta };
     } catch {
@@ -1744,12 +1786,7 @@ function addFromManage() {
   const subsector = document.querySelector("#manageSubsector")?.value.trim();
   if (!ticker) return;
   const symbol = ticker.includes(".") ? ticker : `${ticker}.NS`;
-  const id = `custom-${symbol.toLowerCase().replace(/[^a-z0-9]/g, "-")}`;
-  if (!custom.some((item) => item.id === id)) custom.push({ id, name: name || ticker, symbol, nse: ticker.replace(".NS", ""), bse: bse || "", segment: subsector || "Custom watchlist company" });
-  if (!watchIds.includes(id)) watchIds.push(id);
-  selectedId = id;
-  save();
-  refresh();
+  addCustom(symbol, name || ticker, { bse, segment: subsector || "Custom watchlist company" });
 }
 
 function chartTitle(text) {
@@ -1938,10 +1975,10 @@ function getAnalystRows() {
       return1y: oneYearReturn(item),
       revenue: revenue.value,
       patMargin: patMargin.value,
-      roce: extra.roce,
-      pe: extra.pe,
-      debtEquity: extra.debtEquity,
-      marketCap: extra.marketCap || quote.marketCap,
+      roce: liveMetric(item, "roce"),
+      pe: liveMetric(item, "pe"),
+      debtEquity: liveMetric(item, "debtEquity"),
+      marketCap: liveMetric(item, "marketCapCr"),
       verdict: extra.verdict || "Watch",
       oneLine: extra.oneLine || item.meta.segment || ""
     };
@@ -2048,11 +2085,11 @@ async function search() {
   }
   searchTimer = setTimeout(async () => {
     const { results } = await getJson(`/api/search?q=${encodeURIComponent(q)}`);
-    els.searchResults.innerHTML = results.map((row) => `<button data-symbol="${escapeHtml(row.symbol)}" data-name="${escapeHtml(row.longname || row.shortname || row.symbol)}">
+    els.searchResults.innerHTML = results.map((row) => `<button data-symbol="${escapeHtml(row.symbol)}" data-name="${escapeHtml(row.longname || row.shortname || row.symbol)}" data-segment="${escapeHtml(row.industryDisp || row.sectorDisp || row.exchDisp || "Custom watchlist company")}">
       <strong>${escapeHtml(row.symbol)}</strong><br><small>${escapeHtml(row.longname || row.shortname || row.exchDisp || "")}</small>
     </button>`).join("");
     els.searchResults.style.display = results.length ? "block" : "none";
-    els.searchResults.querySelectorAll("button").forEach((button) => button.addEventListener("click", () => addCustom(button.dataset.symbol, button.dataset.name)));
+    els.searchResults.querySelectorAll("button").forEach((button) => button.addEventListener("click", () => addCustom(button.dataset.symbol, button.dataset.name, { segment: button.dataset.segment })));
   }, 250);
 }
 
@@ -2063,17 +2100,39 @@ function addManual() {
   addCustom(symbol, raw);
 }
 
-function addCustom(symbol, name) {
-  const id = `custom-${symbol.toLowerCase().replace(/[^a-z0-9]/g, "-")}`;
-  if (!custom.some((item) => item.id === id) && !catalog.some((item) => item.symbol === symbol)) {
-    custom.push({ id, name, symbol, nse: symbol.replace(".NS", ""), bse: "", segment: "Custom watchlist company" });
+async function addCustom(symbol, name, options = {}) {
+  const normalizedSymbol = String(symbol || "").toUpperCase();
+  const finalSymbol = normalizedSymbol.includes(".") ? normalizedSymbol : `${normalizedSymbol}.NS`;
+  const catalogMatch = catalog.find((item) => item.symbol?.toUpperCase() === finalSymbol || item.nse?.toUpperCase() === finalSymbol.replace(".NS", ""));
+  if (catalogMatch) {
+    if (!watchIds.includes(catalogMatch.id)) watchIds.push(catalogMatch.id);
+    selectedId = catalogMatch.id;
+    els.companySearch.value = "";
+    els.searchResults.style.display = "none";
+    save();
+    await refresh();
+    return;
   }
+  const id = `custom-${finalSymbol.toLowerCase().replace(/[^a-z0-9]/g, "-")}`;
+  const next = {
+    id,
+    name: name || finalSymbol,
+    symbol: finalSymbol,
+    nse: finalSymbol.replace(".NS", ""),
+    bse: options.bse || "",
+    segment: options.segment || "Custom watchlist company"
+  };
+  const existingIndex = custom.findIndex((item) => item.id === id);
+  if (existingIndex >= 0) custom[existingIndex] = { ...custom[existingIndex], ...next };
+  else custom.push(next);
   if (!watchIds.includes(id)) watchIds.push(id);
   selectedId = id;
   els.companySearch.value = "";
   els.searchResults.style.display = "none";
   save();
-  refresh();
+  renderWatchlist();
+  if (els.marketStatus) els.marketStatus.textContent = `Adding ${next.name} and refreshing all tabs`;
+  await refresh();
 }
 
 function removeCompany(id) {
