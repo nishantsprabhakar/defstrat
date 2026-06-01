@@ -1,5 +1,6 @@
 const defaults = ["zentec", "ideaforge", "mtar", "datapatterns", "azad", "aequs", "paras", "astra"];
 const storeKey = "defence-dashboard-watchlist-v1";
+const selectedStoreKey = `${storeKey}-selected`;
 
 const els = {
   refreshBtn: document.querySelector("#refreshBtn"),
@@ -52,7 +53,7 @@ if (!migratedToDefstratEight) {
   localStorage.setItem(`${storeKey}-defstrat-eight`, "true");
 }
 let dashboard = [];
-let selectedId = watchIds[0];
+let selectedId = localStorage.getItem(selectedStoreKey) || watchIds[0];
 let searchTimer;
 let activeTab = "charts";
 let activeSectorMetric = "revenue";
@@ -517,12 +518,13 @@ const transcriptSources = {
   }
 };
 
-const formatInr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 2 });
-const formatNum = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 2 });
+const formatInr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const formatNum = new Intl.NumberFormat("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 function save() {
   localStorage.setItem(storeKey, JSON.stringify(watchIds));
   localStorage.setItem(`${storeKey}-custom`, JSON.stringify(custom));
+  localStorage.setItem(selectedStoreKey, selectedId || "");
 }
 
 function money(value) {
@@ -721,7 +723,10 @@ async function refresh() {
       return getJson(`/api/company?id=${encodeURIComponent(item.id)}&symbol=${encodeURIComponent(item.symbol)}&bse=${encodeURIComponent(item.bse || "")}&name=${encodeURIComponent(item.name)}&nse=${encodeURIComponent(item.nse || item.symbol.replace(".NS", ""))}&segment=${encodeURIComponent(item.segment || "Custom watchlist company")}`);
     }));
     dashboard = [...data, ...customData].filter(Boolean);
-    if (!dashboard.some((item) => item.meta.id === selectedId)) selectedId = dashboard[0]?.meta.id;
+    if (!dashboard.some((item) => item.meta.id === selectedId)) {
+      selectedId = dashboard[0]?.meta.id;
+      save();
+    }
     render();
     els.marketStatus.textContent = "Live feeds connected";
     els.refreshStamp.textContent = `Updated ${new Date().toLocaleString()}`;
@@ -816,6 +821,7 @@ function renderWatchlist() {
       const del = event.target.closest("[data-delete]");
       if (del) return removeCompany(del.dataset.delete);
       selectedId = node.dataset.select;
+      save();
       render();
     });
   });
@@ -836,6 +842,7 @@ function renderTopWatchlist() {
   els.topWatchlist.querySelectorAll("[data-top-select]").forEach((node) => {
     node.addEventListener("click", () => {
       selectedId = node.dataset.topSelect;
+      save();
       render();
     });
   });
@@ -858,6 +865,7 @@ function renderCards() {
   els.cards.querySelectorAll("[data-card]").forEach((node) => {
     node.addEventListener("click", () => {
       selectedId = node.dataset.card;
+      save();
       render();
     });
   });
@@ -2064,6 +2072,7 @@ function wireInteractiveCharts() {
     const id = target?.dataset.select;
     if (id && dashboard.some((item) => item.meta.id === id)) {
       selectedId = id;
+      save();
       render();
     }
   });
