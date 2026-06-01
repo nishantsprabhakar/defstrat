@@ -52,6 +52,9 @@ if (!migratedToDefstratEight) {
   watchIds = Array.from(new Set([...watchIds, ...defaults]));
   localStorage.setItem(`${storeKey}-defstrat-eight`, "true");
 }
+if (custom.length) {
+  watchIds = Array.from(new Set([...watchIds, ...custom.map((item) => item.id).filter(Boolean)]));
+}
 let dashboard = [];
 let selectedId = localStorage.getItem(selectedStoreKey) || watchIds[0];
 let searchTimer;
@@ -704,6 +707,63 @@ async function postJson(url, body) {
   return response.json();
 }
 
+function customPlaceholder(item = {}) {
+  return {
+    meta: {
+      id: item.id,
+      name: item.name || item.symbol || "Custom company",
+      symbol: item.symbol || "",
+      nse: item.nse || String(item.symbol || "").replace(".NS", ""),
+      bse: item.bse || "",
+      segment: item.segment || "Custom watchlist company"
+    },
+    yahoo: {
+      source: "Stored custom company",
+      quote: {
+        symbol: item.symbol || "",
+        name: item.name || item.symbol || "Custom company",
+        currency: "INR",
+        exchange: "NSE",
+        regularMarketPrice: null,
+        regularMarketChange: null,
+        regularMarketChangePercent: null,
+        regularMarketTime: null,
+        marketCap: null,
+        volume: null,
+        fiftyTwoWeekHigh: null,
+        fiftyTwoWeekLow: null,
+        trailingPE: null,
+        forwardPE: null,
+        dividendYield: null,
+        beta: null
+      },
+      financials: {
+        revenue: null,
+        grossMargins: null,
+        operatingMargins: null,
+        profitMargins: null,
+        ebitda: null,
+        totalDebt: null,
+        totalCash: null,
+        currentRatio: null,
+        returnOnEquity: null,
+        targetMeanPrice: null,
+        incomeAnnual: [],
+        incomeQuarterly: [],
+        balanceAnnual: [],
+        cashflowAnnual: [],
+        earningsTrend: []
+      }
+    },
+    moneycontrol: null,
+    chart: [],
+    bse: [],
+    news: [],
+    refreshedAt: new Date().toISOString(),
+    unavailable: true
+  };
+}
+
 async function boot() {
   const { companies } = await getJson("/api/companies");
   catalog = companies;
@@ -729,11 +789,15 @@ async function refresh() {
     renderWatchlist();
     const known = watchIds.filter((id) => catalog.some((c) => c.id === id));
     const customIds = watchIds.filter((id) => custom.some((c) => c.id === id));
-    const { data } = await getJson(`/api/dashboard?ids=${encodeURIComponent(known.join(","))}`);
-    const customData = await Promise.all(customIds.map((id) => {
+    const data = known.length ? (await getJson(`/api/dashboard?ids=${encodeURIComponent(known.join(","))}`)).data : [];
+    const customResults = await Promise.allSettled(customIds.map((id) => {
       const item = custom.find((x) => x.id === id);
       return getJson(`/api/company?id=${encodeURIComponent(item.id)}&symbol=${encodeURIComponent(item.symbol)}&bse=${encodeURIComponent(item.bse || "")}&name=${encodeURIComponent(item.name)}&nse=${encodeURIComponent(item.nse || item.symbol.replace(".NS", ""))}&segment=${encodeURIComponent(item.segment || "Custom watchlist company")}`);
     }));
+    const customData = customResults.map((result, index) => {
+      if (result.status === "fulfilled" && result.value?.meta?.id) return result.value;
+      return customPlaceholder(custom.find((item) => item.id === customIds[index]));
+    });
     dashboard = [...data, ...customData].filter(Boolean);
     if (!dashboard.some((item) => item.meta.id === selectedId)) {
       selectedId = dashboard[0]?.meta.id;
