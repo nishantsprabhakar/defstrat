@@ -590,6 +590,18 @@ function moneyCr(value) {
   return Number.isFinite(value) ? `Rs ${compact(value)}crs` : "--";
 }
 
+function fixed(value) {
+  return Number.isFinite(value) ? formatNum.format(value) : "--";
+}
+
+function ratio(value) {
+  return Number.isFinite(value) ? `${formatNum.format(value)}x` : "--";
+}
+
+function wcDayBundle(wc = {}) {
+  return [wc.receivable, wc.inventory, wc.payable, wc.netCycle].map(fixed).join(" / ");
+}
+
 function hasSeriesData(values = []) {
   return values.some(Number.isFinite);
 }
@@ -1185,7 +1197,7 @@ function renderBusiness() {
     [`ROCE (${period})`, Number.isFinite(liveMetric(selected, "roce")) ? pct(liveMetric(selected, "roce")) : "--"],
     [`Debt (${debtMetric.period})`, moneyCr(debtMetric.value)],
     [`Cash (${cashMetric.period})`, moneyCr(cashMetric.value)],
-    [`D/E (${period})`, Number.isFinite(liveMetric(selected, "debtEquity")) ? `${formatNum.format(liveMetric(selected, "debtEquity"))}x` : "--"],
+    [`D/E (${period})`, ratio(liveMetric(selected, "debtEquity"))],
     [`EV/Revenue (${period})`, valuation.evRevenue],
     [`EV/EBITDA (${period})`, valuation.evEbitda],
     [`P/E (${period})`, valuation.pe !== "--" ? valuation.pe : (Number.isFinite(q.trailingPE) ? `${formatNum.format(q.trailingPE)}x` : "--")],
@@ -1441,13 +1453,13 @@ function renderHistorical() {
       `<strong>${escapeHtml(item.meta.name)}</strong><br><small>${escapeHtml(revenue.period || extra.period || "latest")} &middot; ${escapeHtml(revenue.source || extra.focus || item.meta.segment)}</small>`,
       money(item.yahoo?.quote?.regularMarketPrice),
       `<span class="${moveClass(oneYearReturn(item))}">${pct(oneYearReturn(item))}</span>`,
-      Number.isFinite(extra.roce) ? pct(extra.roce) : "--",
+      Number.isFinite(liveMetric(item, "roce")) ? pct(liveMetric(item, "roce")) : "--",
       Number.isFinite(ebitdaMargin.value) ? pct(ebitdaMargin.value) : "--",
       valuation.evRevenue,
       valuation.evEbitda,
       valuation.pe,
-      Number.isFinite(extra.fcf) ? `\u20b9${compact(extra.fcf)} Cr` : "--",
-      `${Number.isFinite(wc.receivable) ? wc.receivable : "--"} / ${Number.isFinite(wc.inventory) ? wc.inventory : "--"} / ${Number.isFinite(wc.payable) ? wc.payable : "--"} / ${Number.isFinite(wc.netCycle) ? wc.netCycle : "--"}`
+      Number.isFinite(liveMetric(item, "fcf")) ? `\u20b9${compact(liveMetric(item, "fcf"))} Cr` : "--",
+      wcDayBundle(wc)
     ];
   });
   els.historicalPanel.innerHTML = `<div class="chart-grid">
@@ -1606,7 +1618,7 @@ function renderComparison() {
       valuation.pe,
       Number.isFinite(patMargin.value) ? pct(patMargin.value) : "--",
       Number.isFinite(liveMetric(item, "roe")) ? pct(liveMetric(item, "roe")) : "--",
-      Number.isFinite(liveMetric(item, "debtEquity")) ? `${formatNum.format(liveMetric(item, "debtEquity"))}x` : "--",
+      ratio(liveMetric(item, "debtEquity")),
       escapeHtml(extra.oneLine || item.meta.segment || "")
     ];
   }));
@@ -1964,7 +1976,7 @@ const metrics = {
   patMargin: { key: "patMargin", label: "PAT margin", format: pct },
   pe: { key: "pe", label: "P/E", format: compact },
   return1y: { key: "return1y", label: "1Y return", format: pct },
-  debtEquity: { key: "debtEquity", label: "debt/equity", format: (value) => Number.isFinite(value) ? `${formatNum.format(value)}x` : "--" },
+  debtEquity: { key: "debtEquity", label: "debt/equity", format: ratio },
   revenue: { key: "revenue", label: "revenue", format: (value) => Number.isFinite(value) ? `\u20b9${compact(value)} Cr` : "--" },
   marketCap: { key: "marketCap", label: "market cap", format: (value) => Number.isFinite(value) ? `\u20b9${compact(value)} Cr` : "--" }
 };

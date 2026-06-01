@@ -800,7 +800,11 @@ svg {
   border-bottom: 1px solid var(--line);
   text-align: left;
   vertical-align: top;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+}
+
+.data-table td:first-child {
+  white-space: normal;
 }
 
 .data-table th {
