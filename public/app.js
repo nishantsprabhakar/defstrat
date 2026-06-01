@@ -568,6 +568,12 @@ function sourceMetric(item, key, options = {}) {
     if (Number.isFinite(f.revenue)) return { value: rupeesToCrores(f.revenue), period: "Yahoo latest", source: "Yahoo Finance" };
   }
   if (key === "pat" && Number.isFinite(mc.pat)) return { value: mc.pat, period: mc.period || "latest consolidated year", source: "Moneycontrol consolidated P&L" };
+  if (["ebitda", "ebitdaMargin", "patMargin", "roe", "roa", "roce", "debtEquity"].includes(key) && Number.isFinite(mc[key])) {
+    return { value: mc[key], period: mc.period || "latest consolidated year", source: "Moneycontrol / Yahoo fallback" };
+  }
+  if (key === "patMargin" && Number.isFinite(mc.pat) && Number.isFinite(mc.revenue) && mc.revenue > 0) {
+    return { value: (mc.pat / mc.revenue) * 100, period: mc.period || "latest consolidated year", source: "Moneycontrol consolidated P&L" };
+  }
   if (key === "ebitda" && Number.isFinite(f.ebitda)) return { value: rupeesToCrores(f.ebitda), period: "Yahoo latest", source: "Yahoo Finance" };
   if (key === "ebitdaMargin" && Number.isFinite(f.operatingMargins)) return { value: f.operatingMargins * 100, period: "Yahoo latest", source: "Yahoo Finance" };
   if (key === "grossMargin" && Number.isFinite(f.grossMargins)) return { value: f.grossMargins * 100, period: "Yahoo latest", source: "Yahoo Finance" };
@@ -592,10 +598,17 @@ function chartCard(title, body, className = "") {
 
 function historicalMetricSeries(item, key) {
   const rowKeyMap = {
+    ebitda: "ebitda",
+    ebitdaMargin: "ebitdaMargin",
     pat: "pat",
+    patMargin: "patMargin",
     revenue: "revenue",
+    roe: "roe",
+    roa: "roa",
     roce: "roce",
     fcf: "fcf",
+    debtEquity: "debtEquity",
+    totalAssets: "totalAssets",
     receivableDays: "receivableDays",
     inventoryDays: "inventoryDays",
     payableDays: "payableDays"
@@ -622,6 +635,34 @@ function latestHistoricalValue(item, key) {
   }
   const latest = item?.moneycontrol?.latest?.[key];
   return Number.isFinite(latest) ? latest : NaN;
+}
+
+function liveMetric(item, key) {
+  const extra = extraData[item?.meta?.id] || {};
+  if (Number.isFinite(extra[key])) return extra[key];
+  if (key === "marketCapCr") {
+    if (Number.isFinite(extra.marketCap)) return extra.marketCap;
+    return rupeesToCrores(item?.yahoo?.quote?.marketCap);
+  }
+  if (key === "pe") return valuationMetrics(extra, item).rawPe;
+  if (key === "debtEquity") return sourceMetric(item, "debtEquity").value;
+  if (key === "roe") {
+    const fromSource = sourceMetric(item, "roe").value;
+    if (Number.isFinite(fromSource)) return fromSource;
+    const yahooRoe = item?.yahoo?.financials?.returnOnEquity;
+    return Number.isFinite(yahooRoe) ? yahooRoe * 100 : NaN;
+  }
+  if (key === "roa") {
+    const fromSource = sourceMetric(item, "roa").value;
+    if (Number.isFinite(fromSource)) return fromSource;
+    const pat = sourceMetric(item, "pat").value;
+    const assets = latestHistoricalValue(item, "totalAssets");
+    if (Number.isFinite(pat) && Number.isFinite(assets) && assets > 0) return (pat / assets) * 100;
+    const roe = liveMetric(item, "roe");
+    const debtEquity = liveMetric(item, "debtEquity");
+    return Number.isFinite(roe) && Number.isFinite(debtEquity) ? roe / (1 + debtEquity) : NaN;
+  }
+  return sourceMetric(item, key).value;
 }
 
 function moveClass(value) {
@@ -724,9 +765,9 @@ function seededSeries(item, key) {
 }
 
 function renderSectorSnapshot(avg) {
-  const marketCaps = dashboard.map((item) => extraData[item.meta.id]?.marketCap || item.yahoo?.quote?.marketCap).filter(Number.isFinite);
-  const peValues = dashboard.map((item) => extraData[item.meta.id]?.pe || item.yahoo?.quote?.trailingPE).filter(Number.isFinite);
-  const roeValues = dashboard.map((item) => extraData[item.meta.id]?.roe).filter(Number.isFinite);
+  const marketCaps = dashboard.map((item) => liveMetric(item, "marketCapCr")).filter(Number.isFinite);
+  const peValues = dashboard.map((item) => liveMetric(item, "pe")).filter(Number.isFinite);
+  const roeValues = dashboard.map((item) => liveMetric(item, "roe")).filter(Number.isFinite);
   const returns = dashboard.map((item) => ({ item, value: oneYearReturn(item) })).filter((row) => Number.isFinite(row.value)).sort((a, b) => b.value - a.value);
   els.combinedMarketCap.textContent = marketCaps.length ? `\u20b9${compact(marketCaps.reduce((a, b) => a + b, 0))} Cr` : "--";
   els.snapshotCompanies.textContent = String(dashboard.length);
@@ -741,19 +782,17 @@ function renderSectorCharts() {
   const metricRows = rows.map((row) => ({
     id: row.item.meta.id,
     label: row.extra.label || row.item.meta.nse,
-    a: activeSectorMetric === "roce"
-      ? (Number.isFinite(row.extra.roce) ? row.extra.roce : NaN)
-      : sourceMetric(row.item, activeSectorMetric).value,
+    a: activeSectorMetric === "roce" ? liveMetric(row.item, "roce") : sourceMetric(row.item, activeSectorMetric).value,
     b: activeSectorMetric === "revenue"
       ? sourceMetric(row.item, "pat").value
       : sourceMetric(row.item, "patMargin").value
   }));
   els.sectorCharts.innerHTML = `
     <article class="chart-card">${chartTitle("Revenue & PAT (latest consolidated source)")}<div class="chart-toolbar"><button class="${activeSectorMetric === "revenue" ? "is-active" : ""}" data-sector-metric="revenue">Revenue/PAT</button><button class="${activeSectorMetric === "ebitdaMargin" ? "is-active" : ""}" data-sector-metric="ebitdaMargin">EBITDA/PAT margin</button><button class="${activeSectorMetric === "roce" ? "is-active" : ""}" data-sector-metric="roce">ROCE/PAT margin</button></div>${barChart(metricRows, activeSectorMetric === "revenue" ? "Revenue" : activeSectorMetric === "roce" ? "ROCE" : "EBITDA margin", activeSectorMetric === "revenue" ? "PAT" : "PAT margin")}</article>
-    <article class="chart-card">${chartTitle("Valuation vs Profitability (live / verified only)")} ${scatterChart(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, x: row.extra.pe, y: sourceMetric(row.item, "patMargin").value })), "P/E", "PAT margin")}</article>
+    <article class="chart-card">${chartTitle("Valuation vs Profitability (live / verified only)")} ${scatterChart(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, x: liveMetric(row.item, "pe"), y: sourceMetric(row.item, "patMargin").value })), "P/E", "PAT margin")}</article>
     <article class="chart-card wide">${chartTitle("1Y Price Return Heatmap")}${heatmap(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, value: oneYearReturn(row.item) })))}</article>
-    <article class="chart-card">${chartTitle("ROE vs ROA")}${scatterChart(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, x: row.extra.roa, y: row.extra.roe })), "ROA", "ROE")}</article>
-    <article class="chart-card">${chartTitle("Market Cap Treemap")}${treemap(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, value: row.extra.marketCap || 0 })))}</article>`;
+    <article class="chart-card">${chartTitle("ROE vs ROA")}${scatterChart(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, x: liveMetric(row.item, "roa"), y: liveMetric(row.item, "roe") })), "ROA", "ROE")}</article>
+    <article class="chart-card">${chartTitle("Market Cap Treemap")}${treemap(rows.map((row) => ({ id: row.item.meta.id, label: row.extra.label || row.item.meta.nse, value: liveMetric(row.item, "marketCapCr") || 0 })))}</article>`;
 }
 
 function switchTab(tab) {
@@ -1357,7 +1396,14 @@ function renderHistorical() {
   const patSeries = seededSeries(selected, "pat");
   const roceSeries = seededSeries(selected, "roce");
   const fcfSeries = seededSeries(selected, "fcf");
-  const marginValues = [sourceMetric(selected, "ebitdaMargin").value, sourceMetric(selected, "patMargin").value];
+  const ebitdaMarginSeries = seededSeries(selected, "ebitdaMargin");
+  const patMarginSeries = seededSeries(selected, "patMargin");
+  const marginRows = years.map((year, index) => ({
+    id: selected?.meta.id,
+    label: year,
+    a: ebitdaMarginSeries[index],
+    b: patMarginSeries[index]
+  }));
   const valuationRows = dashboard.map((item) => {
     const extra = extraData[item.meta.id] || {};
     const valuation = valuationMetrics(extra, item);
@@ -1371,7 +1417,7 @@ function renderHistorical() {
   const chartCards = [
     hasSeriesData(revenueSeries) ? chartCard("Revenue Growth Trajectory", lineChart(years, revenueSeries, "Revenue")) : "",
     hasSeriesData(patSeries) ? chartCard("PAT Growth Trajectory", lineChart(years, patSeries, "PAT")) : "",
-    marginValues.some(Number.isFinite) ? chartCard("EBITDA vs PAT Margins", barChart([{ id: selected?.meta.id, label: selectedExtra.label || selected?.meta.nse, a: marginValues[0], b: marginValues[1] }], "EBITDA", "PAT")) : "",
+    marginRows.some((row) => Number.isFinite(row.a) || Number.isFinite(row.b)) ? chartCard("EBITDA vs PAT Margins", barChart(marginRows, "EBITDA", "PAT")) : "",
     hasSeriesData(roceSeries) ? chartCard("Return on Capital Employed (ROCE)", lineChart(years, roceSeries, "ROCE")) : "",
     hasSeriesData(fcfSeries) ? chartCard("Free Cash Flow Generation", lineChart(years, fcfSeries, "FCF")) : "",
     valuationRows.some((row) => hasSeriesData(row.values)) ? chartCard("Peer Valuation Multiples", groupedBarChart(valuationRows, ["EV/Revenue", "EV/EBITDA", "P/E"], "Multiple (x)"), "wide") : "",
@@ -1492,7 +1538,7 @@ function renderComparison() {
       const valuation = valuationMetrics(extra, item);
       return { id: item.meta.id, label: extra.label || item.meta.nse, values: [valuation.rawEvRevenue, valuation.rawEvEbitda, valuation.rawPe] };
     }), ["EV/Revenue", "EV/EBITDA", "P/E"], "Multiple (x)")}</article>
-    <article class="chart-card">${chartTitle("Profitability vs Leverage")}${scatterChart(dashboard.map((item) => ({ id: item.meta.id, label: extraData[item.meta.id]?.label || item.meta.nse, x: extraData[item.meta.id]?.debtEquity, y: extraData[item.meta.id]?.patMargin })), "D/E", "PAT margin")}</article>
+    <article class="chart-card">${chartTitle("Profitability vs Leverage")}${scatterChart(dashboard.map((item) => ({ id: item.meta.id, label: extraData[item.meta.id]?.label || item.meta.nse, x: liveMetric(item, "debtEquity"), y: sourceMetric(item, "patMargin").value })), "D/E", "PAT margin")}</article>
   </div>` + table([
     "Company / period", "Focus", "Revenue", "EV/Revenue", "EV/EBITDA", "P/E", "PAT margin", "ROE", "D/E", "Commentary"
   ], dashboard.map((item) => {
@@ -1508,8 +1554,8 @@ function renderComparison() {
       valuation.evEbitda,
       valuation.pe,
       Number.isFinite(patMargin.value) ? pct(patMargin.value) : "--",
-      Number.isFinite(extra.roe) ? pct(extra.roe) : pct((item.yahoo?.financials?.returnOnEquity || NaN) * 100),
-      Number.isFinite(extra.debtEquity) ? `${formatNum.format(extra.debtEquity)}x` : "--",
+      Number.isFinite(liveMetric(item, "roe")) ? pct(liveMetric(item, "roe")) : "--",
+      Number.isFinite(liveMetric(item, "debtEquity")) ? `${formatNum.format(liveMetric(item, "debtEquity"))}x` : "--",
       escapeHtml(extra.oneLine || item.meta.segment || "")
     ];
   }));

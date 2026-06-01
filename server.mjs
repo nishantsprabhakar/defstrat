@@ -186,7 +186,12 @@ async function moneycontrolFinancials(meta) {
   const pat = parseMoneycontrolRow(html, "Consolidated Profit/Loss After MI And Associates");
   const pbt = parseMoneycontrolRow(html, "Profit/Loss Before Tax");
   const financeCosts = parseMoneycontrolRow(html, "Finance Costs");
+  const depreciation = parseMoneycontrolRow(html, "Depreciation And Amortisation Expenses");
   const totalAssets = parseMoneycontrolRow(balanceHtml, "Total Assets");
+  const shareCapital = parseMoneycontrolRow(balanceHtml, "Total Share Capital");
+  const reserves = parseMoneycontrolRow(balanceHtml, "Total Reserves and Surplus");
+  const longBorrowings = parseMoneycontrolRow(balanceHtml, "Long Term Borrowings");
+  const shortBorrowings = parseMoneycontrolRow(balanceHtml, "Short Term Borrowings");
   const currentLiabilities = parseMoneycontrolRow(balanceHtml, "Total Current Liabilities");
   const inventories = parseMoneycontrolRow(balanceHtml, "Inventories");
   const receivables = parseMoneycontrolRow(balanceHtml, "Trade Receivables");
@@ -203,6 +208,19 @@ async function moneycontrolFinancials(meta) {
     const ebit = pbt[index] + financeCosts[index];
     return capitalEmployed > 0 ? (ebit / capitalEmployed) * 100 : NaN;
   });
+  const ebitda = byIndex((index) => pbt[index] + financeCosts[index] + depreciation[index]);
+  const ebitdaMargin = byIndex((index) => baseRevenue[index] > 0 ? ((pbt[index] + financeCosts[index] + depreciation[index]) / baseRevenue[index]) * 100 : NaN);
+  const patMargin = byIndex((index) => baseRevenue[index] > 0 ? (pat[index] / baseRevenue[index]) * 100 : NaN);
+  const roa = byIndex((index) => totalAssets[index] > 0 ? (pat[index] / totalAssets[index]) * 100 : NaN);
+  const roe = byIndex((index) => {
+    const equity = shareCapital[index] + reserves[index];
+    return equity > 0 ? (pat[index] / equity) * 100 : NaN;
+  });
+  const debtEquity = byIndex((index) => {
+    const equity = shareCapital[index] + reserves[index];
+    const debt = longBorrowings[index] + shortBorrowings[index];
+    return equity > 0 ? debt / equity : NaN;
+  });
   const fcf = byIndex((index) => Number.isFinite(cfo[index]) && Number.isFinite(investing[index]) ? cfo[index] + investing[index] : NaN);
   const receivableDays = byIndex((index) => baseRevenue[index] > 0 ? (receivables[index] / baseRevenue[index]) * 365 : NaN);
   const inventoryDays = byIndex((index) => baseRevenue[index] > 0 ? (inventories[index] / baseRevenue[index]) * 365 : NaN);
@@ -212,7 +230,13 @@ async function moneycontrolFinancials(meta) {
     revenue: revenue[0] ?? operatingRevenue[0] ?? null,
     operatingRevenue: operatingRevenue[0] ?? null,
     pat: pat[0] ?? null,
+    ebitda: ebitda[0],
+    ebitdaMargin: ebitdaMargin[0],
+    patMargin: patMargin[0],
     roce: roce[0],
+    roe: roe[0],
+    roa: roa[0],
+    debtEquity: debtEquity[0],
     fcf: fcf[0],
     receivableDays: receivableDays[0],
     inventoryDays: inventoryDays[0],
@@ -230,7 +254,15 @@ async function moneycontrolFinancials(meta) {
       pat,
       pbt,
       financeCosts,
+      depreciation,
+      ebitda,
+      ebitdaMargin,
+      patMargin,
       totalAssets,
+      shareCapital,
+      reserves,
+      longBorrowings,
+      shortBorrowings,
       currentLiabilities,
       inventories,
       receivables,
@@ -238,6 +270,9 @@ async function moneycontrolFinancials(meta) {
       cfo,
       investing,
       roce,
+      roe,
+      roa,
+      debtEquity,
       fcf,
       receivableDays,
       inventoryDays,
@@ -691,12 +726,21 @@ async function companyPayload(meta) {
     moneycontrolValue.latest = {
       period: overviewYears.at(-1) ? `FY${overviewYears.at(-1).slice(-2)}` : "latest consolidated year",
       revenue: moneycontrolQuoteValue.overview.revenue.at(-1)?.value ?? null,
-      pat: moneycontrolQuoteValue.overview.pat.at(-1)?.value ?? null
+      pat: moneycontrolQuoteValue.overview.pat.at(-1)?.value ?? null,
+      patMargin: moneycontrolQuoteValue.overview.revenue.at(-1)?.value > 0
+        ? (moneycontrolQuoteValue.overview.pat.at(-1)?.value / moneycontrolQuoteValue.overview.revenue.at(-1)?.value) * 100
+        : null,
+      roe: moneycontrolQuoteValue.overview.roe.at(-1)?.value ?? null,
+      debtEquity: moneycontrolQuoteValue.overview.debtEquity.at(-1)?.value ?? null
     };
+    const revenueRows = alignOverview("revenue");
+    const patRows = alignOverview("pat");
+    const patMarginRows = overviewYears.map((_, index) => revenueRows[index] > 0 && Number.isFinite(patRows[index]) ? Number(((patRows[index] / revenueRows[index]) * 100).toFixed(2)) : null);
     moneycontrolValue.rows = {
       ...(moneycontrolValue.rows || {}),
-      revenue: alignOverview("revenue"),
-      pat: alignOverview("pat"),
+      revenue: revenueRows,
+      pat: patRows,
+      patMargin: patMarginRows,
       roe: alignOverview("roe"),
       debtEquity: alignOverview("debtEquity")
     };
