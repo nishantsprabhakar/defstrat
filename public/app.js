@@ -1503,9 +1503,12 @@ function renderCallSummary() {
     ${note}
     <small>${escapeHtml(summary.period)} &middot; Call date/period: ${escapeHtml(summary.callDate)} &middot; Refreshed every minute; replaced when a newer transcript is available for the followed company.</small>
     <strong>${escapeHtml(summary.title)}</strong>
-    <div id="autoCallSummary" class="empty">Checking for newer transcript uploads...</div>
     ${summary.sections.map((section) => `<div class="call-section"><h3>${escapeHtml(section.heading)}</h3><p>${escapeHtml(section.text)}</p></div>`).join("")}
     <div class="call-section"><h3>Company filing financial metrics</h3>${table(["Metric", "Value", "Period", "Source"], filingRows)}</div>
+    <details class="transcript-monitor">
+      <summary>Automatic transcript monitor</summary>
+      <div id="autoCallSummary" class="empty">Checking for newer transcript uploads...</div>
+    </details>
   </article>`;
   refreshCallSummary(selected.meta.id);
 }
