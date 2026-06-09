@@ -5,20 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
-    <title>Defence Finance Command</title>
-    <link rel="stylesheet" href="/styles.css?v=20260529-2">
+    <title>Live Finance Command</title>
+    <link rel="stylesheet" href="/styles.css?v=finance-tool-20260609">
   </head>
   <body>
     <main class="shell">
       <section class="hero">
         <div class="hero__copy">
           <div class="brand-lockup">
-            <img src="/defstrat-logo.svg" alt="DefStrat logo">
+            <img src="/defstrat-logo.svg" alt="Finance Command logo">
             <span>by Nishant Prabhakar</span>
           </div>
-          <p class="eyebrow">Live Indian defence equities</p>
-          <h1>Defence Finance Command</h1>
-          <p class="lede">A real-time operating view of prices, consolidated financials, filings, presentations and earnings commentary from company filings, Yahoo Finance, Moneycontrol and BSE sources.</p>
+          <p class="eyebrow">Live listed-company finance tool</p>
+          <h1>Live Finance Command</h1>
+          <p class="lede">A real-time operating view for listed companies: prices, consolidated financials, filings, news, presentations and earnings commentary from Yahoo Finance, Moneycontrol, BSE and company sources.</p>
         </div>
         <div class="status-panel" aria-live="polite">
           <span class="pulse"></span>
@@ -55,7 +55,7 @@
         <div><small>Best 1Y return</small><strong id="bestReturn">--</strong></div>
         <div><small>Sector avg ROE</small><strong id="sectorRoe">N/A</strong></div>
       </section>
-      <p class="data-note">Live prices and history use Yahoo Finance chart feeds. Financial metrics use consolidated company filings first; gaps fall back to Yahoo Finance or Moneycontrol consolidated P&L. Earnings-call financial metrics use company filings only.</p>
+      <p class="data-note">Live prices and history use Yahoo Finance chart feeds. Financial metrics use consolidated company filings first; gaps fall back to Yahoo Finance or Moneycontrol consolidated P&L. Newly added companies refresh through Yahoo immediately and use Moneycontrol/BSE where available.</p>
 
       <section class="top-watchbar" aria-label="Selected company watchlist">
         <div class="top-watchbar__label">
@@ -73,7 +73,7 @@
         <button data-tab="earnings">Earnings</button>
         <button data-tab="callSummary">Earnings Call</button>
         <button data-tab="comparison">Comparison</button>
-        <button data-tab="ai">DefStrat AI</button>
+        <button data-tab="ai">Finance AI</button>
         <button data-tab="manage">Manage</button>
       </nav>
 
@@ -81,14 +81,14 @@
         <aside class="watchlist">
           <div class="section-title">
             <h2>Watchlist</h2>
-            <button id="resetBtn" title="Restore default defence list">Reset</button>
+            <button id="resetBtn" title="Restore default watchlist">Reset</button>
           </div>
           <div id="watchlist"></div>
         </aside>
 
         <section class="workspace">
           <div class="section-title">
-            <h2>Sector Charts</h2>
+          <h2>Market Charts</h2>
             <span>Revenue, profitability, valuation and returns</span>
           </div>
           <div class="chart-grid" id="sectorCharts"></div>
@@ -177,7 +177,7 @@
 
       <section class="tab-panel data-panel" data-panel="ai">
         <div class="section-title">
-          <h2>DefStrat AI</h2>
+          <h2>Finance AI</h2>
           <span>Live briefing from company filings, Yahoo, Moneycontrol, BSE and current news</span>
         </div>
         <div id="aiPanel"></div>
@@ -193,11 +193,11 @@
 
       <footer class="app-footer">
         <strong>Disclaimer</strong>
-        <p>DefStrat is an informational dashboard for financial review and monitoring. It is not investment advice, a recommendation, or a solicitation to buy or sell securities. Live market data, company filings, news and transcript summaries may contain delays, omissions or third-party errors; verify all figures with official exchange/company sources before making decisions.</p>
+        <p>Live Finance Command is an informational dashboard for financial review and monitoring. It is not investment advice, a recommendation, or a solicitation to buy or sell securities. Live market data, company filings, news and transcript summaries may contain delays, omissions or third-party errors; verify all figures with official exchange/company sources before making decisions.</p>
         <span>Copyright &copy; 2026 Nishant Prabhakar. All rights reserved.</span>
       </footer>
     </main>
     <div id="chartTooltip" class="chart-tooltip" role="status" aria-live="polite"></div>
-    <script src="/app.js?v=20260529-2" type="module"></script>
+    <script src="/app.js?v=finance-tool-20260609" type="module"></script>
   </body>
 </html>

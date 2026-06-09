@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: defstrat-dashboard
+    name: live-finance-command
     env: node
     plan: free
     buildCommand: ""

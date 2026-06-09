@@ -1,5 +1,5 @@
 const defaults = ["zentec", "ideaforge", "mtar", "datapatterns", "azad", "aequs", "paras", "astra"];
-const storeKey = "defence-dashboard-watchlist-v1";
+const storeKey = "live-finance-tool-watchlist-v1";
 const selectedStoreKey = `${storeKey}-selected`;
 
 const els = {
@@ -804,11 +804,11 @@ async function refresh() {
       save();
     }
     render();
-    els.marketStatus.textContent = "Live feeds connected";
+    els.marketStatus.textContent = "Live finance feeds connected";
     els.refreshStamp.textContent = `Updated ${new Date().toLocaleString()}`;
   } catch (error) {
     els.marketStatus.textContent = "Some live feeds are unavailable";
-    els.refreshStamp.textContent = "The dashboard will retry automatically";
+    els.refreshStamp.textContent = "The finance tool will retry automatically";
     els.cards.innerHTML = `<div class="error">Live data request failed. ${escapeHtml(error.message)}</div>`;
   }
 }
@@ -1146,7 +1146,7 @@ function liveNewsRows(item, limit = 6) {
     date: formatDate(row.date),
     title: row.title,
     detail: row.detail,
-    source: "DefStrat note",
+    source: "Finance note",
     link: null
   }));
   return [...yahooRows, ...bseRows, ...staticRows].slice(0, limit);
@@ -1708,8 +1708,8 @@ function renderAiBrief() {
     <article class="brief-card"><small>Momentum leader</small><strong>${leader ? escapeHtml(leader.meta.name) : "Awaiting data"}</strong><p>${leader ? `The current 1Y return is ${pct(oneYearReturn(leader))}, based on Yahoo chart history.` : "Live chart history has not returned enough data yet."}</p></article>
     <article class="brief-card"><small>Selected company</small><strong>${escapeHtml(selected?.meta.name || "No company")}</strong><p>${escapeHtml(selectedExtra.oneLine || selected?.meta.segment || "Select a company to view the briefing.")}</p></article>
   </div>
-  <div class="ai-box"><input id="aiPrompt" placeholder="Ask about latest prices, Yahoo news, BSE filings, valuations or comparisons"><button id="aiAskBtn">Ask DefStrat AI</button></div>
-  <article class="brief-card" id="aiAnswer"><small>Analyst response</small><p>Choose a prompt or ask a question. DefStrat refreshes company filing, Yahoo Finance, Moneycontrol consolidated P&L, BSE and current news context before answering.</p></article>`;
+  <div class="ai-box"><input id="aiPrompt" placeholder="Ask about latest prices, Yahoo news, BSE filings, valuations or comparisons"><button id="aiAskBtn">Ask Finance AI</button></div>
+  <article class="brief-card" id="aiAnswer"><small>Analyst response</small><p>Choose a prompt or ask a question. Finance AI refreshes company filing, Yahoo Finance, Moneycontrol consolidated P&L, BSE and current news context before answering.</p></article>`;
   document.querySelectorAll("[data-ai-prompt]").forEach((button) => button.addEventListener("click", () => answerAi(button.dataset.aiPrompt)));
   document.querySelector("#aiAskBtn")?.addEventListener("click", () => answerAi(document.querySelector("#aiPrompt")?.value || ""));
 }
@@ -1717,7 +1717,7 @@ function renderAiBrief() {
 function renderManage() {
   if (!els.managePanel) return;
   els.managePanel.innerHTML = `<div class="brief-grid">
-    <article class="brief-card"><small>AI analyst settings</small><strong>Backend AI enabled</strong><p>DefStrat AI now calls the server for company filing, Yahoo Finance, Moneycontrol consolidated P&L, BSE, news and transcript context. Add OPENAI_API_KEY on the host for full AI responses; otherwise it uses a live-data fallback.</p></article>
+    <article class="brief-card"><small>AI analyst settings</small><strong>Backend AI enabled</strong><p>Finance AI calls the server for company filing, Yahoo Finance, Moneycontrol consolidated P&L, BSE, news and transcript context. Add OPENAI_API_KEY on the host for full AI responses; otherwise it uses a live-data fallback.</p></article>
     <article class="brief-card"><small>Tracked companies</small><strong>${watchIds.length}</strong><p>${watchIds.map((id) => escapeHtml(metaFor(id)?.name || id)).join(", ")}</p></article>
     <article class="brief-card"><small>Data sources</small><strong>Filings + Yahoo + Moneycontrol + BSE</strong><p>Quote history comes from Yahoo Finance. Financial fallback uses Moneycontrol consolidated P&L or Yahoo only when filing data is unavailable. Filings and presentations link back to BSE where available.</p></article>
   </div>
@@ -1740,7 +1740,7 @@ async function answerAi(prompt) {
   const answer = document.querySelector("#aiAnswer");
   if (!answer) return;
   if (!normalized.trim()) {
-    renderAiResponse("Ask DefStrat AI", [{ heading: "Ready", body: "Ask for a company, metric, comparison, latest price, news, BSE filing, or earnings-call summary." }]);
+    renderAiResponse("Ask Finance AI", [{ heading: "Ready", body: "Ask for a company, metric, comparison, latest price, news, BSE filing, or earnings-call summary." }]);
     return;
   }
   answer.innerHTML = `<small>Searching live sources</small><p>Refreshing Yahoo Finance quote/chart data, live internet news and BSE filing context before answering...</p>`;
@@ -1752,7 +1752,7 @@ async function answerAi(prompt) {
       selectedId,
       ids: watchIds
     });
-    renderAiText(`DefStrat AI (${result.mode === "openai" ? "AI backend" : "live-data fallback"}) - ${formatDate(result.refreshedAt)}`, result.answer);
+    renderAiText(`Finance AI (${result.mode === "openai" ? "AI backend" : "live-data fallback"}) - ${formatDate(result.refreshedAt)}`, result.answer);
     return;
   } catch {
     answer.innerHTML = `<small>Live local context</small><p>Using the current dashboard data for custom-company coverage.</p>`;
@@ -1805,7 +1805,7 @@ async function answerAi(prompt) {
     title = row ? `${row.name} briefing` : "Company briefing";
     lines = row ? [{ heading: row.name, body: `Live price ${money(row.price)}, 1Y return ${pct(row.return1y)}, ROCE ${pct(row.roce)}, PAT margin ${pct(row.patMargin)}. ${row.oneLine}` }] : [{ heading: "No company selected", body: "Select a company first." }];
   } else {
-    title = `DefStrat view`;
+    title = `Finance view`;
     const leader = rankRows(rows, metrics.return1y, "desc")[0];
     const quality = rankRows(rows, metrics.roce, "desc")[0];
     lines = [

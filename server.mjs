@@ -439,6 +439,121 @@ async function yahooChart(symbol) {
   return { meta, points };
 }
 
+async function yahooTimeseriesFinancials(symbol) {
+  const types = [
+    "annualTotalRevenue",
+    "annualNetIncome",
+    "annualEBITDA",
+    "annualTotalAssets",
+    "annualStockholdersEquity",
+    "annualTotalDebt",
+    "annualOperatingCashFlow",
+    "annualCapitalExpenditure",
+    "annualAccountsReceivable",
+    "annualInventory",
+    "annualAccountsPayable"
+  ];
+  const period2 = Math.floor(Date.now() / 1000) + 86400;
+  const period1 = period2 - (11 * 365 * 24 * 60 * 60);
+  const params = new URLSearchParams({
+    symbol,
+    type: types.join(","),
+    period1: String(period1),
+    period2: String(period2)
+  });
+  const url = `https://query1.finance.yahoo.com/ws/fundamentals-timeseries/v1/finance/timeseries/${encodeURIComponent(symbol)}?${params}`;
+  const json = await fetchJson(url, { headers: { origin: "https://finance.yahoo.com", referer: "https://finance.yahoo.com/" } });
+  const rows = json?.timeseries?.result || [];
+  const byType = new Map();
+  for (const row of rows) {
+    const type = row?.meta?.type?.[0];
+    if (type && Array.isArray(row[type])) byType.set(type, row[type]);
+  }
+  const yearSet = new Map();
+  for (const entries of byType.values()) {
+    for (const entry of entries) {
+      const asOfDate = entry?.asOfDate || "";
+      const year = Number(String(asOfDate).slice(0, 4));
+      if (Number.isFinite(year)) yearSet.set(`FY${String(year).slice(-2)}`, year);
+    }
+  }
+  const years = [...yearSet.entries()].sort((a, b) => b[1] - a[1]).map(([label]) => label).slice(0, 6);
+  const toCr = (value) => Number.isFinite(value) ? value / 1e7 : null;
+  const metric = (type) => {
+    const map = new Map((byType.get(type) || []).map((entry) => {
+      const asOfDate = entry?.asOfDate || "";
+      const year = Number(String(asOfDate).slice(0, 4));
+      return [`FY${String(year).slice(-2)}`, compactYahoo(entry?.reportedValue)];
+    }));
+    return years.map((year) => toCr(map.get(year)));
+  };
+  const ratioRows = (fn) => years.map((_, index) => {
+    const value = fn(index);
+    return Number.isFinite(value) ? Number(value.toFixed(2)) : null;
+  });
+  const byIndex = (fn) => years.map((_, index) => {
+    const value = fn(index);
+    return Number.isFinite(value) ? Number(value.toFixed(2)) : null;
+  });
+  const revenue = metric("annualTotalRevenue");
+  const pat = metric("annualNetIncome");
+  const ebitda = metric("annualEBITDA");
+  const totalAssets = metric("annualTotalAssets");
+  const equity = metric("annualStockholdersEquity");
+  const debt = metric("annualTotalDebt");
+  const cfo = metric("annualOperatingCashFlow");
+  const capex = metric("annualCapitalExpenditure");
+  const receivables = metric("annualAccountsReceivable");
+  const inventories = metric("annualInventory");
+  const payables = metric("annualAccountsPayable");
+  const ebitdaMargin = ratioRows((index) => revenue[index] > 0 ? (ebitda[index] / revenue[index]) * 100 : NaN);
+  const patMargin = ratioRows((index) => revenue[index] > 0 ? (pat[index] / revenue[index]) * 100 : NaN);
+  const roe = ratioRows((index) => equity[index] > 0 ? (pat[index] / equity[index]) * 100 : NaN);
+  const roa = ratioRows((index) => totalAssets[index] > 0 ? (pat[index] / totalAssets[index]) * 100 : NaN);
+  const debtEquity = ratioRows((index) => equity[index] > 0 ? debt[index] / equity[index] : NaN);
+  const fcf = byIndex((index) => Number.isFinite(cfo[index]) && Number.isFinite(capex[index]) ? cfo[index] + capex[index] : NaN);
+  const receivableDays = ratioRows((index) => revenue[index] > 0 ? (receivables[index] / revenue[index]) * 365 : NaN);
+  const inventoryDays = ratioRows((index) => revenue[index] > 0 ? (inventories[index] / revenue[index]) * 365 : NaN);
+  const payableDays = ratioRows((index) => revenue[index] > 0 ? (payables[index] / revenue[index]) * 365 : NaN);
+  if (!revenue.some(Number.isFinite) && !pat.some(Number.isFinite)) return null;
+  return {
+    source: "Yahoo Finance annual fundamentals",
+    url: `https://finance.yahoo.com/quote/${encodeURIComponent(symbol)}/financials/`,
+    available: true,
+    latest: {
+      period: years[0] || "latest annual year",
+      revenue: revenue[0],
+      pat: pat[0],
+      ebitda: ebitda[0],
+      ebitdaMargin: ebitdaMargin[0],
+      patMargin: patMargin[0],
+      roe: roe[0],
+      roa: roa[0],
+      debtEquity: debtEquity[0],
+      fcf: fcf[0],
+      receivableDays: receivableDays[0],
+      inventoryDays: inventoryDays[0],
+      payableDays: payableDays[0]
+    },
+    years,
+    rows: {
+      revenue,
+      pat,
+      ebitda,
+      ebitdaMargin,
+      patMargin,
+      roe,
+      roa,
+      debtEquity,
+      fcf,
+      totalAssets,
+      receivableDays,
+      inventoryDays,
+      payableDays
+    }
+  };
+}
+
 async function yahooNews(meta) {
   const query = `"${meta.name}" ${meta.nse || meta.symbol} stock`;
   const json = await fetchJson(`https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=0&newsCount=8`, {
@@ -679,14 +794,15 @@ async function transcriptSummary(meta) {
 }
 
 async function companyPayload(meta) {
-  const [chart, richYahoo, simpleQuote, mcQuote, bse, news, moneycontrol] = await Promise.allSettled([
+  const [chart, richYahoo, simpleQuote, mcQuote, bse, news, moneycontrol, yahooTimeseries] = await Promise.allSettled([
     yahooChart(meta.symbol),
     yahooCompany(meta.symbol),
     yahooSimpleQuote(meta.symbol),
     moneycontrolQuote(meta),
     bseAnnouncements(meta.bse),
     companyNews(meta),
-    moneycontrolFinancials(meta)
+    moneycontrolFinancials(meta),
+    yahooTimeseriesFinancials(meta.symbol)
   ]);
   const chartValue = chart.status === "fulfilled" ? chart.value : { meta: {}, points: [] };
   const yahooValue = richYahoo.status === "fulfilled" ? richYahoo.value : yahooFromChart(meta.symbol, chartValue);
@@ -712,7 +828,7 @@ async function companyPayload(meta) {
     }
     yahooValue.source = yahooValue.source === "Yahoo Finance chart" ? "Yahoo Finance chart + Moneycontrol quote" : yahooValue.source;
   }
-  const moneycontrolValue = moneycontrol.status === "fulfilled" ? moneycontrol.value : { source: "Moneycontrol consolidated P&L", available: false, reason: moneycontrol.reason?.message || "Unavailable" };
+  let moneycontrolValue = moneycontrol.status === "fulfilled" ? moneycontrol.value : { source: "Moneycontrol consolidated P&L", available: false, reason: moneycontrol.reason?.message || "Unavailable" };
   if (!moneycontrolValue?.available && moneycontrolQuoteValue?.overview?.revenue?.length) {
     const overviewYears = moneycontrolQuoteValue.overview.revenue.map((row) => row.year);
     const alignOverview = (key) => {
@@ -745,6 +861,12 @@ async function companyPayload(meta) {
       debtEquity: alignOverview("debtEquity")
     };
   }
+  if (!moneycontrolValue?.available) {
+    const yahooHistory = yahooTimeseries.status === "fulfilled" && yahooTimeseries.value?.available
+      ? yahooTimeseries.value
+      : yahooFinancialHistory(yahooValue);
+    if (yahooHistory?.available) moneycontrolValue = yahooHistory;
+  }
   return {
     meta,
     yahoo: yahooValue,
@@ -753,6 +875,106 @@ async function companyPayload(meta) {
     bse: bse.status === "fulfilled" ? bse.value : [],
     news: news.status === "fulfilled" ? news.value : [],
     refreshedAt: new Date().toISOString()
+  };
+}
+
+function statementValue(row, keys = []) {
+  for (const key of keys) {
+    const value = row?.[key];
+    if (Number.isFinite(value)) return value;
+  }
+  return null;
+}
+
+function sumStatementValues(row, keys = []) {
+  const values = keys.map((key) => row?.[key]).filter(Number.isFinite);
+  return values.length ? values.reduce((total, value) => total + value, 0) : null;
+}
+
+function fiscalYearFromStatement(row, index) {
+  const endDate = Number(row?.endDate);
+  if (Number.isFinite(endDate)) {
+    const year = new Date(endDate * 1000).getUTCFullYear();
+    if (Number.isFinite(year)) return `FY${String(year).slice(-2)}`;
+  }
+  return `FY${String(new Date().getFullYear() - index).slice(-2)}`;
+}
+
+function yahooFinancialHistory(yahooValue) {
+  const financials = yahooValue?.financials || {};
+  const income = Array.isArray(financials.incomeAnnual) ? financials.incomeAnnual : [];
+  const balance = Array.isArray(financials.balanceAnnual) ? financials.balanceAnnual : [];
+  const cashflow = Array.isArray(financials.cashflowAnnual) ? financials.cashflowAnnual : [];
+  if (!income.length) return null;
+
+  const years = income.map(fiscalYearFromStatement);
+  const byIndex = (fn) => years.map((_, index) => {
+    const value = fn(index);
+    return Number.isFinite(value) ? Number(value.toFixed(2)) : null;
+  });
+  const toCr = (value) => Number.isFinite(value) ? value / 1e7 : null;
+  const revenue = byIndex((index) => toCr(statementValue(income[index], ["totalRevenue"])));
+  const pat = byIndex((index) => toCr(statementValue(income[index], ["netIncome", "netIncomeCommonStockholders"])));
+  const ebitda = byIndex((index) => toCr(statementValue(income[index], ["ebitda"]) ?? sumStatementValues(income[index], ["ebit", "reconciledDepreciation", "depreciationAndAmortization"])));
+  const totalAssets = byIndex((index) => toCr(statementValue(balance[index], ["totalAssets"])));
+  const equity = byIndex((index) => toCr(statementValue(balance[index], ["totalStockholderEquity", "stockholdersEquity"])));
+  const totalDebt = byIndex((index) => toCr(sumStatementValues(balance[index], ["shortLongTermDebt", "currentDebt", "longTermDebt"])));
+  const receivables = byIndex((index) => toCr(statementValue(balance[index], ["netReceivables", "accountsReceivable"])));
+  const inventories = byIndex((index) => toCr(statementValue(balance[index], ["inventory"])));
+  const payables = byIndex((index) => toCr(statementValue(balance[index], ["accountsPayable"])));
+  const cfo = byIndex((index) => toCr(statementValue(cashflow[index], ["totalCashFromOperatingActivities", "operatingCashFlow"])));
+  const capex = byIndex((index) => toCr(statementValue(cashflow[index], ["capitalExpenditures"])));
+  const ratioRows = (fn) => years.map((_, index) => {
+    const value = fn(index);
+    return Number.isFinite(value) ? Number(value.toFixed(2)) : null;
+  });
+  const ebitdaMargin = ratioRows((index) => revenue[index] > 0 ? (ebitda[index] / revenue[index]) * 100 : NaN);
+  const patMargin = ratioRows((index) => revenue[index] > 0 ? (pat[index] / revenue[index]) * 100 : NaN);
+  const roe = ratioRows((index) => equity[index] > 0 ? (pat[index] / equity[index]) * 100 : NaN);
+  const roa = ratioRows((index) => totalAssets[index] > 0 ? (pat[index] / totalAssets[index]) * 100 : NaN);
+  const debtEquity = ratioRows((index) => equity[index] > 0 ? totalDebt[index] / equity[index] : NaN);
+  const fcf = byIndex((index) => Number.isFinite(cfo[index]) && Number.isFinite(capex[index]) ? cfo[index] + capex[index] : NaN);
+  const receivableDays = ratioRows((index) => revenue[index] > 0 ? (receivables[index] / revenue[index]) * 365 : NaN);
+  const inventoryDays = ratioRows((index) => revenue[index] > 0 ? (inventories[index] / revenue[index]) * 365 : NaN);
+  const payableDays = ratioRows((index) => revenue[index] > 0 ? (payables[index] / revenue[index]) * 365 : NaN);
+
+  const hasData = revenue.some(Number.isFinite) || pat.some(Number.isFinite);
+  if (!hasData) return null;
+  return {
+    source: "Yahoo Finance annual financial statements",
+    url: `https://finance.yahoo.com/quote/${encodeURIComponent(yahooValue?.quote?.symbol || "")}/financials/`,
+    available: true,
+    latest: {
+      period: years[0] || "latest annual year",
+      revenue: revenue[0],
+      pat: pat[0],
+      ebitda: ebitda[0],
+      ebitdaMargin: ebitdaMargin[0],
+      patMargin: patMargin[0],
+      roe: roe[0],
+      roa: roa[0],
+      debtEquity: debtEquity[0],
+      fcf: fcf[0],
+      receivableDays: receivableDays[0],
+      inventoryDays: inventoryDays[0],
+      payableDays: payableDays[0]
+    },
+    years,
+    rows: {
+      revenue,
+      pat,
+      ebitda,
+      ebitdaMargin,
+      patMargin,
+      roe,
+      roa,
+      debtEquity,
+      fcf,
+      totalAssets,
+      receivableDays,
+      inventoryDays,
+      payableDays
+    }
   };
 }
 
@@ -871,7 +1093,7 @@ async function callOpenAi(prompt, context) {
     body: JSON.stringify({
       model: AI_MODEL,
       instructions: [
-        "You are DefStrat AI, an expert Indian defence-equities financial reviewer.",
+        "You are Finance AI, an expert listed-company financial reviewer.",
         "Use only the supplied Yahoo Finance, Moneycontrol consolidated P&L, BSE, news and audited metric context.",
         "Use company filing / investor release figures first. For metrics not available there, use Yahoo Finance or Moneycontrol consolidated data only.",
         "Mention fiscal years for every financial figure and state the source. Do not use standalone figures. Do not invent missing values.",
@@ -1034,5 +1256,5 @@ http.createServer(async (req, res) => {
     send(res, 502, { error: error.message || "Upstream data request failed" });
   }
 }).listen(PORT, () => {
-  console.log(`Defence finance dashboard running at http://localhost:${PORT}`);
+  console.log(`Live finance tool running at http://localhost:${PORT}`);
 });
