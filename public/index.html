@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <title>Live Finance Command</title>
-    <link rel="stylesheet" href="/styles.css?v=finance-tool-20260609">
+    <link rel="stylesheet" href="/styles.css?v=peer-news-20260615">
   </head>
   <body>
     <main class="shell">
@@ -73,6 +73,7 @@
         <button data-tab="earnings">Earnings</button>
         <button data-tab="callSummary">Earnings Call</button>
         <button data-tab="comparison">Comparison</button>
+        <button data-tab="sectorNews">Sector News</button>
         <button data-tab="ai">Finance AI</button>
         <button data-tab="manage">Manage</button>
       </nav>
@@ -170,9 +171,17 @@
       <section class="tab-panel data-panel" data-panel="comparison">
         <div class="section-title">
           <h2>Comparison</h2>
-          <span>Operating and valuation snapshot</span>
+          <span>Operating snapshot and FY22-FY26 trailing valuation comps</span>
         </div>
         <div id="comparisonPanel"></div>
+      </section>
+
+      <section class="tab-panel data-panel" data-panel="sectorNews">
+        <div class="section-title">
+          <h2>Sector News</h2>
+          <span>Latest tracked-company and market news, refreshed automatically each day</span>
+        </div>
+        <div id="sectorNewsPanel"></div>
       </section>
 
       <section class="tab-panel data-panel" data-panel="ai">
@@ -198,6 +207,6 @@
       </footer>
     </main>
     <div id="chartTooltip" class="chart-tooltip" role="status" aria-live="polite"></div>
-    <script src="/app.js?v=finance-tool-20260609" type="module"></script>
+    <script src="/app.js?v=peer-news-20260615" type="module"></script>
   </body>
 </html>

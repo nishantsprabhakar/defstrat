@@ -447,6 +447,9 @@ async function yahooTimeseriesFinancials(symbol) {
     "annualTotalAssets",
     "annualStockholdersEquity",
     "annualTotalDebt",
+    "annualCashCashEquivalentsAndShortTermInvestments",
+    "annualBasicAverageShares",
+    "annualDilutedAverageShares",
     "annualOperatingCashFlow",
     "annualCapitalExpenditure",
     "annualAccountsReceivable",
@@ -501,6 +504,21 @@ async function yahooTimeseriesFinancials(symbol) {
   const totalAssets = metric("annualTotalAssets");
   const equity = metric("annualStockholdersEquity");
   const debt = metric("annualTotalDebt");
+  const cash = metric("annualCashCashEquivalentsAndShortTermInvestments");
+  const shares = years.map((year) => {
+    const basicMap = new Map((byType.get("annualBasicAverageShares") || []).map((entry) => {
+      const asOfDate = entry?.asOfDate || "";
+      const fy = `FY${String(Number(String(asOfDate).slice(0, 4))).slice(-2)}`;
+      return [fy, compactYahoo(entry?.reportedValue)];
+    }));
+    const dilutedMap = new Map((byType.get("annualDilutedAverageShares") || []).map((entry) => {
+      const asOfDate = entry?.asOfDate || "";
+      const fy = `FY${String(Number(String(asOfDate).slice(0, 4))).slice(-2)}`;
+      return [fy, compactYahoo(entry?.reportedValue)];
+    }));
+    const value = basicMap.get(year) ?? dilutedMap.get(year);
+    return Number.isFinite(value) ? Number(value.toFixed(2)) : null;
+  });
   const cfo = metric("annualOperatingCashFlow");
   const capex = metric("annualCapitalExpenditure");
   const receivables = metric("annualAccountsReceivable");
@@ -530,6 +548,9 @@ async function yahooTimeseriesFinancials(symbol) {
       roe: roe[0],
       roa: roa[0],
       debtEquity: debtEquity[0],
+      debt: debt[0],
+      cash: cash[0],
+      shares: shares[0],
       fcf: fcf[0],
       receivableDays: receivableDays[0],
       inventoryDays: inventoryDays[0],
@@ -545,6 +566,9 @@ async function yahooTimeseriesFinancials(symbol) {
       roe,
       roa,
       debtEquity,
+      debt,
+      cash,
+      shares,
       fcf,
       totalAssets,
       receivableDays,
@@ -866,6 +890,13 @@ async function companyPayload(meta) {
       ? yahooTimeseries.value
       : yahooFinancialHistory(yahooValue);
     if (yahooHistory?.available) moneycontrolValue = yahooHistory;
+  }
+  if (!Number.isFinite(yahooValue?.quote?.marketCap)) {
+    const price = Number(yahooValue?.quote?.regularMarketPrice);
+    const shares = Number(moneycontrolValue?.latest?.shares);
+    if (Number.isFinite(price) && Number.isFinite(shares) && shares > 0) {
+      yahooValue.quote.marketCap = price * shares;
+    }
   }
   return {
     meta,

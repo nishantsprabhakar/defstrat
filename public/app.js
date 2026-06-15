@@ -34,6 +34,7 @@ els.businessPanel = document.querySelector("#businessPanel");
 els.earningsPanel = document.querySelector("#earningsPanel");
 els.callSummaryPanel = document.querySelector("#callSummaryPanel");
 els.comparisonPanel = document.querySelector("#comparisonPanel");
+els.sectorNewsPanel = document.querySelector("#sectorNewsPanel");
 els.aiPanel = document.querySelector("#aiPanel");
 els.managePanel = document.querySelector("#managePanel");
 els.sectorCharts = document.querySelector("#sectorCharts");
@@ -74,6 +75,7 @@ const extraData = {
 };
 
 const years = ["FY21", "FY22", "FY23", "FY24", "FY25", "FY26"];
+const peerMultipleYears = ["FY22", "FY23", "FY24", "FY25", "FY26"];
 
 const companyUpdates = {
   zentec: [
@@ -628,7 +630,10 @@ function historicalMetricSeries(item, key) {
     totalAssets: "totalAssets",
     receivableDays: "receivableDays",
     inventoryDays: "inventoryDays",
-    payableDays: "payableDays"
+    payableDays: "payableDays",
+    debt: "debt",
+    cash: "cash",
+    shares: "shares"
   };
   const rowKey = rowKeyMap[key] || null;
   const mc = item?.moneycontrol;
@@ -1152,6 +1157,51 @@ function liveNewsRows(item, limit = 6) {
   return [...yahooRows, ...bseRows, ...staticRows].slice(0, limit);
 }
 
+function renderSectorNews() {
+  if (!els.sectorNewsPanel) return;
+  const seen = new Set();
+  const rows = dashboard.flatMap((item) => {
+    const company = item.meta.name;
+    return (item.news || []).map((row) => ({
+      company,
+      dateRaw: row.date,
+      date: formatDate(row.date),
+      title: row.title || "Market news",
+      detail: newsDetail(row),
+      source: row.publisher || row.source || "Live news",
+      link: row.link
+    }));
+  }).filter((row) => {
+    const key = `${row.title}`.toLowerCase().replace(/\W+/g, " ").trim();
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  }).sort((a, b) => {
+    const aTime = Date.parse(a.dateRaw || "");
+    const bTime = Date.parse(b.dateRaw || "");
+    return (Number.isFinite(bTime) ? bTime : 0) - (Number.isFinite(aTime) ? aTime : 0);
+  }).slice(0, 18);
+
+  els.sectorNewsPanel.innerHTML = `<div class="info-grid">
+    <article class="brief-card">
+      <small>Auto refresh</small>
+      <strong>Latest sector news across tracked companies</strong>
+      <p>News is rebuilt from the live dashboard feed every refresh and therefore updates at least daily when sources publish new articles. Add or remove companies to change this sector basket.</p>
+    </article>
+    <article class="brief-card">
+      <small>Last checked</small>
+      <strong>${new Date().toLocaleString()}</strong>
+      <p>Sources include Yahoo Finance news and Google News RSS surfaced through the backend company feeds.</p>
+    </article>
+  </div>
+  <div class="news-grid">${rows.length ? rows.map((row) => `<article class="news-card">
+    <small>${escapeHtml(row.date)} &middot; ${escapeHtml(row.company)} &middot; ${escapeHtml(row.source)}</small>
+    <strong>${escapeHtml(row.title)}</strong>
+    <p>${escapeHtml(row.detail)}</p>
+    ${row.link ? `<a href="${row.link}" target="_blank" rel="noreferrer">Open article</a>` : ""}
+  </article>`).join("") : `<div class="empty">No sector news has been returned yet. The dashboard will check again on the next refresh.</div>`}</div>`;
+}
+
 function summarizeText(value, max = 210) {
   const text = String(value || "").replace(/&nbsp;/g, " ").replace(/\u00a0/g, " ").replace(/\s+/g, " ").trim();
   if (!text) return "Latest item available from the live feed; open the source for the full article or filing.";
@@ -1189,6 +1239,7 @@ function renderDataTabs() {
   renderEarnings();
   renderCallSummary();
   renderComparison();
+  renderSectorNews();
   renderAiBrief();
   renderManage();
 }
@@ -1358,12 +1409,9 @@ function valuationMetrics(extra = {}, item = null) {
   const ebitdaMetric = item ? sourceMetric(item, "ebitda") : { value: Number(extra.ebitda) };
   const revenue = Number.isFinite(revenueMetric.value) ? revenueMetric.value : Number(extra.revenue);
   const ebitda = Number.isFinite(ebitdaMetric.value) ? ebitdaMetric.value : revenue * (Number(extra.ebitdaMargin) / 100);
-  const liveMarketCap = rupeesToCrores(item?.yahoo?.quote?.marketCap);
   const enterpriseValue = Number.isFinite(extra.enterpriseValue)
     ? Number(extra.enterpriseValue)
-    : Number.isFinite(extra.marketCap)
-      ? Number(extra.marketCap)
-      : liveMarketCap;
+    : currentEnterpriseValueCr(item, extra);
   const rawEvRevenue = Number.isFinite(enterpriseValue) && revenue > 0 ? enterpriseValue / revenue : NaN;
   const rawEvEbitda = Number.isFinite(enterpriseValue) && ebitda > 0 ? enterpriseValue / ebitda : NaN;
   const patMetric = item ? sourceMetric(item, "pat") : { value: Number(extra.pat) };
@@ -1371,8 +1419,8 @@ function valuationMetrics(extra = {}, item = null) {
     ? Number(extra.pe)
     : Number.isFinite(item?.yahoo?.quote?.trailingPE)
       ? Number(item.yahoo.quote.trailingPE)
-      : Number.isFinite(enterpriseValue) && patMetric.value > 0
-        ? enterpriseValue / patMetric.value
+      : Number.isFinite(currentMarketCapCr(item, extra)) && patMetric.value > 0
+        ? currentMarketCapCr(item, extra) / patMetric.value
         : NaN;
   return {
     rawEvRevenue,
@@ -1382,6 +1430,69 @@ function valuationMetrics(extra = {}, item = null) {
     evEbitda: Number.isFinite(rawEvEbitda) ? `${formatNum.format(rawEvEbitda)}x` : "--",
     pe: Number.isFinite(rawPe) ? `${formatNum.format(rawPe)}x` : "--"
   };
+}
+
+function currentMarketCapCr(item, extra = {}) {
+  if (Number.isFinite(extra.marketCap)) return Number(extra.marketCap);
+  const quoted = rupeesToCrores(item?.yahoo?.quote?.marketCap);
+  if (Number.isFinite(quoted)) return quoted;
+  const price = Number(item?.yahoo?.quote?.regularMarketPrice);
+  const shares = latestHistoricalValue(item, "shares");
+  return Number.isFinite(price) && Number.isFinite(shares) ? rupeesToCrores(price * shares) : NaN;
+}
+
+function currentEnterpriseValueCr(item, extra = {}) {
+  if (Number.isFinite(extra.enterpriseValue)) return Number(extra.enterpriseValue);
+  const marketCap = currentMarketCapCr(item, extra);
+  if (!Number.isFinite(marketCap)) return NaN;
+  const debt = Number.isFinite(extra.debt) ? extra.debt : latestHistoricalValue(item, "debt");
+  const cash = Number.isFinite(extra.cash) ? extra.cash : latestHistoricalValue(item, "cash");
+  return marketCap + (Number.isFinite(debt) ? debt : 0) - (Number.isFinite(cash) ? cash : 0);
+}
+
+function seriesValueForYear(item, key, fiscalYear) {
+  const series = historicalMetricSeries(item, key);
+  const index = years.indexOf(fiscalYear);
+  if (series && index >= 0 && Number.isFinite(series[index])) return series[index];
+  const extra = extraData[item?.meta?.id] || {};
+  if ((extra.period || "") === fiscalYear && Number.isFinite(extra[key])) return extra[key];
+  return NaN;
+}
+
+function peerTrailingMultipleRows() {
+  return dashboard.flatMap((item) => {
+    const extra = extraData[item.meta.id] || {};
+    const marketCap = currentMarketCapCr(item, extra);
+    const enterpriseValue = currentEnterpriseValueCr(item, extra);
+    return peerMultipleYears.map((fiscalYear) => {
+      const revenue = seriesValueForYear(item, "revenue", fiscalYear);
+      const ebitda = seriesValueForYear(item, "ebitda", fiscalYear);
+      const pat = seriesValueForYear(item, "pat", fiscalYear);
+      return {
+        id: item.meta.id,
+        company: item.meta.name,
+        label: `${extra.label || item.meta.nse} ${fiscalYear}`,
+        fiscalYear,
+        source: item.moneycontrol?.source || extra.source || "Live fallback source",
+        evRevenue: Number.isFinite(enterpriseValue) && revenue > 0 ? enterpriseValue / revenue : NaN,
+        evEbitda: Number.isFinite(enterpriseValue) && ebitda > 0 ? enterpriseValue / ebitda : NaN,
+        pe: Number.isFinite(marketCap) && pat > 0 ? marketCap / pat : NaN
+      };
+    });
+  });
+}
+
+function latestPeerMultipleRows() {
+  const latestYear = peerMultipleYears.at(-1);
+  return dashboard.map((item) => {
+    const extra = extraData[item.meta.id] || {};
+    const row = peerTrailingMultipleRows().find((entry) => entry.id === item.meta.id && entry.fiscalYear === latestYear);
+    return {
+      id: item.meta.id,
+      label: extra.label || item.meta.nse,
+      values: row ? [row.evRevenue, row.evEbitda, row.pe] : [NaN, NaN, NaN]
+    };
+  });
 }
 
 function workingCapitalMetrics(extra = {}, item = null) {
@@ -1659,14 +1770,23 @@ async function refreshCallSummary(id) {
 
 function renderComparison() {
   if (!els.comparisonPanel) return;
+  const peerRows = peerTrailingMultipleRows();
+  const peerTableRows = peerRows.map((row) => [
+    `<strong>${escapeHtml(row.company)}</strong><br><small>${escapeHtml(row.fiscalYear)} trailing &middot; ${escapeHtml(row.source)}</small>`,
+    ratio(row.evRevenue),
+    ratio(row.evEbitda),
+    ratio(row.pe)
+  ]);
   els.comparisonPanel.innerHTML = `<div class="chart-grid">
-    <article class="chart-card wide">${chartTitle("Peer Valuation Multiples")}${groupedBarChart(dashboard.map((item) => {
-      const extra = extraData[item.meta.id] || {};
-      const valuation = valuationMetrics(extra, item);
-      return { id: item.meta.id, label: extra.label || item.meta.nse, values: [valuation.rawEvRevenue, valuation.rawEvEbitda, valuation.rawPe] };
-    }), ["EV/Revenue", "EV/EBITDA", "P/E"], "Multiple (x)")}</article>
+    <article class="chart-card wide">${chartTitle("FY26 Trailing Peer Valuation Multiples")}${groupedBarChart(latestPeerMultipleRows(), ["EV/Revenue", "EV/EBITDA", "P/E"], "Multiple (x)")}</article>
     <article class="chart-card">${chartTitle("Profitability vs Leverage")}${scatterChart(dashboard.map((item) => ({ id: item.meta.id, label: extraData[item.meta.id]?.label || item.meta.nse, x: liveMetric(item, "debtEquity"), y: sourceMetric(item, "patMargin").value })), "D/E", "PAT margin")}</article>
-  </div>` + table([
+  </div>
+  <article class="brief-card">
+    <small>FY22-FY26 trailing peer comps</small>
+    <strong>EV/Revenue, EV/EBITDA and P/E by fiscal year</strong>
+    <p>Multiples use current enterprise value or market cap against each fiscal year's reported revenue, EBITDA and PAT. Sources refresh with the live dashboard; Yahoo annual fundamentals are used where company filing or Moneycontrol rows are not mapped.</p>
+    ${table(["Company / FY basis", "EV/Revenue", "EV/EBITDA", "P/E"], peerTableRows)}
+  </article>` + table([
     "Company / period", "Focus", "Revenue", "EV/Revenue", "EV/EBITDA", "P/E", "PAT margin", "ROE", "D/E", "Commentary"
   ], dashboard.map((item) => {
     const extra = extraData[item.meta.id] || {};
