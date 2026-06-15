@@ -62,6 +62,9 @@ let searchTimer;
 let activeTab = "charts";
 let activeSectorMetric = "revenue";
 let activePriceRange = "1Y";
+let sectorNewsFallback = [];
+let sectorNewsLoading = false;
+let sectorNewsFetchedAt = "";
 
 const extraData = {
   zentec: { label: "Zen", focus: "Training simulators, anti-drone systems", revenue: 687.69, ebitda: 332.7, pat: 193.45, grossMargin: 69.3, patMargin: 28.1, ebitdaMargin: 48.37, roe: null, roa: null, roce: null, debtEquity: null, pe: null, pb: null, marketCap: null, eps: null, divYield: null, receivableDays: null, inventoryDays: null, payableDays: null, fcf: null, period: "FY26", source: "NSE/BSE Q4 FY26 investor presentation filed 3 May 2026", verdict: "Positive", oneLine: "High-growth defence electronics and simulation play with order visibility tied to domestic procurement." },
@@ -1159,8 +1162,30 @@ function liveNewsRows(item, limit = 6) {
 
 function renderSectorNews() {
   if (!els.sectorNewsPanel) return;
+  const rows = collectSectorNewsRows();
+  if (!rows.length && !sectorNewsLoading) {
+    fetchSectorNewsFallback();
+  }
+  const checkedAt = sectorNewsFetchedAt || new Date().toISOString();
+  els.sectorNewsPanel.innerHTML = `<div class="info-grid">
+    <article class="brief-card">
+      <small>Auto refresh</small>
+      <strong>Latest sector news across tracked companies</strong>
+      <p>News is rebuilt from the live dashboard feed every refresh and falls back to a dedicated sector-news endpoint. It updates automatically when sources publish new articles, at least daily.</p>
+    </article>
+    <article class="brief-card">
+      <small>Last checked</small>
+      <strong>${new Date(checkedAt).toLocaleString()}</strong>
+      <p>Sources include Yahoo Finance news and Google News RSS surfaced through the backend company feeds.</p>
+    </article>
+  </div>
+  <div class="news-grid">${rows.length ? rows.map(newsCard).join("") : `<div class="empty">${sectorNewsLoading ? "Refreshing sector news..." : "No sector news has been returned yet. The dashboard will check again on the next refresh."}</div>`}</div>`;
+}
+
+function collectSectorNewsRows() {
   const seen = new Set();
-  const rows = dashboard.flatMap((item) => {
+  return [
+    ...dashboard.flatMap((item) => {
     const company = item.meta.name;
     return (item.news || []).map((row) => ({
       company,
@@ -1171,7 +1196,17 @@ function renderSectorNews() {
       source: row.publisher || row.source || "Live news",
       link: row.link
     }));
-  }).filter((row) => {
+    }),
+    ...sectorNewsFallback.map((row) => ({
+      company: row.company || row.symbol || "Tracked company",
+      dateRaw: row.date,
+      date: formatDate(row.date),
+      title: row.title || "Market news",
+      detail: newsDetail(row),
+      source: row.publisher || row.source || "Live news",
+      link: row.link
+    }))
+  ].filter((row) => {
     const key = `${row.title}`.toLowerCase().replace(/\W+/g, " ").trim();
     if (!key || seen.has(key)) return false;
     seen.add(key);
@@ -1181,25 +1216,34 @@ function renderSectorNews() {
     const bTime = Date.parse(b.dateRaw || "");
     return (Number.isFinite(bTime) ? bTime : 0) - (Number.isFinite(aTime) ? aTime : 0);
   }).slice(0, 18);
+}
 
-  els.sectorNewsPanel.innerHTML = `<div class="info-grid">
-    <article class="brief-card">
-      <small>Auto refresh</small>
-      <strong>Latest sector news across tracked companies</strong>
-      <p>News is rebuilt from the live dashboard feed every refresh and therefore updates at least daily when sources publish new articles. Add or remove companies to change this sector basket.</p>
-    </article>
-    <article class="brief-card">
-      <small>Last checked</small>
-      <strong>${new Date().toLocaleString()}</strong>
-      <p>Sources include Yahoo Finance news and Google News RSS surfaced through the backend company feeds.</p>
-    </article>
-  </div>
-  <div class="news-grid">${rows.length ? rows.map((row) => `<article class="news-card">
+function newsCard(row) {
+  return `<article class="news-card">
     <small>${escapeHtml(row.date)} &middot; ${escapeHtml(row.company)} &middot; ${escapeHtml(row.source)}</small>
     <strong>${escapeHtml(row.title)}</strong>
     <p>${escapeHtml(row.detail)}</p>
     ${row.link ? `<a href="${row.link}" target="_blank" rel="noreferrer">Open article</a>` : ""}
-  </article>`).join("") : `<div class="empty">No sector news has been returned yet. The dashboard will check again on the next refresh.</div>`}</div>`;
+  </article>`;
+}
+
+async function fetchSectorNewsFallback() {
+  sectorNewsLoading = true;
+  try {
+    const known = watchIds.filter((id) => catalog.some((company) => company.id === id));
+    const suffix = known.length ? `?ids=${encodeURIComponent(known.join(","))}` : "";
+    const result = await getJson(`/api/sector-news${suffix}`);
+    sectorNewsFallback = Array.isArray(result.news) ? result.news : [];
+    sectorNewsFetchedAt = result.refreshedAt || new Date().toISOString();
+  } catch {
+    sectorNewsFallback = [];
+    sectorNewsFetchedAt = new Date().toISOString();
+  } finally {
+    sectorNewsLoading = false;
+    if (activeTab === "sectorNews" || els.sectorNewsPanel?.innerHTML.includes("Refreshing sector news")) {
+      renderSectorNews();
+    }
+  }
 }
 
 function summarizeText(value, max = 210) {

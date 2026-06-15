@@ -637,6 +637,36 @@ async function companyNews(meta) {
   }).sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0)).slice(0, 10);
 }
 
+async function sectorNews(ids = []) {
+  const selected = (ids.length ? ids : companies.map((company) => company.id))
+    .map((id) => companies.find((company) => company.id === id || company.nse === String(id).toUpperCase() || company.symbol === id))
+    .filter(Boolean);
+  const results = await Promise.allSettled(selected.map(async (meta) => {
+    const rows = await companyNews(meta);
+    return rows.map((row) => ({
+      company: meta.name,
+      symbol: meta.symbol,
+      title: row.title,
+      publisher: row.publisher || row.source || "Live news",
+      date: row.date,
+      link: row.link,
+      summary: row.summary || row.title || "",
+      source: row.source || "Live news"
+    }));
+  }));
+  const seen = new Set();
+  return results
+    .flatMap((result) => result.status === "fulfilled" ? result.value : [])
+    .filter((row) => {
+      const key = String(row.title || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+      if (!key || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0))
+    .slice(0, 24);
+}
+
 function isRelevantNews(meta, row) {
   const generic = new Set(["limited", "ltd", "technologies", "technology", "engineering", "defence", "defense", "india", "micro", "systems", "products"]);
   const haystack = `${row.title || ""} ${row.summary || ""} ${row.publisher || ""}`.toLowerCase();
@@ -1239,6 +1269,13 @@ async function routeApi(req, res, url) {
       meta,
       news: news.status === "fulfilled" ? news.value : [],
       bse: bse.status === "fulfilled" ? bse.value : [],
+      refreshedAt: new Date().toISOString()
+    });
+  }
+  if (url.pathname === "/api/sector-news") {
+    const ids = (url.searchParams.get("ids") || "").split(",").map((id) => id.trim()).filter(Boolean);
+    return send(res, 200, {
+      news: await sectorNews(ids),
       refreshedAt: new Date().toISOString()
     });
   }
