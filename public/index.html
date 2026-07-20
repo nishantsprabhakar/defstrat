@@ -6,7 +6,7 @@
     <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
     <meta http-equiv="Pragma" content="no-cache">
     <title>Live Finance Command</title>
-    <link rel="stylesheet" href="/styles.css?v=sector-news-fix-20260615">
+    <link rel="stylesheet" href="/styles.css?v=call-schedule-20260720">
   </head>
   <body>
     <main class="shell">
@@ -72,6 +72,7 @@
         <button data-tab="historical">Historical</button>
         <button data-tab="earnings">Earnings</button>
         <button data-tab="callSummary">Earnings Call</button>
+        <button data-tab="callSchedule">Call Schedule</button>
         <button data-tab="comparison">Comparison</button>
         <button data-tab="sectorNews">Sector News</button>
         <button data-tab="ai">Finance AI</button>
@@ -160,6 +161,14 @@
         <div id="callSummaryPanel"></div>
       </section>
 
+      <section class="tab-panel data-panel" data-panel="callSchedule">
+        <div class="section-title">
+          <h2>Earnings Call Schedule</h2>
+          <span>Announced dates for all tracked companies</span>
+        </div>
+        <div id="callSchedulePanel"></div>
+      </section>
+
       <section class="tab-panel data-panel" data-panel="earnings">
         <div class="section-title">
           <h2>Earnings</h2>
@@ -207,6 +216,6 @@
       </footer>
     </main>
     <div id="chartTooltip" class="chart-tooltip" role="status" aria-live="polite"></div>
-    <script src="/app.js?v=sector-news-fix-20260615" type="module"></script>
+    <script src="/app.js?v=call-schedule-20260720" type="module"></script>
   </body>
 </html>

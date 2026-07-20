@@ -33,6 +33,7 @@ els.companyInfoPanel = document.querySelector("#companyInfoPanel");
 els.businessPanel = document.querySelector("#businessPanel");
 els.earningsPanel = document.querySelector("#earningsPanel");
 els.callSummaryPanel = document.querySelector("#callSummaryPanel");
+els.callSchedulePanel = document.querySelector("#callSchedulePanel");
 els.comparisonPanel = document.querySelector("#comparisonPanel");
 els.sectorNewsPanel = document.querySelector("#sectorNewsPanel");
 els.aiPanel = document.querySelector("#aiPanel");
@@ -1282,6 +1283,7 @@ function renderDataTabs() {
   renderHistorical();
   renderEarnings();
   renderCallSummary();
+  renderCallSchedule();
   renderComparison();
   renderSectorNews();
   renderAiBrief();
@@ -1790,6 +1792,31 @@ function renderCallSummary() {
     const target = document.querySelector("#autoCallSummary");
     if (target) target.innerHTML = "Automatic transcript monitoring is available for the default tracked universe. For custom companies, this tab refreshes live Yahoo/news data and any BSE code you add in Manage.";
   }
+}
+
+function hasSpecificCallDate(value) {
+  const text = String(value || "").trim();
+  return /^\d{1,2}\s+[A-Za-z]{3,9}\s+20\d{2}$/.test(text) || /^\d{1,2}[/-]\d{1,2}[/-]20\d{2}$/.test(text);
+}
+
+function renderCallSchedule() {
+  if (!els.callSchedulePanel) return;
+  const rows = dashboard.map((item) => {
+    const summary = callSummaries[item.meta.id];
+    const date = hasSpecificCallDate(summary?.callDate) ? summary.callDate : "-";
+    return [
+      `<strong>${escapeHtml(item.meta.name)}</strong><br><small>${escapeHtml(item.meta.nse || item.meta.symbol || "")}</small>`,
+      date,
+      summary?.period ? escapeHtml(summary.period) : "-",
+      date === "-" ? "Not announced" : "Announced",
+      summary?.source ? escapeHtml(summary.source) : "-"
+    ];
+  });
+  els.callSchedulePanel.innerHTML = `<article class="brief-card">
+    <small>Schedule tracker</small>
+    <strong>Earnings call dates for all tracked companies</strong>
+    <p>Only specific announced calendar dates are shown. Where a company has not announced a date, or only a broad period is available, the schedule shows "-".</p>
+  </article>${table(["Company", "Call date", "Period", "Status", "Source"], rows)}`;
 }
 
 async function refreshCallSummary(id) {
