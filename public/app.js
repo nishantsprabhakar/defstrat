@@ -537,6 +537,7 @@ const transcriptSources = {
 
 const formatInr = new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const formatNum = new Intl.NumberFormat("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const formatWhole = new Intl.NumberFormat("en-IN", { maximumFractionDigits: 0 });
 
 function save() {
   localStorage.setItem(storeKey, JSON.stringify(watchIds));
@@ -548,6 +549,10 @@ function money(value) {
   return Number.isFinite(value) ? formatInr.format(value) : "--";
 }
 
+function signedMoney(value) {
+  return Number.isFinite(value) ? `${value >= 0 ? "+" : "-"}${formatInr.format(Math.abs(value))}` : "--";
+}
+
 function compact(value) {
   if (!Number.isFinite(value)) return "--";
   const abs = Math.abs(value);
@@ -557,9 +562,21 @@ function compact(value) {
   return formatNum.format(value);
 }
 
+function compactWhole(value) {
+  if (!Number.isFinite(value)) return "--";
+  const abs = Math.abs(value);
+  if (abs >= 1e7) return `${formatNum.format(value / 1e7)}Cr`;
+  if (abs >= 1e5) return `${formatNum.format(value / 1e5)}L`;
+  return formatWhole.format(value);
+}
+
+function volume(value) {
+  return Number.isFinite(value) ? compactWhole(value) : "--";
+}
+
 function cardSubMetric(q) {
-  if (Number.isFinite(q.marketCap)) return `${compact(q.marketCap)} mcap`;
-  if (Number.isFinite(q.volume)) return `${compact(q.volume)} volume`;
+  if (Number.isFinite(q.marketCap)) return `${moneyCr(rupeesToCrores(q.marketCap))} mcap`;
+  if (Number.isFinite(q.volume)) return `${volume(q.volume)} volume`;
   return "Live quote";
 }
 
@@ -604,7 +621,7 @@ function sourceMetric(item, key, options = {}) {
 }
 
 function moneyCr(value) {
-  return Number.isFinite(value) ? `Rs ${compact(value)}crs` : "--";
+  return Number.isFinite(value) ? `₹${compact(value)} Cr` : "--";
 }
 
 function fixed(value) {
@@ -616,7 +633,8 @@ function ratio(value) {
 }
 
 function wcDayBundle(wc = {}) {
-  return [wc.receivable, wc.inventory, wc.payable, wc.netCycle].map(fixed).join(" / ");
+  const values = [wc.receivable, wc.inventory, wc.payable, wc.netCycle];
+  return values.every(Number.isFinite) ? values.map(fixed).join(" / ") : "--";
 }
 
 function hasSeriesData(values = []) {
@@ -673,12 +691,12 @@ function latestHistoricalValue(item, key) {
 
 function liveMetric(item, key) {
   const extra = extraData[item?.meta?.id] || {};
+  if (key === "pe") return valuationMetrics(extra, item).rawPe;
   if (Number.isFinite(extra[key])) return extra[key];
   if (key === "marketCapCr") {
     if (Number.isFinite(extra.marketCap)) return extra.marketCap;
     return rupeesToCrores(item?.yahoo?.quote?.marketCap);
   }
-  if (key === "pe") return valuationMetrics(extra, item).rawPe;
   if (key === "debtEquity") return sourceMetric(item, "debtEquity").value;
   if (key === "roe") {
     const fromSource = sourceMetric(item, "roe").value;
@@ -844,7 +862,8 @@ function render() {
   els.companyCount.textContent = String(watchIds.length);
   els.avgMove.textContent = pct(avg);
   els.avgMove.className = moveClass(avg);
-  els.filingCount.textContent = String(dashboard.reduce((total, d) => total + (d.bse?.length || 0), 0));
+  const bseCount = dashboard.reduce((total, d) => total + (Array.isArray(d.bse) ? d.bse.length : 0), 0);
+  els.filingCount.textContent = bseCount ? String(bseCount) : "0 returned";
 }
 
 function seededSeries(item, key) {
@@ -868,7 +887,7 @@ function renderSectorSnapshot(avg) {
   const peValues = dashboard.map((item) => liveMetric(item, "pe")).filter(Number.isFinite);
   const roeValues = dashboard.map((item) => liveMetric(item, "roe")).filter(Number.isFinite);
   const returns = dashboard.map((item) => ({ item, value: oneYearReturn(item) })).filter((row) => Number.isFinite(row.value)).sort((a, b) => b.value - a.value);
-  els.combinedMarketCap.textContent = marketCaps.length ? `\u20b9${compact(marketCaps.reduce((a, b) => a + b, 0))} Cr` : "--";
+  els.combinedMarketCap.textContent = marketCaps.length ? moneyCr(marketCaps.reduce((a, b) => a + b, 0)) : "--";
   els.snapshotCompanies.textContent = String(dashboard.length);
   els.sectorPe.textContent = peValues.length ? formatNum.format(peValues.reduce((a, b) => a + b, 0) / peValues.length) : "N/A";
   els.bestReturn.textContent = returns[0] ? `${pct(returns[0].value)} ${extraData[returns[0].item.meta.id]?.label || returns[0].item.meta.nse}` : "--";
@@ -971,20 +990,21 @@ function renderDetail() {
   const q = item.yahoo?.quote || {};
   const extra = extraData[item.meta.id] || {};
   const revenue = sourceMetric(item, "revenue");
+  const valuation = valuationMetrics(extra, item);
   els.selectedName.textContent = item.meta.name;
   els.selectedCodes.innerHTML = `${escapeHtml(item.meta.nse || item.meta.symbol)} &middot; BSE ${escapeHtml(item.meta.bse || "custom")} &middot; ${escapeHtml(item.meta.isin || "")}`;
   els.selectedPrice.textContent = money(q.regularMarketPrice);
-  els.selectedMove.textContent = `${money(q.regularMarketChange)} ${pct(q.regularMarketChangePercent)}`;
+  els.selectedMove.textContent = `${signedMoney(q.regularMarketChange)} ${pct(q.regularMarketChangePercent)}`;
   els.selectedMove.className = moveClass(q.regularMarketChangePercent);
   renderChart(item.chart || []);
   const metrics = [
     ["Last price", money(q.regularMarketPrice)],
-    ["Day change", `${money(q.regularMarketChange)} ${pct(q.regularMarketChangePercent)}`],
-    ["Volume", compact(q.volume)],
+    ["Day change", `${signedMoney(q.regularMarketChange)} ${pct(q.regularMarketChangePercent)}`],
+    ["Volume", volume(q.volume)],
     ["52W high", money(q.fiftyTwoWeekHigh)],
     ["52W low", money(q.fiftyTwoWeekLow)],
     [`Revenue (${revenue.period})`, moneyCr(revenue.value)],
-    [`P/E (${extra.period || "live"})`, Number.isFinite(extra.pe) ? `${formatNum.format(extra.pe)}x` : compact(q.trailingPE)],
+    [`P/E (${revenue.period || extra.period || "live"})`, valuation.pe],
     ["Financial source", revenue.source],
     ["Quote source", item.yahoo?.source || "Live feed"]
   ];
@@ -1095,7 +1115,7 @@ function filterPricePoints(points, range) {
 }
 
 function formatEpochDate(time, options = { day: "2-digit", month: "short", year: "2-digit" }) {
-  return new Date(time * 1000).toLocaleDateString(undefined, options);
+  return normalizeDateLabel(new Date(time * 1000).toLocaleDateString(undefined, options));
 }
 
 function renderInsights(item) {
@@ -1309,7 +1329,11 @@ function formatDate(value) {
   if (!value) return "Live";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value).slice(0, 24);
-  return date.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" });
+  return normalizeDateLabel(date.toLocaleDateString(undefined, { day: "2-digit", month: "short", year: "numeric" }));
+}
+
+function normalizeDateLabel(value) {
+  return String(value || "").replace(/\bSept\b/g, "Sep");
 }
 
 function oneYearReturn(item) {
@@ -1382,7 +1406,6 @@ function renderBusiness() {
     capabilities: selected.meta.segment || "Capability profile will appear here once added."
   };
   const q = selected.yahoo?.quote || {};
-  const f = selected.yahoo?.financials || {};
   const valuation = valuationMetrics(extra, selected);
   const revenueMetric = sourceMetric(selected, "revenue");
   const grossMetric = sourceMetric(selected, "grossMargin");
@@ -1403,7 +1426,7 @@ function renderBusiness() {
     [`D/E (${period})`, ratio(liveMetric(selected, "debtEquity"))],
     [`EV/Revenue (${period})`, valuation.evRevenue],
     [`EV/EBITDA (${period})`, valuation.evEbitda],
-    [`P/E (${period})`, valuation.pe !== "--" ? valuation.pe : (Number.isFinite(q.trailingPE) ? `${formatNum.format(q.trailingPE)}x` : "--")],
+    [`P/E (${period})`, valuation.pe],
     ["1Y return", pct(oneYearReturn(selected))]
   ];
   els.businessPanel.innerHTML = `<div class="business-layout">
@@ -1426,7 +1449,7 @@ function renderBusiness() {
       <div class="business-kpis">
         <div><small>Live price</small><strong>${money(q.regularMarketPrice)}</strong></div>
         <div><small>Day move</small><strong class="${moveClass(q.regularMarketChangePercent)}">${pct(q.regularMarketChangePercent)}</strong></div>
-        <div><small>Market cap</small><strong>${Number.isFinite(liveMetric(selected, "marketCapCr")) ? `Rs ${compact(liveMetric(selected, "marketCapCr"))}crs` : "--"}</strong></div>
+        <div><small>Market cap</small><strong>${Number.isFinite(liveMetric(selected, "marketCapCr")) ? moneyCr(liveMetric(selected, "marketCapCr")) : "--"}</strong></div>
       </div>
     </article>
 
@@ -1503,12 +1526,13 @@ function valuationMetrics(extra = {}, item = null) {
   const rawEvRevenue = Number.isFinite(enterpriseValue) && revenue > 0 ? enterpriseValue / revenue : NaN;
   const rawEvEbitda = Number.isFinite(enterpriseValue) && ebitda > 0 ? enterpriseValue / ebitda : NaN;
   const patMetric = item ? sourceMetric(item, "pat") : { value: Number(extra.pat) };
-  const rawPe = Number.isFinite(extra.pe)
-    ? Number(extra.pe)
-    : Number.isFinite(item?.yahoo?.quote?.trailingPE)
-      ? Number(item.yahoo.quote.trailingPE)
-      : Number.isFinite(currentMarketCapCr(item, extra)) && patMetric.value > 0
-        ? currentMarketCapCr(item, extra) / patMetric.value
+  const marketCap = currentMarketCapCr(item, extra);
+  const rawPe = Number.isFinite(marketCap) && patMetric.value > 0
+    ? marketCap / patMetric.value
+    : Number.isFinite(extra.pe)
+      ? Number(extra.pe)
+      : Number.isFinite(item?.yahoo?.quote?.trailingPE)
+        ? Number(item.yahoo.quote.trailingPE)
         : NaN;
   return {
     rawEvRevenue,
@@ -1708,7 +1732,7 @@ function renderHistorical() {
       valuation.evRevenue,
       valuation.evEbitda,
       valuation.pe,
-      Number.isFinite(liveMetric(item, "fcf")) ? `\u20b9${compact(liveMetric(item, "fcf"))} Cr` : "--",
+      Number.isFinite(liveMetric(item, "fcf")) ? moneyCr(liveMetric(item, "fcf")) : "--",
       wcDayBundle(wc)
     ];
   });
@@ -1732,7 +1756,7 @@ function renderEarnings() {
         <summary>${escapeHtml(item.meta.name)} &middot; ${escapeHtml(revenue.period || extra.period || "Live")}</summary>
         <div class="body">
           <div class="fundamentals">
-            <div><small>Revenue (${escapeHtml(revenue.period || "latest")})</small><strong>${Number.isFinite(revenue.value) ? `\u20b9${compact(revenue.value)} Cr` : "--"}</strong></div>
+            <div><small>Revenue (${escapeHtml(revenue.period || "latest")})</small><strong>${Number.isFinite(revenue.value) ? moneyCr(revenue.value) : "--"}</strong></div>
             <div><small>PAT margin (${escapeHtml(patMargin.period || "latest")})</small><strong>${Number.isFinite(patMargin.value) ? pct(patMargin.value) : "--"}</strong></div>
             <div><small>1Y return</small><strong>${pct(oneYearReturn(item))}</strong></div>
             <div><small>IC verdict</small><strong>${escapeHtml(extra.verdict || "Watch")}</strong></div>
@@ -1918,7 +1942,7 @@ function renderComparison() {
     return [
       `<strong>${escapeHtml(item.meta.name)}</strong><br><small>${escapeHtml(revenue.period || extra.period || "latest")} &middot; ${escapeHtml(revenue.source || "Unavailable")}</small>`,
       escapeHtml(extra.focus || item.meta.segment || ""),
-      Number.isFinite(revenue.value) ? `\u20b9${compact(revenue.value)} Cr` : "--",
+      Number.isFinite(revenue.value) ? moneyCr(revenue.value) : "--",
       valuation.evRevenue,
       valuation.evEbitda,
       valuation.pe,
@@ -2274,7 +2298,7 @@ function treemap(rows) {
   const total = rows.reduce((sum, row) => sum + Math.max(row.value || 0, 0), 0) || 1;
   return `<div class="heatmap">${rows.map((row) => {
     const pctSize = Math.max(72, (row.value / total) * 600);
-    return `<div class="heat-cell" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(`${row.label}: market cap INR ${compact(row.value)} Cr`)}" style="min-height:${pctSize}px"><strong>${escapeHtml(row.label)}</strong><span>\u20b9${compact(row.value)} Cr</span></div>`;
+    return `<div class="heat-cell" data-select="${escapeHtml(row.id || "")}" data-tip="${escapeHtml(`${row.label}: market cap ${moneyCr(row.value)}`)}" style="min-height:${pctSize}px"><strong>${escapeHtml(row.label)}</strong><span>${moneyCr(row.value)}</span></div>`;
   }).join("")}<div class="chart-caption">Tiles: company &middot; Size: market cap</div></div>`;
 }
 
@@ -2284,8 +2308,8 @@ const metrics = {
   pe: { key: "pe", label: "P/E", format: compact },
   return1y: { key: "return1y", label: "1Y return", format: pct },
   debtEquity: { key: "debtEquity", label: "debt/equity", format: ratio },
-  revenue: { key: "revenue", label: "revenue", format: (value) => Number.isFinite(value) ? `\u20b9${compact(value)} Cr` : "--" },
-  marketCap: { key: "marketCap", label: "market cap", format: (value) => Number.isFinite(value) ? `\u20b9${compact(value)} Cr` : "--" }
+  revenue: { key: "revenue", label: "revenue", format: moneyCr },
+  marketCap: { key: "marketCap", label: "market cap", format: moneyCr }
 };
 
 function getAnalystRows() {
