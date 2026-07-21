@@ -28,8 +28,8 @@ const auditedMetrics = {
   zentec: { period: "FY26", revenue: 687.69, ebitda: 332.7, pat: 193.45, ebitdaMargin: 48.37, grossMargin: 69.3, source: "NSE/BSE Q4 FY26 investor presentation filed 3 May 2026" },
   ideaforge: { period: "FY26", revenue: 226.1, pat: -17.0, ebitda: 27.1, ebitdaMargin: 12.0, grossMargin: 58.0, source: "NSE Q4 FY26 press release filed 30 Apr 2026" },
   mtar: { period: "FY26", revenue: 876.2, pat: 94.0, ebitda: 171.2, ebitdaMargin: 19.5, source: "Company Q4 FY26 results release / BSE filing dated 12 May 2026" },
-  datapatterns: { period: "FY26", revenue: 924.8, pat: 271.4, ebitda: 371.0, ebitdaMargin: 40.1, patMargin: 29.3, receivableDays: 287, inventoryDays: 108, payableDays: 30, source: "Data Patterns Q4 FY26 earnings transcript / presentation filed 15 May 2026" },
-  azad: { period: "FY26", revenue: 602.98, ebitda: 222.5, pat: 133.56, ebitdaMargin: 36.9, patMargin: 22.1, source: "Audited FY26 consolidated results filed 15 May 2026" },
+  datapatterns: { period: "FY26", revenue: 924.8, pat: 271.4, ebitda: 371.0, ebitdaMargin: 40.1, patMargin: 29.3, receivableDays: 287, inventoryDays: 294, payableDays: 82, source: "Data Patterns Q4 FY26 earnings transcript / Screener FY26 consolidated ratios" },
+  azad: { period: "FY26", revenue: 602.98, ebitda: 225.31, pat: 133.56, ebitdaMargin: 37.4, patMargin: 22.1, source: "Audited FY26 consolidated results filed 15 May 2026" },
   aequs: { period: "FY26", revenue: 1230.4, pat: -113.3, ebitda: 154.5, ebitdaMargin: 12.6, patMargin: -9.2, source: "Company FY26 press release dated 26 May 2026" },
   paras: { period: "FY26", revenue: 476.57, pat: 89.46, ebitda: 120.46, ebitdaMargin: 25.3, patMargin: 18.8, source: "Company Q4 FY26 results release / BSE filing dated 13 May 2026" },
   astra: { period: "FY26", revenue: 1162.8, ebitda: 334.0, pat: 192.97, ebitdaMargin: 28.7, patMargin: 16.6, source: "Company audited FY26 results dated 26 May 2026" }
