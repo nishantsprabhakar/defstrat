@@ -15,6 +15,12 @@
 
 * { box-sizing: border-box; }
 
+*,
+*::before,
+*::after {
+  min-width: 0;
+}
+
 html {
   overflow-x: hidden;
 }
@@ -59,6 +65,7 @@ button:hover {
 
 .shell {
   width: min(1520px, calc(100% - 32px));
+  max-width: 100%;
   margin: 0 auto;
   padding: 24px 0 36px;
 }
@@ -390,12 +397,15 @@ input:focus {
 }
 
 .tab-panel.is-active {
-  display: grid;
+  display: block;
 }
 
 .data-panel {
   margin-top: 16px;
   padding: 16px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 
 .layout {
@@ -477,7 +487,7 @@ h2 {
 
 .chart-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(260px, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 12px;
 }
@@ -817,12 +827,16 @@ svg {
 .data-table {
   width: 100%;
   border-collapse: collapse;
+  table-layout: auto;
   overflow: hidden;
 }
 
 .table-wrap {
   width: 100%;
+  max-width: 100%;
+  min-width: 0;
   overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .data-table th,
@@ -831,7 +845,9 @@ svg {
   border-bottom: 1px solid var(--line);
   text-align: left;
   vertical-align: top;
-  white-space: nowrap;
+  white-space: normal;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
 .data-table td:first-child {
@@ -852,10 +868,12 @@ svg {
 }
 
 .brief-card {
+  min-width: 0;
   padding: 16px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: rgba(255,255,255,.035);
+  overflow: hidden;
 }
 
 .brief-card p {

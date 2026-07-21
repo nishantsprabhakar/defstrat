@@ -87,7 +87,6 @@ const extraData = {
 };
 
 const years = ["FY21", "FY22", "FY23", "FY24", "FY25", "FY26"];
-const peerMultipleYears = ["FY22", "FY23", "FY24", "FY25", "FY26"];
 
 const companyUpdates = {
   zentec: [
@@ -1506,38 +1505,6 @@ function currentEnterpriseValueCr(item, extra = {}) {
   return marketCap + (Number.isFinite(debt) ? debt : 0) - (Number.isFinite(cash) ? cash : 0);
 }
 
-function seriesValueForYear(item, key, fiscalYear) {
-  const series = historicalMetricSeries(item, key);
-  const index = years.indexOf(fiscalYear);
-  if (series && index >= 0 && Number.isFinite(series[index])) return series[index];
-  const extra = extraData[item?.meta?.id] || {};
-  if ((extra.period || "") === fiscalYear && Number.isFinite(extra[key])) return extra[key];
-  return NaN;
-}
-
-function peerTrailingMultipleRows() {
-  return dashboard.flatMap((item) => {
-    const extra = extraData[item.meta.id] || {};
-    const marketCap = currentMarketCapCr(item, extra);
-    const enterpriseValue = currentEnterpriseValueCr(item, extra);
-    return peerMultipleYears.map((fiscalYear) => {
-      const revenue = seriesValueForYear(item, "revenue", fiscalYear);
-      const ebitda = seriesValueForYear(item, "ebitda", fiscalYear);
-      const pat = seriesValueForYear(item, "pat", fiscalYear);
-      return {
-        id: item.meta.id,
-        company: item.meta.name,
-        label: `${extra.label || item.meta.nse} ${fiscalYear}`,
-        fiscalYear,
-        source: item.moneycontrol?.source || extra.source || "Live fallback source",
-        evRevenue: Number.isFinite(enterpriseValue) && revenue > 0 ? enterpriseValue / revenue : NaN,
-        evEbitda: Number.isFinite(enterpriseValue) && ebitda > 0 ? enterpriseValue / ebitda : NaN,
-        pe: Number.isFinite(marketCap) && pat > 0 ? marketCap / pat : NaN
-      };
-    });
-  });
-}
-
 function latestPeerMultipleRow(item) {
   const extra = extraData[item.meta.id] || {};
   const revenue = sourceMetric(item, "revenue");
@@ -1557,10 +1524,6 @@ function latestPeerMultipleRow(item) {
     evEbitda: valuation.rawEvEbitda,
     pe: valuation.rawPe
   };
-}
-
-function latestPeerMultipleTableRows() {
-  return dashboard.map(latestPeerMultipleRow);
 }
 
 function latestPeerMultipleRows() {
@@ -1909,23 +1872,10 @@ async function refreshCallSummary(id) {
 
 function renderComparison() {
   if (!els.comparisonPanel) return;
-  const peerRows = latestPeerMultipleTableRows();
-  const peerTableRows = peerRows.map((row) => [
-    `<strong>${escapeHtml(row.company)}</strong><br><small>${escapeHtml(row.fiscalYear)} trailing &middot; ${escapeHtml(row.source)}</small>`,
-    ratio(row.evRevenue),
-    ratio(row.evEbitda),
-    ratio(row.pe)
-  ]);
   els.comparisonPanel.innerHTML = `<div class="chart-grid">
     <article class="chart-card wide">${chartTitle("Latest Trailing Peer Valuation Multiples")}${groupedBarChart(latestPeerMultipleRows(), ["EV/Revenue", "EV/EBITDA", "P/E"], "Multiple (x)")}</article>
     <article class="chart-card">${chartTitle("Profitability vs Leverage")}${scatterChart(dashboard.map((item) => ({ id: item.meta.id, label: extraData[item.meta.id]?.label || item.meta.nse, x: liveMetric(item, "debtEquity"), y: sourceMetric(item, "patMargin").value })), "D/E", "PAT margin")}</article>
-  </div>
-  <article class="brief-card">
-    <small>Latest trailing peer comps</small>
-    <strong>EV/Revenue, EV/EBITDA and P/E by latest available FY</strong>
-    <p>Multiples use current enterprise value or market cap against the latest available consolidated revenue, EBITDA and PAT for each company. Company FY26 filings are used first; gaps fall back to Moneycontrol or Yahoo Finance.</p>
-    ${table(["Company / latest FY basis", "EV/Revenue", "EV/EBITDA", "P/E"], peerTableRows)}
-  </article>` + table([
+  </div>` + table([
     "Company / period", "Focus", "Revenue", "EV/Revenue", "EV/EBITDA", "P/E", "PAT margin", "ROE", "D/E", "Commentary"
   ], dashboard.map((item) => {
     const extra = extraData[item.meta.id] || {};
