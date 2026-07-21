@@ -1,6 +1,7 @@
 const defaults = ["zentec", "ideaforge", "mtar", "datapatterns", "azad", "aequs", "paras", "astra"];
 const storeKey = "live-finance-tool-watchlist-v1";
 const selectedStoreKey = `${storeKey}-selected`;
+const removedDefaultIds = new Set(["beml", "bemlbo", "bemlns", "beml.bo", "beml.ns"]);
 
 const els = {
   refreshBtn: document.querySelector("#refreshBtn"),
@@ -49,6 +50,9 @@ els.chartTooltip = document.querySelector("#chartTooltip");
 let catalog = [];
 let watchIds = JSON.parse(localStorage.getItem(storeKey) || "null") || defaults;
 let custom = JSON.parse(localStorage.getItem(`${storeKey}-custom`) || "[]");
+const isRemovedDefault = (value) => removedDefaultIds.has(String(value || "").toLowerCase().replace(/[^a-z0-9.]/g, ""));
+watchIds = watchIds.filter((id) => !isRemovedDefault(id));
+custom = custom.filter((item) => !isRemovedDefault(item.id) && !isRemovedDefault(item.symbol) && !isRemovedDefault(item.nse));
 const migratedToDefstratEight = localStorage.getItem(`${storeKey}-defstrat-eight`) === "true";
 if (!migratedToDefstratEight) {
   watchIds = Array.from(new Set([...watchIds, ...defaults]));
@@ -57,6 +61,8 @@ if (!migratedToDefstratEight) {
 if (custom.length) {
   watchIds = Array.from(new Set([...watchIds, ...custom.map((item) => item.id).filter(Boolean)]));
 }
+localStorage.setItem(storeKey, JSON.stringify(watchIds));
+localStorage.setItem(`${storeKey}-custom`, JSON.stringify(custom));
 let dashboard = [];
 let callSchedule = [];
 let callScheduleRefreshedAt = "";
