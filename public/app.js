@@ -58,6 +58,8 @@ if (custom.length) {
   watchIds = Array.from(new Set([...watchIds, ...custom.map((item) => item.id).filter(Boolean)]));
 }
 let dashboard = [];
+let callSchedule = [];
+let callScheduleRefreshedAt = "";
 let selectedId = localStorage.getItem(selectedStoreKey) || watchIds[0];
 let searchTimer;
 let activeTab = "charts";
@@ -808,6 +810,7 @@ async function refresh() {
       return customPlaceholder(custom.find((item) => item.id === customIds[index]));
     });
     dashboard = [...data, ...customData].filter(Boolean);
+    await refreshCallSchedule();
     if (!dashboard.some((item) => item.meta.id === selectedId)) {
       selectedId = dashboard[0]?.meta.id;
       save();
@@ -1794,29 +1797,64 @@ function renderCallSummary() {
   }
 }
 
-function hasSpecificCallDate(value) {
-  const text = String(value || "").trim();
-  return /^\d{1,2}\s+[A-Za-z]{3,9}\s+20\d{2}$/.test(text) || /^\d{1,2}[/-]\d{1,2}[/-]20\d{2}$/.test(text);
+function customScheduleParam() {
+  const rows = custom
+    .filter((item) => watchIds.includes(item.id))
+    .map((item) => [item.id, item.symbol, item.bse || "", item.name, item.nse || item.symbol.replace(".NS", "")]
+      .map((part) => encodeURIComponent(part || ""))
+      .join("~"));
+  return rows.length ? `&custom=${encodeURIComponent(rows.join("|"))}` : "";
+}
+
+async function refreshCallSchedule() {
+  try {
+    const ids = dashboard.map((item) => item.meta.id).join(",");
+    if (!ids) {
+      callSchedule = [];
+      return;
+    }
+    const result = await getJson(`/api/call-schedule?ids=${encodeURIComponent(ids)}${customScheduleParam()}`);
+    callSchedule = Array.isArray(result.schedules) ? result.schedules : [];
+    callScheduleRefreshedAt = result.refreshedAt || new Date().toISOString();
+  } catch (error) {
+    callSchedule = dashboard.map((item) => ({
+      companyId: item.meta.id,
+      company: item.meta.name,
+      symbol: item.meta.nse || item.meta.symbol,
+      callDate: "-",
+      period: "-",
+      eventType: "-",
+      status: "Schedule refresh failed",
+      source: "-",
+      title: error.message
+    }));
+    callScheduleRefreshedAt = new Date().toISOString();
+  }
 }
 
 function renderCallSchedule() {
   if (!els.callSchedulePanel) return;
+  const scheduleById = new Map(callSchedule.map((row) => [row.companyId, row]));
   const rows = dashboard.map((item) => {
-    const summary = callSummaries[item.meta.id];
-    const date = hasSpecificCallDate(summary?.callDate) ? summary.callDate : "-";
+    const schedule = scheduleById.get(item.meta.id) || {};
+    const date = schedule.callDate && schedule.callDate !== "-" ? schedule.callDate : "-";
+    const source = schedule.source && schedule.source !== "-" && schedule.link
+      ? `<a href="${escapeHtml(schedule.link)}" target="_blank" rel="noreferrer">${escapeHtml(schedule.source)}</a>`
+      : escapeHtml(schedule.source || "-");
     return [
       `<strong>${escapeHtml(item.meta.name)}</strong><br><small>${escapeHtml(item.meta.nse || item.meta.symbol || "")}</small>`,
-      date,
-      summary?.period ? escapeHtml(summary.period) : "-",
-      date === "-" ? "Not announced" : "Announced",
-      summary?.source ? escapeHtml(summary.source) : "-"
+      escapeHtml(date),
+      escapeHtml(schedule.period || "-"),
+      escapeHtml(schedule.eventType || "-"),
+      escapeHtml(schedule.status || (date === "-" ? "Not announced" : "Announced")),
+      source
     ];
   });
   els.callSchedulePanel.innerHTML = `<article class="brief-card">
-    <small>Schedule tracker</small>
-    <strong>Earnings call dates for all tracked companies</strong>
-    <p>Only specific announced calendar dates are shown. Where a company has not announced a date, or only a broad period is available, the schedule shows "-".</p>
-  </article>${table(["Company", "Call date", "Period", "Status", "Source"], rows)}`;
+    <small>Upcoming schedule tracker</small>
+    <strong>Upcoming results and earnings call dates</strong>
+    <p>Refreshed automatically on every dashboard refresh. Only future announced calendar dates from BSE/Yahoo/news signals are shown; where a date is not announced, the table shows "-".${callScheduleRefreshedAt ? ` Last checked ${escapeHtml(formatDate(callScheduleRefreshedAt))}.` : ""}</p>
+  </article>${table(["Company", "Date", "Period", "Event", "Status", "Source"], rows)}`;
 }
 
 async function refreshCallSummary(id) {

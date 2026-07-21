@@ -6,9 +6,11 @@ const PORT = Number(process.env.PORT || 4173);
 const ROOT = join(process.cwd(), "public");
 const TTL = 60_000;
 const TRANSCRIPT_TTL = 15 * 60_000;
+const SCHEDULE_TTL = 5 * 60_000;
 const AI_MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
 const cache = new Map();
 const transcriptCache = new Map();
+const scheduleCache = new Map();
 
 const companies = [
   { id: "zentec", name: "Zen Technologies", symbol: "ZENTEC.NS", nse: "ZENTEC", bse: "533339", isin: "INE251B01027", segment: "Simulation, anti-drone and training systems", moneycontrol: "https://www.moneycontrol.com/financials/zentechnologies/consolidated-profit-lossVI/zt01" },
@@ -782,6 +784,136 @@ function parseDate(value) {
   return Date.UTC(Number(match[3]), Number(match[2]) - 1, Number(match[1]));
 }
 
+const monthNames = {
+  jan: 0, january: 0,
+  feb: 1, february: 1,
+  mar: 2, march: 2,
+  apr: 3, april: 3,
+  may: 4,
+  jun: 5, june: 5,
+  jul: 6, july: 6,
+  aug: 7, august: 7,
+  sep: 8, sept: 8, september: 8,
+  oct: 9, october: 9,
+  nov: 10, november: 10,
+  dec: 11, december: 11
+};
+
+function fiscalPeriodForDate(date) {
+  const month = date.getMonth();
+  const year = date.getFullYear();
+  const fy = month >= 3 ? year + 1 : year;
+  if (month >= 3 && month <= 5) return `Q1 FY${String(fy).slice(-2)}`;
+  if (month >= 6 && month <= 8) return `Q2 FY${String(fy).slice(-2)}`;
+  if (month >= 9 && month <= 11) return `Q3 FY${String(fy).slice(-2)}`;
+  return `Q4 FY${String(fy).slice(-2)}`;
+}
+
+function formatScheduleDate(date) {
+  return date.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }).replace(/ /g, " ");
+}
+
+function scheduleKeywords(text = "") {
+  const clean = String(text).toLowerCase();
+  const isResultRelated = [
+    "financial result",
+    "financial results",
+    "unaudited result",
+    "audited result",
+    "quarterly result",
+    "results",
+    "board meeting"
+  ].some((term) => clean.includes(term));
+  const isCallRelated = [
+    "earnings call",
+    "conference call",
+    "investor call",
+    "analyst call",
+    "analysts/investors",
+    "investor meet",
+    "investors meet"
+  ].some((term) => clean.includes(term));
+  return { isResultRelated, isCallRelated, matches: isResultRelated || isCallRelated };
+}
+
+function extractFutureDates(text = "", base = new Date()) {
+  const dates = [];
+  const add = (date) => {
+    if (!(date instanceof Date) || Number.isNaN(date.getTime())) return;
+    const normalized = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const today = new Date(base.getFullYear(), base.getMonth(), base.getDate());
+    if (normalized >= today && !dates.some((item) => item.getTime() === normalized.getTime())) dates.push(normalized);
+  };
+  const source = String(text || "").replace(/\s+/g, " ");
+  for (const match of source.matchAll(/\b(\d{1,2})[\/.-](\d{1,2})[\/.-](20\d{2})\b/g)) {
+    add(new Date(Number(match[3]), Number(match[2]) - 1, Number(match[1])));
+  }
+  for (const match of source.matchAll(/\b(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]{3,9})[,\s]+(20\d{2})\b/g)) {
+    const month = monthNames[match[2].toLowerCase()];
+    if (month !== undefined) add(new Date(Number(match[3]), month, Number(match[1])));
+  }
+  for (const match of source.matchAll(/\b([A-Za-z]{3,9})\s+(\d{1,2})(?:st|nd|rd|th)?[,]?\s+(20\d{2})\b/g)) {
+    const month = monthNames[match[1].toLowerCase()];
+    if (month !== undefined) add(new Date(Number(match[3]), month, Number(match[2])));
+  }
+  return dates.sort((a, b) => a - b);
+}
+
+function scheduleCandidateFromRow(meta, row, kind = "filing") {
+  const text = `${row.title || ""} ${row.category || ""} ${row.notes || ""} ${row.summary || ""}`;
+  const flags = scheduleKeywords(text);
+  if (!flags.matches) return null;
+  const dates = extractFutureDates(text);
+  if (!dates.length) return null;
+  const date = dates[0];
+  return {
+    companyId: meta.id,
+    company: meta.name,
+    symbol: meta.nse || meta.symbol,
+    callDate: formatScheduleDate(date),
+    dateIso: date.toISOString(),
+    period: fiscalPeriodForDate(date),
+    eventType: flags.isCallRelated ? "Earnings call / investor meet" : "Results / board meeting",
+    status: "Announced",
+    source: row.category || row.publisher || row.source || (kind === "filing" ? "BSE filing" : "Live news"),
+    title: row.title || "Schedule announcement",
+    link: row.attachment || row.link || "https://www.bseindia.com/corporates/ann.html",
+    refreshedAt: new Date().toISOString()
+  };
+}
+
+async function upcomingSchedule(meta) {
+  const key = `schedule:${meta.id}:${meta.symbol}:${meta.bse || ""}`;
+  const cached = scheduleCache.get(key);
+  if (cached && Date.now() - cached.time < SCHEDULE_TTL) return cached.data;
+  const sources = await Promise.allSettled([
+    meta.bse ? bseAnnouncements(meta.bse) : Promise.resolve([]),
+    companyNews(meta)
+  ]);
+  const bse = sources[0].status === "fulfilled" ? sources[0].value : [];
+  const news = sources[1].status === "fulfilled" ? sources[1].value : [];
+  const candidates = [
+    ...bse.map((row) => scheduleCandidateFromRow(meta, row, "filing")),
+    ...news.map((row) => scheduleCandidateFromRow(meta, row, "news"))
+  ].filter(Boolean).sort((a, b) => parseDate(a.dateIso) - parseDate(b.dateIso));
+  const data = candidates[0] || {
+    companyId: meta.id,
+    company: meta.name,
+    symbol: meta.nse || meta.symbol,
+    callDate: "-",
+    dateIso: null,
+    period: "-",
+    eventType: "-",
+    status: "Not announced",
+    source: "-",
+    title: "No upcoming results/call date announced in latest BSE/Yahoo/news scan",
+    link: meta.bse ? "https://www.bseindia.com/corporates/ann.html" : `https://finance.yahoo.com/quote/${meta.symbol}`,
+    refreshedAt: new Date().toISOString()
+  };
+  scheduleCache.set(key, { time: Date.now(), data });
+  return data;
+}
+
 async function transcriptCandidates(meta) {
   const key = `transcripts:${meta.id}`;
   const cached = transcriptCache.get(key);
@@ -1290,6 +1422,21 @@ async function routeApi(req, res, url) {
     const selected = ids.map((id) => companies.find((c) => c.id === id || c.nse === id.toUpperCase())).filter(Boolean);
     const summaries = await Promise.all(selected.map(transcriptSummary));
     return send(res, 200, { summaries, refreshedAt: new Date().toISOString() });
+  }
+  if (url.pathname === "/api/call-schedule") {
+    const ids = (url.searchParams.get("ids") || companies.map((c) => c.id).join(",")).split(",").filter(Boolean);
+    const customRows = (url.searchParams.get("custom") || "")
+      .split("|")
+      .map((entry) => {
+        const [id, symbol, bse, name, nse] = entry.split("~").map((part) => decodeURIComponent(part || ""));
+        return symbol ? { id, symbol, bse, name: name || symbol, nse: nse || symbol.replace(".NS", ""), segment: "Custom watchlist company" } : null;
+      })
+      .filter(Boolean);
+    const selected = ids
+      .map((id) => companies.find((c) => c.id === id || c.nse === id.toUpperCase()) || customRows.find((c) => c.id === id))
+      .filter(Boolean);
+    const schedules = await Promise.all(selected.map(upcomingSchedule));
+    return send(res, 200, { schedules, refreshedAt: new Date().toISOString() });
   }
   if (url.pathname === "/api/ai" && req.method === "POST") {
     return send(res, 200, await aiAnswer(await readJsonBody(req)));
