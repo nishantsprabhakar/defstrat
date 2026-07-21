@@ -1180,13 +1180,13 @@ function renderSectorNews() {
   els.sectorNewsPanel.innerHTML = `<div class="info-grid">
     <article class="brief-card">
       <small>Auto refresh</small>
-      <strong>Latest sector news across tracked companies</strong>
-      <p>News is rebuilt from the live dashboard feed every refresh and falls back to a dedicated sector-news endpoint. It updates automatically when sources publish new articles, at least daily.</p>
+      <strong>Latest business and sector news across tracked companies</strong>
+      <p>News is rebuilt from the live dashboard feed every refresh and filters for company business, industry, orders, products, results, capacity and defence/aerospace updates.</p>
     </article>
     <article class="brief-card">
       <small>Last checked</small>
       <strong>${new Date(checkedAt).toLocaleString()}</strong>
-      <p>Sources include Yahoo Finance news and Google News RSS surfaced through the backend company feeds.</p>
+      <p>Sources include Yahoo Finance news and Google News RSS surfaced through the backend company feeds. Routine share-price movement, target-price and technical trading stories are excluded.</p>
     </article>
   </div>
   <div class="news-grid">${rows.length ? rows.map(newsCard).join("") : `<div class="empty">${sectorNewsLoading ? "Refreshing sector news..." : "No sector news has been returned yet. The dashboard will check again on the next refresh."}</div>`}</div>`;
@@ -1218,7 +1218,7 @@ function collectSectorNewsRows() {
     }))
   ].filter((row) => {
     const key = `${row.title}`.toLowerCase().replace(/\W+/g, " ").trim();
-    if (!key || seen.has(key)) return false;
+    if (!key || seen.has(key) || isPriceMovementNews(row) || !isBusinessNews(row)) return false;
     seen.add(key);
     return true;
   }).sort((a, b) => {
@@ -1226,6 +1226,39 @@ function collectSectorNewsRows() {
     const bTime = Date.parse(b.dateRaw || "");
     return (Number.isFinite(bTime) ? bTime : 0) - (Number.isFinite(aTime) ? aTime : 0);
   }).slice(0, 18);
+}
+
+function isPriceMovementNews(row) {
+  const text = `${row.title || ""} ${row.detail || ""} ${row.summary || ""}`.toLowerCase();
+  return [
+    /\bshare(?:s)?\s+(?:price|rise|rises|rose|fall|falls|fell|gain|gains|gained|jump|jumps|jumped|slip|slips|slipped|surge|surges|surged|tank|tanks|tanked|rally|rallies|rallied|decline|declines|declined)\b/,
+    /\bstock\s+(?:price|rise|rises|rose|fall|falls|fell|gain|gains|gained|jump|jumps|jumped|slip|slips|slipped|surge|surges|surged|tank|tanks|tanked|rally|rallies|rallied|decline|declines|declined)\b/,
+    /\b(?:buy|sell|hold|add|reduce|accumulate)\s+(?:rating|call|recommendation)\b/,
+    /\btarget\s+price\b/,
+    /\bprice\s+target\b/,
+    /\btechnical\s+(?:view|analysis|chart)\b/,
+    /\b(?:nifty|sensex|market)\s+(?:today|live|update)\b/,
+    /\b(?:52-week|52 week)\s+(?:high|low)\b/,
+    /\btrading\s+(?:higher|lower|flat)\b/,
+    /\b(?:falls?|fell|down|up|rises?|rose|gain|gains|gained|jumps?|jumped|surges?|surged|slides?|slid|slips?|slipped|rall(?:y|ies|ied))\s+(?:over\s+|by\s+|nearly\s+|almost\s+|up\s+to\s+)?\d+(?:\.\d+)?\s*(?:%|pc|percent)(?=\s|$)/,
+    /\blower\s+(?:circuit|limit)\b/,
+    /\bshare\s+price\s+today\b/,
+    /\b(?:trading\s+levels|expert\s+strategy|stock\s+reacted|stocks?\s+rally|multibagger\s+stock)\b/,
+    /\bstocks?\b.*\b(?:reacted|rally|rallies|trading|strategy|up|down)\b/,
+    /\benterprise\s+value\s+to\s+(?:revenue|ebitda)\b/,
+    /\b(?:ev\/revenue|ev\/ebitda|valuation\s+multiple)\b/
+  ].some((pattern) => pattern.test(text));
+}
+
+function isBusinessNews(row) {
+  const text = `${row.title || ""} ${row.detail || ""} ${row.summary || ""}`.toLowerCase();
+  return [
+    "order", "contract", "tender", "results", "revenue", "profit", "ebitda", "pat", "margin",
+    "capacity", "plant", "facility", "manufacturing", "product", "launch", "drone", "radar",
+    "missile", "defence", "defense", "aerospace", "space", "export", "acquisition", "partnership",
+    "joint venture", "capex", "approval", "delivery", "programme", "program", "earnings", "investor",
+    "management", "guidance", "backlog", "pipeline", "modernisation", "modernization", "dac", "qip"
+  ].some((term) => text.includes(term));
 }
 
 function newsCard(row) {

@@ -582,7 +582,7 @@ async function yahooTimeseriesFinancials(symbol) {
 }
 
 async function yahooNews(meta) {
-  const query = `"${meta.name}" ${meta.nse || meta.symbol} stock`;
+  const query = `"${meta.name}" ${meta.nse || meta.symbol} (order OR contract OR results OR revenue OR acquisition OR product OR defence OR aerospace OR manufacturing)`;
   const json = await fetchJson(`https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=0&newsCount=8`, {
     headers: { origin: "https://finance.yahoo.com", referer: "https://finance.yahoo.com/" }
   });
@@ -598,7 +598,7 @@ async function yahooNews(meta) {
 }
 
 async function googleNews(meta) {
-  const query = `"${meta.name}" OR "${meta.nse}" stock`;
+  const query = `("${meta.name}" OR "${meta.nse}") (order OR contract OR results OR revenue OR acquisition OR product OR defence OR aerospace OR manufacturing) -share -shares -stock -price -target`;
   const rss = await fetchText(`https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=en-IN&gl=IN&ceid=IN:en`);
   const items = [...rss.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 8);
   return items.map((match) => {
@@ -673,15 +673,58 @@ async function sectorNews(ids = []) {
 function isRelevantNews(meta, row) {
   const generic = new Set(["limited", "ltd", "technologies", "technology", "engineering", "defence", "defense", "india", "micro", "systems", "products"]);
   const haystack = `${row.title || ""} ${row.summary || ""} ${row.publisher || ""}`.toLowerCase();
+  if (isPriceMovementNews(row)) return false;
+  const hasBusinessSignal = isBusinessNewsText(haystack);
   const fullName = String(meta.name || "").toLowerCase();
   const symbol = String(meta.symbol || "").replace(/\..+$/, "").toLowerCase();
   const ticker = String(meta.nse || "").toLowerCase();
   if (fullName && haystack.includes(fullName)) return true;
-  if (ticker && haystack.includes(ticker)) return true;
-  if (symbol && haystack.includes(symbol)) return true;
+  if (ticker && haystack.includes(ticker)) return hasBusinessSignal && (ticker.length >= 6 || hasCompanyIdentityContext(haystack));
+  if (symbol && haystack.includes(symbol)) return hasBusinessSignal && (symbol.length >= 6 || hasCompanyIdentityContext(haystack));
   const nameTokens = fullName.split(/[^a-z0-9]+/).filter((term) => term.length > 2 && !generic.has(term));
-  if (nameTokens.length === 1) return haystack.includes(nameTokens[0]);
+  if (nameTokens.length === 1) return haystack.includes(nameTokens[0]) && hasBusinessSignal;
   return nameTokens.length > 1 && nameTokens.filter((term) => haystack.includes(term)).length >= 2;
+}
+
+function hasCompanyIdentityContext(text) {
+  return [
+    "defence", "defense", "aerospace", "space", "engineering", "technologies", "technology",
+    "manufacturing", "systems", "microwave", "electronics", "drone", "radar", "weapons",
+    "missile", "limited", "ltd", "nse:", "bse:"
+  ].some((term) => text.includes(term));
+}
+
+function isBusinessNewsText(text) {
+  return [
+    "order", "contract", "tender", "results", "revenue", "profit", "ebitda", "pat", "margin",
+    "capacity", "plant", "facility", "manufacturing", "product", "launch", "drone", "radar",
+    "missile", "defence", "defense", "aerospace", "space", "export", "acquisition", "partnership",
+    "joint venture", "capex", "approval", "delivery", "programme", "program", "earnings", "investor",
+    "management", "guidance", "backlog", "pipeline", "modernisation", "modernization", "dac", "qip"
+  ].some((term) => text.includes(term));
+}
+
+function isPriceMovementNews(row) {
+  const text = `${row.title || ""} ${row.summary || ""}`.toLowerCase();
+  const priceOnlyPatterns = [
+    /\bshare(?:s)?\s+(?:price|rise|rises|rose|fall|falls|fell|gain|gains|gained|jump|jumps|jumped|slip|slips|slipped|surge|surges|surged|tank|tanks|tanked|rally|rallies|rallied|decline|declines|declined)\b/,
+    /\bstock\s+(?:price|rise|rises|rose|fall|falls|fell|gain|gains|gained|jump|jumps|jumped|slip|slips|slipped|surge|surges|surged|tank|tanks|tanked|rally|rallies|rallied|decline|declines|declined)\b/,
+    /\b(?:buy|sell|hold|add|reduce|accumulate)\s+(?:rating|call|recommendation)\b/,
+    /\btarget\s+price\b/,
+    /\bprice\s+target\b/,
+    /\btechnical\s+(?:view|analysis|chart)\b/,
+    /\b(?:nifty|sensex|market)\s+(?:today|live|update)\b/,
+    /\b(?:52-week|52 week)\s+(?:high|low)\b/,
+    /\btrading\s+(?:higher|lower|flat)\b/,
+    /\b(?:falls?|fell|down|up|rises?|rose|gain|gains|gained|jumps?|jumped|surges?|surged|slides?|slid|slips?|slipped|rall(?:y|ies|ied))\s+(?:over\s+|by\s+|nearly\s+|almost\s+|up\s+to\s+)?\d+(?:\.\d+)?\s*(?:%|pc|percent)(?=\s|$)/,
+    /\blower\s+(?:circuit|limit)\b/,
+    /\bshare\s+price\s+today\b/,
+    /\b(?:trading\s+levels|expert\s+strategy|stock\s+reacted|stocks?\s+rally|multibagger\s+stock)\b/,
+    /\bstocks?\b.*\b(?:reacted|rally|rallies|trading|strategy|up|down)\b/,
+    /\benterprise\s+value\s+to\s+(?:revenue|ebitda)\b/,
+    /\b(?:ev\/revenue|ev\/ebitda|valuation\s+multiple)\b/
+  ];
+  return priceOnlyPatterns.some((pattern) => pattern.test(text));
 }
 
 function yahooFromChart(symbol, chartResult) {
