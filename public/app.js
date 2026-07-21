@@ -1531,15 +1531,38 @@ function peerTrailingMultipleRows() {
   });
 }
 
+function latestPeerMultipleRow(item) {
+  const extra = extraData[item.meta.id] || {};
+  const revenue = sourceMetric(item, "revenue");
+  const ebitda = sourceMetric(item, "ebitda");
+  const pat = sourceMetric(item, "pat");
+  const valuation = valuationMetrics(extra, item);
+  const period = revenue.period || ebitda.period || pat.period || extra.period || "latest";
+  const sources = [revenue.source, ebitda.source, pat.source]
+    .filter((source) => source && source !== "Unavailable");
+  return {
+    id: item.meta.id,
+    company: item.meta.name,
+    label: extra.label || item.meta.nse,
+    fiscalYear: period,
+    source: sources[0] || extra.source || "Live Yahoo / Moneycontrol fallback",
+    evRevenue: valuation.rawEvRevenue,
+    evEbitda: valuation.rawEvEbitda,
+    pe: valuation.rawPe
+  };
+}
+
+function latestPeerMultipleTableRows() {
+  return dashboard.map(latestPeerMultipleRow);
+}
+
 function latestPeerMultipleRows() {
-  const latestYear = peerMultipleYears.at(-1);
   return dashboard.map((item) => {
-    const extra = extraData[item.meta.id] || {};
-    const row = peerTrailingMultipleRows().find((entry) => entry.id === item.meta.id && entry.fiscalYear === latestYear);
+    const row = latestPeerMultipleRow(item);
     return {
       id: item.meta.id,
-      label: extra.label || item.meta.nse,
-      values: row ? [row.evRevenue, row.evEbitda, row.pe] : [NaN, NaN, NaN]
+      label: row.label,
+      values: [row.evRevenue, row.evEbitda, row.pe]
     };
   });
 }
@@ -1879,7 +1902,7 @@ async function refreshCallSummary(id) {
 
 function renderComparison() {
   if (!els.comparisonPanel) return;
-  const peerRows = peerTrailingMultipleRows();
+  const peerRows = latestPeerMultipleTableRows();
   const peerTableRows = peerRows.map((row) => [
     `<strong>${escapeHtml(row.company)}</strong><br><small>${escapeHtml(row.fiscalYear)} trailing &middot; ${escapeHtml(row.source)}</small>`,
     ratio(row.evRevenue),
@@ -1887,14 +1910,14 @@ function renderComparison() {
     ratio(row.pe)
   ]);
   els.comparisonPanel.innerHTML = `<div class="chart-grid">
-    <article class="chart-card wide">${chartTitle("FY26 Trailing Peer Valuation Multiples")}${groupedBarChart(latestPeerMultipleRows(), ["EV/Revenue", "EV/EBITDA", "P/E"], "Multiple (x)")}</article>
+    <article class="chart-card wide">${chartTitle("Latest Trailing Peer Valuation Multiples")}${groupedBarChart(latestPeerMultipleRows(), ["EV/Revenue", "EV/EBITDA", "P/E"], "Multiple (x)")}</article>
     <article class="chart-card">${chartTitle("Profitability vs Leverage")}${scatterChart(dashboard.map((item) => ({ id: item.meta.id, label: extraData[item.meta.id]?.label || item.meta.nse, x: liveMetric(item, "debtEquity"), y: sourceMetric(item, "patMargin").value })), "D/E", "PAT margin")}</article>
   </div>
   <article class="brief-card">
-    <small>FY22-FY26 trailing peer comps</small>
-    <strong>EV/Revenue, EV/EBITDA and P/E by fiscal year</strong>
-    <p>Multiples use current enterprise value or market cap against each fiscal year's reported revenue, EBITDA and PAT. Sources refresh with the live dashboard; Yahoo annual fundamentals are used where company filing or Moneycontrol rows are not mapped.</p>
-    ${table(["Company / FY basis", "EV/Revenue", "EV/EBITDA", "P/E"], peerTableRows)}
+    <small>Latest trailing peer comps</small>
+    <strong>EV/Revenue, EV/EBITDA and P/E by latest available FY</strong>
+    <p>Multiples use current enterprise value or market cap against the latest available consolidated revenue, EBITDA and PAT for each company. Company FY26 filings are used first; gaps fall back to Moneycontrol or Yahoo Finance.</p>
+    ${table(["Company / latest FY basis", "EV/Revenue", "EV/EBITDA", "P/E"], peerTableRows)}
   </article>` + table([
     "Company / period", "Focus", "Revenue", "EV/Revenue", "EV/EBITDA", "P/E", "PAT margin", "ROE", "D/E", "Commentary"
   ], dashboard.map((item) => {
