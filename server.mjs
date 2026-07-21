@@ -8,6 +8,7 @@ const TTL = 60_000;
 const TRANSCRIPT_TTL = 15 * 60_000;
 const SCHEDULE_TTL = 5 * 60_000;
 const AI_MODEL = process.env.OPENAI_MODEL || "gpt-4.1-mini";
+const POLLINATIONS_MODEL = process.env.POLLINATIONS_MODEL || "openai";
 const cache = new Map();
 const transcriptCache = new Map();
 const scheduleCache = new Map();
@@ -1275,9 +1276,68 @@ function extractResponseText(json) {
   return parts.join("\n").trim();
 }
 
+function financeAiMessages(prompt, context) {
+  return [
+    {
+      role: "system",
+      content: [
+        "You are Finance AI, an expert listed-company financial reviewer.",
+        "Use only the supplied Yahoo Finance, Moneycontrol consolidated P&L, BSE, news and audited metric context.",
+        "Use company filing / investor release figures first. For metrics not available there, use Yahoo Finance or Moneycontrol consolidated data only.",
+        "Mention fiscal years for every financial figure and state the source. Do not use standalone figures. Do not invent missing values.",
+        "Answer in 3-6 concise analyst bullets with source/date cues where available.",
+        "This is informational analysis, not investment advice."
+      ].join(" ")
+    },
+    {
+      role: "user",
+      content: `User question: ${prompt}\n\nContext JSON:\n${JSON.stringify(context, null, 2)}`
+    }
+  ];
+}
+
+function extractChatCompletionText(json) {
+  return String(json?.choices?.[0]?.message?.content || json?.choices?.[0]?.text || "").trim();
+}
+
+function compactPollinationsPrompt(prompt, context) {
+  const rows = (context.companies || []).slice(0, 5).map((row) => {
+    const f = row.financials || {};
+    const news = row.latestNews?.[0];
+    const bse = row.latestBse?.[0];
+    return {
+      name: row.name,
+      symbol: row.symbol,
+      price: row.quote?.price,
+      dayMovePct: row.quote?.dayMovePct,
+      revenue: f.revenue,
+      pat: f.pat,
+      ebitdaMargin: f.ebitdaMargin,
+      latestNews: news ? { title: news.title, date: news.date } : null,
+      latestBse: bse ? { title: bse.title, date: bse.date } : null
+    };
+  });
+  return [
+    "You are Finance AI. Answer in 3-6 concise analyst bullets.",
+    "Use only the supplied context. Mention fiscal years and sources for financial figures. Do not invent missing data.",
+    `Question: ${prompt}`,
+    `Context: ${JSON.stringify({ generatedAt: context.generatedAt, companies: rows })}`
+  ].join("\n");
+}
+
+async function fetchWithTimeout(url, options = {}, timeoutMs = 10_000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function callOpenAi(prompt, context) {
   if (!process.env.OPENAI_API_KEY) return null;
-  const response = await fetch("https://api.openai.com/v1/responses", {
+  const response = await fetchWithTimeout("https://api.openai.com/v1/responses", {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -1285,20 +1345,64 @@ async function callOpenAi(prompt, context) {
     },
     body: JSON.stringify({
       model: AI_MODEL,
-      instructions: [
-        "You are Finance AI, an expert listed-company financial reviewer.",
-        "Use only the supplied Yahoo Finance, Moneycontrol consolidated P&L, BSE, news and audited metric context.",
-        "Use company filing / investor release figures first. For metrics not available there, use Yahoo Finance or Moneycontrol consolidated data only.",
-        "Mention fiscal years for every financial figure and state the source. Do not use standalone figures. Do not invent missing values.",
-        "Answer in 3-6 concise analyst bullets with source/date cues where available.",
-        "This is informational analysis, not investment advice."
-      ].join(" "),
-      input: `User question: ${prompt}\n\nContext JSON:\n${JSON.stringify(context, null, 2)}`,
+      instructions: financeAiMessages(prompt, context)[0].content,
+      input: financeAiMessages(prompt, context)[1].content,
       max_output_tokens: 900
     })
   });
   if (!response.ok) throw new Error(`OpenAI ${response.status}: ${await response.text()}`);
   return extractResponseText(await response.json());
+}
+
+async function callPollinations(prompt, context) {
+  const messages = financeAiMessages(prompt, context);
+  const body = JSON.stringify({
+    model: POLLINATIONS_MODEL,
+    messages,
+    temperature: 0.2,
+    max_tokens: 900
+  });
+  const endpoints = [];
+  if (process.env.POLLINATIONS_API_KEY) {
+    endpoints.push({
+      kind: "chat",
+      url: "https://gen.pollinations.ai/v1/chat/completions",
+      headers: { authorization: `Bearer ${process.env.POLLINATIONS_API_KEY}` }
+    });
+  }
+  endpoints.push({ kind: "chat", url: "https://text.pollinations.ai/openai", headers: {} });
+  endpoints.push({
+    kind: "simple",
+    url: `https://gen.pollinations.ai/text/${encodeURIComponent(compactPollinationsPrompt(prompt, context))}?model=${encodeURIComponent(POLLINATIONS_MODEL)}`,
+    headers: {}
+  });
+
+  let lastError = null;
+  for (const endpoint of endpoints) {
+    try {
+      const response = await fetchWithTimeout(endpoint.url, {
+        method: endpoint.kind === "simple" ? "GET" : "POST",
+        headers: {
+          "accept": "application/json,text/plain,*/*",
+          "user-agent": "Mozilla/5.0 FinanceAI/1.0",
+          ...(endpoint.kind === "simple" ? {} : { "content-type": "application/json" }),
+          ...endpoint.headers
+        },
+        ...(endpoint.kind === "simple" ? {} : { body })
+      }, endpoint.kind === "simple" ? 8_000 : 12_000);
+      if (!response.ok) throw new Error(`Pollinations ${response.status}: ${await response.text()}`);
+      const contentType = response.headers.get("content-type") || "";
+      const text = contentType.includes("application/json")
+        ? extractChatCompletionText(await response.json())
+        : (await response.text()).trim();
+      if (text) return text;
+      lastError = new Error("Pollinations returned an empty response");
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  if (lastError) throw lastError;
+  return null;
 }
 
 function deterministicAiAnswer(prompt, context) {
@@ -1348,13 +1452,25 @@ async function aiAnswer(body = {}) {
   };
   let text = null;
   let mode = "deterministic";
+  const providerErrors = [];
   try {
     text = await callOpenAi(prompt, context);
     if (text) mode = "openai";
   } catch (error) {
-    text = `${deterministicAiAnswer(prompt, context)}\n\nAI backend note: OpenAI response failed, so this answer used the deterministic live-data fallback. ${error.message}`;
+    providerErrors.push(`OpenAI: ${error.message}`);
   }
-  if (!text) text = deterministicAiAnswer(prompt, context);
+  if (!text) {
+    try {
+      text = await callPollinations(prompt, context);
+      if (text) mode = "pollinations";
+    } catch (error) {
+      providerErrors.push(`Pollinations: ${error.message}`);
+    }
+  }
+  if (!text) {
+    const note = providerErrors.length ? `\n\nAI backend note: ${providerErrors.join(" | ")}. Used deterministic live-data fallback.` : "";
+    text = `${deterministicAiAnswer(prompt, context)}${note}`;
+  }
   return {
     answer: text,
     mode,

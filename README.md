@@ -32,7 +32,7 @@ The backend proxies Yahoo Finance chart/quote/fundamentals data, Moneycontrol co
 
 ## AI and transcript refresh
 
-Finance AI calls the backend endpoint `/api/ai`, which refreshes company filing metrics, Yahoo Finance, Moneycontrol consolidated P&L, BSE announcements and news context before answering. Set `OPENAI_API_KEY` on your host for full AI-generated responses. Without it, the server returns a deterministic live-data fallback instead of inventing unavailable numbers.
+Finance AI calls the backend endpoint `/api/ai`, which refreshes company filing metrics, Yahoo Finance, Moneycontrol consolidated P&L, BSE announcements and news context before answering. Set `OPENAI_API_KEY` on your host for OpenAI responses. You can also set `POLLINATIONS_API_KEY` and optional `POLLINATIONS_MODEL` for Pollinations AI. If OpenAI is unavailable, the server tries Pollinations before returning a deterministic live-data fallback instead of inventing unavailable numbers.
 
 The earnings-call tab calls `/api/transcript-summary` for the selected company. The backend scans BSE/company/news sources for transcript-like uploads and surfaces the latest detected filing or presentation signal automatically. Financial metrics shown in the earnings-call summary are restricted to company filing / investor-release data; Yahoo and Moneycontrol are only fallback sources outside that filing-backed summary section.
 

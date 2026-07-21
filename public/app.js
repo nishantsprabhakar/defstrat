@@ -1969,7 +1969,7 @@ function renderAiBrief() {
 function renderManage() {
   if (!els.managePanel) return;
   els.managePanel.innerHTML = `<div class="brief-grid">
-    <article class="brief-card"><small>AI analyst settings</small><strong>Backend AI enabled</strong><p>Finance AI calls the server for company filing, Yahoo Finance, Moneycontrol consolidated P&L, BSE, news and transcript context. Add OPENAI_API_KEY on the host for full AI responses; otherwise it uses a live-data fallback.</p></article>
+    <article class="brief-card"><small>AI analyst settings</small><strong>Backend AI enabled</strong><p>Finance AI calls the server for company filing, Yahoo Finance, Moneycontrol consolidated P&L, BSE, news and transcript context. It uses OpenAI when configured, then Pollinations AI, then a deterministic live-data fallback.</p></article>
     <article class="brief-card"><small>Tracked companies</small><strong>${watchIds.length}</strong><p>${watchIds.map((id) => escapeHtml(metaFor(id)?.name || id)).join(", ")}</p></article>
     <article class="brief-card"><small>Data sources</small><strong>Filings + Yahoo + Moneycontrol + BSE</strong><p>Quote history comes from Yahoo Finance. Financial fallback uses Moneycontrol consolidated P&L or Yahoo only when filing data is unavailable. Filings and presentations link back to BSE where available.</p></article>
   </div>
@@ -2004,7 +2004,8 @@ async function answerAi(prompt) {
       selectedId,
       ids: watchIds
     });
-    renderAiText(`Finance AI (${result.mode === "openai" ? "AI backend" : "live-data fallback"}) - ${formatDate(result.refreshedAt)}`, result.answer);
+    const modeLabel = result.mode === "openai" ? "OpenAI backend" : result.mode === "pollinations" ? "Pollinations AI" : "live-data fallback";
+    renderAiText(`Finance AI (${modeLabel}) - ${formatDate(result.refreshedAt)}`, result.answer);
     return;
   } catch {
     answer.innerHTML = `<small>Live local context</small><p>Using the current dashboard data for custom-company coverage.</p>`;

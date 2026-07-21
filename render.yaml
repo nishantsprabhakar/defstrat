@@ -13,3 +13,7 @@ services:
         sync: false
       - key: OPENAI_MODEL
         value: gpt-4.1-mini
+      - key: POLLINATIONS_API_KEY
+        sync: false
+      - key: POLLINATIONS_MODEL
+        value: openai
